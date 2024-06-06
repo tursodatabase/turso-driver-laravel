@@ -159,7 +159,7 @@ For database operation usage, everything have same interface like usual when you
 use Illuminate\Support\Facades\DB;
 
 // Create
-DB::table('users')->craete([
+DB::table('users')->create([
     'name' => 'Budi Dalton',
     'email' => 'budi.dalton@duck.com'
 ]);
