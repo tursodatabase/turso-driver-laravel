@@ -40,7 +40,7 @@ Before using this package, you need to install and configure LibSQL Native Exten
 You can install the package via composer:
 
 ```bash
-composer require darkterminal/turso-driver-laravel
+composer require tursodatabase/turso-driver-laravel
 ```
 
 You can publish package vendor using this command:
