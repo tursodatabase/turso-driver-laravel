@@ -2,8 +2,8 @@
 
 namespace Turso\Driver\Laravel\Facades;
 
-use Turso\Driver\Laravel\Database\LibSQLDatabase;
 use Illuminate\Support\Facades\Facade;
+use Turso\Driver\Laravel\Database\LibSQLDatabase;
 
 /**
  * @see \Turso\Driver\Laravel\LibSQLDriver

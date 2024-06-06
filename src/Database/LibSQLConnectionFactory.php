@@ -8,8 +8,8 @@ class LibSQLConnectionFactory extends BaseConnectionFactory
 {
     protected function createConnection($driver, $connection, $database, $prefix = '', array $config = [])
     {
-        $config['driver'] = "libsql";
-        $config['url'] = "file:". $config['database'];
+        $config['driver'] = 'libsql';
+        $config['url'] = 'file:'.$config['database'];
         $connection = new LibSQLDatabase($config);
 
         return parent::createConnection($config['driver'], $connection, $config['url'], $prefix, $config);

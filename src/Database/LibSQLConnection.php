@@ -2,10 +2,9 @@
 
 namespace Turso\Driver\Laravel\Database;
 
-use Turso\Driver\Laravel\Database\LibSQLSchemaGrammar;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Database\Connection;
 use Exception;
+use Illuminate\Database\Connection;
+use Illuminate\Filesystem\Filesystem;
 
 class LibSQLConnection extends Connection
 {
@@ -59,6 +58,7 @@ class LibSQLConnection extends Connection
     {
         $db = new LibSQLDatabase($config);
         $this->setReadPdo($db);
+
         return $db;
     }
 

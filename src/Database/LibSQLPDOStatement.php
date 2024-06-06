@@ -2,18 +2,22 @@
 
 namespace Turso\Driver\Laravel\Database;
 
-use Turso\Driver\Laravel\Enums\LibSQLType;
-use Turso\Driver\Laravel\Enums\PdoParam;
 use LibSQL;
 use PDO;
 use PDOStatement;
+use Turso\Driver\Laravel\Enums\LibSQLType;
+use Turso\Driver\Laravel\Enums\PdoParam;
 
 class LibSQLPDOStatement extends PDOStatement
 {
     protected int $affectedRows = 0;
+
     protected int $fetchMode = PDO::FETCH_BOTH;
+
     protected array $bindings = [];
+
     protected array $response = [];
+
     protected array $lastInsertIds = [];
 
     public function __construct(
@@ -25,6 +29,7 @@ class LibSQLPDOStatement extends PDOStatement
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
         $this->fetchMode = $mode;
+
         return true;
     }
 
@@ -32,10 +37,11 @@ class LibSQLPDOStatement extends PDOStatement
     {
         $type = LibSQLType::fromValue($value);
         $this->bindings[$param] = $type->bind($value);
+
         return true;
     }
 
-    public function execute(array $parameters = null): bool
+    public function execute(?array $parameters = null): bool
     {
         collect((array) $parameters)
             ->each(function (mixed $value, int $key) {
@@ -44,10 +50,10 @@ class LibSQLPDOStatement extends PDOStatement
             });
 
         if (str_starts_with(strtolower($this->query), 'select')) {
-            $this->response = $this->db->query($this->query, array_column($this->bindings, "value"))->fetchArray(LibSQL::LIBSQL_ALL);
+            $this->response = $this->db->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
         } else {
             $statement = $this->db->prepare($this->query);
-            $this->response = $statement->query(array_column($this->bindings, "value"))->fetchArray(LibSQL::LIBSQL_ALL);
+            $this->response = $statement->query(array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
         }
 
         $lastId = (int) $this->response['last_insert_rowid'];
@@ -84,8 +90,7 @@ class LibSQLPDOStatement extends PDOStatement
         int $mode = PDO::FETCH_DEFAULT,
         int $cursorOrientation = PDO::FETCH_ORI_NEXT,
         int $cursorOffset = 0
-    ): mixed
-    {
+    ): mixed {
         if ($mode === PDO::FETCH_DEFAULT) {
             $mode = $this->fetchMode;
         }

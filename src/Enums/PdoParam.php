@@ -18,8 +18,8 @@ enum PdoParam: int
             'boolean' => self::BOOL,
             'double', 'integer' => self::INT,
             'resource' => self::LOB,
-            'NULL'     => self::NULL,
-            default    => self::STR,
+            'NULL' => self::NULL,
+            default => self::STR,
         };
     }
 }

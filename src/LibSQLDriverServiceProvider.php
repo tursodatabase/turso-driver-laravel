@@ -2,17 +2,16 @@
 
 namespace Turso\Driver\Laravel;
 
-use Turso\Driver\Laravel\Database\LibSQLConnection;
-use Turso\Driver\Laravel\Database\LibSQLConnector;
-use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Connection;
-use Turso\Driver\Laravel\Database\LibSQLConnectionFactory;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Illuminate\Database\DatabaseManager;
 use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Turso\Driver\Laravel\Database\LibSQLConnection;
+use Turso\Driver\Laravel\Database\LibSQLConnectionFactory;
+use Turso\Driver\Laravel\Database\LibSQLConnector;
 
 class LibSQLDriverServiceProvider extends PackageServiceProvider
 {
-
     public function boot(): void
     {
         if (config('database.default') !== 'libsql' || config('database.connections.libsql.driver') === 'libsql') {
@@ -26,7 +25,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
         $this->app->extend(DatabaseManager::class, function (DatabaseManager $manager) {
             Connection::resolverFor('libsql', function ($connection = null, ?string $database = null, string $prefix = '', array $config = []) {
                 $config = config('database.connections.libsql');
-                if (!isset($config['driver'])) {
+                if (! isset($config['driver'])) {
                     $config['driver'] = 'libsql';
                 }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
-use Illuminate\Database\Schema\SQLiteBuilder;
 use Darkterminal\LibSQL\Exceptions\FeatureNotSupportedException;
+use Illuminate\Database\Schema\SQLiteBuilder;
 
 class LibSQLSchemaBuilder extends SQLiteBuilder
 {
@@ -64,7 +64,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     protected function grammar(): LibSQLSchemaGrammar
     {
-        if (!($this->grammar instanceof LibSQLSchemaGrammar)) {
+        if (! ($this->grammar instanceof LibSQLSchemaGrammar)) {
             $this->grammar = new LibSQLSchemaGrammar();
         }
 

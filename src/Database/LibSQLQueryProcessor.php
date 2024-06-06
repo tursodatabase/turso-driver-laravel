@@ -10,7 +10,6 @@ class LibSQLQueryProcessor extends SQLiteProcessor
      * Process the list of tables.
      *
      * @param  mixed  $results
-     * @return array
      */
     public function processTables($results): array
     {

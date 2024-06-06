@@ -28,7 +28,7 @@ enum LibSQLType: string
 
     public static function fromString(string $value): self
     {
-        if (!ctype_print($value) || !mb_check_encoding($value, 'UTF-8')) {
+        if (! ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) {
             return self::BLOB;
         }
 
@@ -39,20 +39,20 @@ enum LibSQLType: string
     {
         return match ($this) {
             self::NULL => [
-                'type'  => $this->value,
+                'type' => $this->value,
                 'value' => 'null',
             ],
             self::FLOAT => [
-                'type'  => $this->value,
+                'type' => $this->value,
                 'value' => $value,
             ],
             self::BLOB => [
-                'type'   => $this->value,
+                'type' => $this->value,
                 'base64' => base64_encode(base64_encode($value)),
             ],
 
             default => [
-                'type'  => $this->value,
+                'type' => $this->value,
                 'value' => (string) $value,
             ],
         };

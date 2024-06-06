@@ -2,8 +2,8 @@
 
 namespace Turso\Driver\Laravel;
 
-use Turso\Driver\Laravel\Database\LibSQLDatabase;
 use Illuminate\Support\Collection;
+use Turso\Driver\Laravel\Database\LibSQLDatabase;
 
 class LibSQLManager
 {
@@ -19,8 +19,8 @@ class LibSQLManager
 
     public function __call(string $method, array $arguments = []): mixed
     {
-        if (!method_exists($this->client, $method)) {
-            throw new BadMethodCallException('Call to undefined method ' . static::class . '::' . $method . '()');
+        if (! method_exists($this->client, $method)) {
+            throw new BadMethodCallException('Call to undefined method '.static::class.'::'.$method.'()');
         }
 
         return $this->client->$method(...$arguments);

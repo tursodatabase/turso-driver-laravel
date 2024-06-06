@@ -2,15 +2,19 @@
 
 namespace Turso\Driver\Laravel\Database;
 
-use Turso\Driver\Laravel\Exceptions\ConfigurationIsNotFound;
 use LibSQL;
+use Turso\Driver\Laravel\Exceptions\ConfigurationIsNotFound;
 
 class LibSQLDatabase
 {
     protected LibSQL $db;
+
     protected array $config;
+
     protected string $connection_mode;
+
     protected array $lastInsertIds = [];
+
     protected bool $inTransaction = false;
 
     public function __construct(array $config = [])
@@ -22,15 +26,15 @@ class LibSQLDatabase
             $url = \str_replace('file:', '/', $config['url']);
             $this->db = new LibSQL($url, LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, $config['encryptionKey']);
 
-        } else if ($this->connection_mode === 'memory' && $config['remoteOnly'] === false) {
+        } elseif ($this->connection_mode === 'memory' && $config['remoteOnly'] === false) {
 
             $this->db = new LibSQL($libsql['uri']);
 
-        } else if ($this->connection_mode === 'remote' && $config['remoteOnly'] === true) {
+        } elseif ($this->connection_mode === 'remote' && $config['remoteOnly'] === true) {
 
             $this->db = new LibSQL("libsql:dbname={$libsql['url']};authToken={$libsql['token']}");
 
-        } else if ($this->connection_mode === 'remote_replica' && $config['remoteOnly'] === false) {
+        } elseif ($this->connection_mode === 'remote_replica' && $config['remoteOnly'] === false) {
 
             $config['url'] = \str_replace('file:', 'file:/', $config['url']);
             $removeKeys = ['driver', 'name', 'prefix', 'name', 'database', 'remoteOnly'];
@@ -41,8 +45,7 @@ class LibSQLDatabase
 
         } else {
 
-            throw new ConfigurationIsNotFound("Connection not found!");
-
+            throw new ConfigurationIsNotFound('Connection not found!');
         }
     }
 
@@ -120,39 +123,38 @@ class LibSQLDatabase
     /**
      * Check the connection mode based on the provided path.
      *
-     * @param string $path The database connection path.
-     *
+     * @param  string  $path  The database connection path.
      * @return array|false The connection mode details, or false if not applicable.
      */
-    private function checkConnectionMode(string $path, string $url = "", string $token = ""): array|false
+    private function checkConnectionMode(string $path, string $url = '', string $token = ''): array|false
     {
-        if (strpos($path, "file:") !== false && $path !== 'file:' && !empty($url) && !empty($token)) {
+        if (strpos($path, 'file:') !== false && $path !== 'file:' && ! empty($url) && ! empty($token)) {
             $this->connection_mode = 'remote_replica';
             $path = [
                 'mode' => $this->connection_mode,
                 'uri' => $path,
                 'url' => $url,
-                'token' => $token
+                'token' => $token,
             ];
-        } else if ($path === 'file:' && !empty($url) && !empty($token)) {
+        } elseif ($path === 'file:' && ! empty($url) && ! empty($token)) {
             $this->connection_mode = 'remote';
             $path = [
                 'mode' => $this->connection_mode,
                 'uri' => $path,
                 'url' => $url,
-                'token' => $token
+                'token' => $token,
             ];
-        } else if (strpos($path, "file:") !== false) {
+        } elseif (strpos($path, 'file:') !== false) {
             $this->connection_mode = 'local';
             $path = [
                 'mode' => $this->connection_mode,
-                'uri' => str_replace("file:", "", $path)
+                'uri' => str_replace('file:', '', $path),
             ];
-        } else if ($path === ":memory:") {
+        } elseif ($path === ':memory:') {
             $this->connection_mode = 'memory';
             $path = [
                 'mode' => $this->connection_mode,
-                'uri' => $path
+                'uri' => $path,
             ];
         } else {
             $path = false;
