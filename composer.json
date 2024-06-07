@@ -1,7 +1,7 @@
 {
     "name": "tursodatabase/turso-driver-laravel",
     "description": "A Turso Driver for Laravel",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "keywords": [
         "darkterminal",
         "laravel",
