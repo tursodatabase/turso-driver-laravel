@@ -129,7 +129,7 @@ class LibSQLDatabase
      */
     private function checkConnectionMode(string $path, string $url = '', string $token = ''): array|false
     {
-        if ((strpos($path, 'file:') !== false || $path !== 'file:') && !empty($url) && !empty($token)) {
+        if ((strpos($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token)) {
             $this->connection_mode = 'remote_replica';
             $path = [
                 'mode' => $this->connection_mode,
