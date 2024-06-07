@@ -20,7 +20,7 @@ class LibSQLDatabase
     public function __construct(array $config = [])
     {
         $config = config('database.connections.libsql');
-        $libsql = $this->checkConnectionMode($config['url'], $config['syncUrl'], $config['authToken']);
+        $libsql = $this->checkConnectionMode($config['url'], $config['syncUrl'], $config['authToken'], $config['remoteOnly']);
 
         if ($this->connection_mode === 'local') {
 
@@ -33,11 +33,11 @@ class LibSQLDatabase
 
         } elseif ($this->connection_mode === 'remote' && $config['remoteOnly'] === true) {
 
-            $this->db = new LibSQL("libsql:dbname={$libsql['url']};authToken={$libsql['token']}");
+            $this->db = new LibSQL("libsql:dbname={$config['syncUrl']};authToken={$config['authToken']}");
 
         } elseif ($this->connection_mode === 'remote_replica') {
 
-            $config['url'] = \str_replace('file:', 'file:/', $config['url']);
+            $config['url'] = "file:" . str_replace('file:', '', database_path($config['url']));
             $removeKeys = ['driver', 'name', 'prefix', 'name', 'database', 'remoteOnly'];
             foreach ($removeKeys as $key) {
                 unset($config[$key]);
@@ -127,9 +127,9 @@ class LibSQLDatabase
      * @param  string  $path  The database connection path.
      * @return array|false The connection mode details, or false if not applicable.
      */
-    private function checkConnectionMode(string $path, string $url = '', string $token = ''): array|false
+    private function checkConnectionMode(string $path, string $url = '', string $token = '', bool $remoteOnly = false): array|false
     {
-        if ((strpos($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token)) {
+        if ((strpos($path, 'file:') !== false || $path !== 'file:') && !empty($url) && !empty($token) && $remoteOnly === false) {
             $this->connection_mode = 'remote_replica';
             $path = [
                 'mode' => $this->connection_mode,
@@ -137,7 +137,7 @@ class LibSQLDatabase
                 'url' => $url,
                 'token' => $token,
             ];
-        } elseif ($path === 'file:' && ! empty($url) && ! empty($token)) {
+        } elseif (strpos($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
             $this->connection_mode = 'remote';
             $path = [
                 'mode' => $this->connection_mode,
