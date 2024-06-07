@@ -129,7 +129,7 @@ class LibSQLPDOStatement extends PDOStatement
             PDO::FETCH_BOTH => array_merge($allRows, $rowValues),
             PDO::FETCH_ASSOC, PDO::FETCH_NAMED => $allRows,
             PDO::FETCH_NUM => $rowValues,
-            PDO::FETCH_OBJ => (object) $allRows,
+            PDO::FETCH_OBJ => $allRows,
             default => throw new \PDOException('Unsupported fetch mode.'),
         };
 

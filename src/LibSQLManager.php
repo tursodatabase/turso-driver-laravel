@@ -2,6 +2,7 @@
 
 namespace Turso\Driver\Laravel;
 
+use BadMethodCallException;
 use Illuminate\Support\Collection;
 use Turso\Driver\Laravel\Database\LibSQLDatabase;
 

@@ -20,6 +20,6 @@ class LibSQLConnectionFactory extends BaseConnectionFactory
         $connector = new LibSQLConnector();
         $connector->connect(config('database.connections.libsql'));
 
-        return parent::createConnector($connector);
+        return parent::createConnector(config('database.connections.libsql'));
     }
 }

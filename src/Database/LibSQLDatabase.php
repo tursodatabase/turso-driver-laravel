@@ -19,14 +19,15 @@ class LibSQLDatabase
 
     public function __construct(array $config = [])
     {
+        $config = config('database.connections.libsql');
         $libsql = $this->checkConnectionMode($config['url'], $config['syncUrl'], $config['authToken']);
 
-        if ($this->connection_mode === 'local' && $config['remoteOnly'] === false) {
+        if ($this->connection_mode === 'local') {
 
-            $url = \str_replace('file:', '/', $config['url']);
-            $this->db = new LibSQL($url, LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, $config['encryptionKey']);
+            $url = \str_replace('file:', '', database_path($config['url']));
+            $this->db = new LibSQL("file:$url", LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, $config['encryptionKey']);
 
-        } elseif ($this->connection_mode === 'memory' && $config['remoteOnly'] === false) {
+        } elseif ($this->connection_mode === 'memory') {
 
             $this->db = new LibSQL($libsql['uri']);
 
@@ -34,7 +35,7 @@ class LibSQLDatabase
 
             $this->db = new LibSQL("libsql:dbname={$libsql['url']};authToken={$libsql['token']}");
 
-        } elseif ($this->connection_mode === 'remote_replica' && $config['remoteOnly'] === false) {
+        } elseif ($this->connection_mode === 'remote_replica') {
 
             $config['url'] = \str_replace('file:', 'file:/', $config['url']);
             $removeKeys = ['driver', 'name', 'prefix', 'name', 'database', 'remoteOnly'];
@@ -128,7 +129,7 @@ class LibSQLDatabase
      */
     private function checkConnectionMode(string $path, string $url = '', string $token = ''): array|false
     {
-        if (strpos($path, 'file:') !== false && $path !== 'file:' && ! empty($url) && ! empty($token)) {
+        if ((strpos($path, 'file:') !== false || $path !== 'file:') && !empty($url) && !empty($token)) {
             $this->connection_mode = 'remote_replica';
             $path = [
                 'mode' => $this->connection_mode,
