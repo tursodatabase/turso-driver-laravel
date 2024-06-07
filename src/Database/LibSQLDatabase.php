@@ -37,7 +37,7 @@ class LibSQLDatabase
 
         } elseif ($this->connection_mode === 'remote_replica') {
 
-            $config['url'] = "file:" . str_replace('file:', '', database_path($config['url']));
+            $config['url'] = 'file:'.str_replace('file:', '', database_path($config['url']));
             $removeKeys = ['driver', 'name', 'prefix', 'name', 'database', 'remoteOnly'];
             foreach ($removeKeys as $key) {
                 unset($config[$key]);
@@ -129,7 +129,7 @@ class LibSQLDatabase
      */
     private function checkConnectionMode(string $path, string $url = '', string $token = '', bool $remoteOnly = false): array|false
     {
-        if ((strpos($path, 'file:') !== false || $path !== 'file:') && !empty($url) && !empty($token) && $remoteOnly === false) {
+        if ((strpos($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
             $this->connection_mode = 'remote_replica';
             $path = [
                 'mode' => $this->connection_mode,
