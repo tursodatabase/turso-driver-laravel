@@ -15,18 +15,14 @@ namespace {
          * @param  string  $conn_id  The connection ID.
          * @param  string  $sql  The SQL statement.
          */
-        public function __construct(string $conn_id, string $sql)
-        {
-        }
+        public function __construct(string $conn_id, string $sql) {}
 
         /**
          * Finalizes the prepared statement.
          *
          * @return void
          */
-        public function finalize()
-        {
-        }
+        public function finalize() {}
 
         /**
          * Executes the prepared statement with given parameters.
@@ -34,9 +30,7 @@ namespace {
          * @param  array  $parameters  The parameters for the statement.
          * @return int The number of affected rows.
          */
-        public function execute(array $parameters)
-        {
-        }
+        public function execute(array $parameters) {}
 
         /**
          * Executes the prepared statement and retrieves the result set.
@@ -44,27 +38,21 @@ namespace {
          * @param  array  $parameters  The parameters for the statement.
          * @return LibSQLResult The result set.
          */
-        public function query(array $parameters = [])
-        {
-        }
+        public function query(array $parameters = []) {}
 
         /**
          * Resets the prepared statement.
          *
          * @return void
          */
-        public function reset()
-        {
-        }
+        public function reset() {}
 
         /**
          * Gets the number of parameters in the prepared statement.
          *
          * @return int The number of parameters.
          */
-        public function parameterCount()
-        {
-        }
+        public function parameterCount() {}
 
         /**
          * Gets the name of a parameter by index.
@@ -72,18 +60,14 @@ namespace {
          * @param  int  $idx  The index of the parameter.
          * @return string The name of the parameter.
          */
-        public function parameterName(int $idx)
-        {
-        }
+        public function parameterName(int $idx) {}
 
         /**
          * Gets the column names of the result set.
          *
          * @return array The column names.
          */
-        public function columns()
-        {
-        }
+        public function columns() {}
     }
 
     /**
@@ -97,27 +81,21 @@ namespace {
          * @param  string  $conn_id  The connection ID.
          * @param  string  $trx_mode  The transaction mode.
          */
-        public function __construct(string $conn_id, string $trx_mode)
-        {
-        }
+        public function __construct(string $conn_id, string $trx_mode) {}
 
         /**
          * Retrieves the number of rows changed by the last SQL statement.
          *
          * @return int The number of rows changed.
          */
-        public function changes()
-        {
-        }
+        public function changes() {}
 
         /**
          * Checks if the transaction is set to autocommit.
          *
          * @return bool True if autocommit is enabled, otherwise false.
          */
-        public function isAutocommit()
-        {
-        }
+        public function isAutocommit() {}
 
         /**
          * Executes an SQL statement within the transaction.
@@ -126,9 +104,7 @@ namespace {
          * @param  array  $parameters  The parameters for the statement (optional).
          * @return int The number of affected rows.
          */
-        public function execute(string $stmt, array $parameters = [])
-        {
-        }
+        public function execute(string $stmt, array $parameters = []) {}
 
         /**
          * Executes a query within the transaction and returns the result set.
@@ -137,27 +113,21 @@ namespace {
          * @param  array  $parameters  The parameters for the statement (optional).
          * @return array The result set.
          */
-        public function query(string $stmt, array $parameters = [])
-        {
-        }
+        public function query(string $stmt, array $parameters = []) {}
 
         /**
          * Commits the transaction.
          *
          * @return void
          */
-        public function commit()
-        {
-        }
+        public function commit() {}
 
         /**
          * Rolls back the transaction.
          *
          * @return void
          */
-        public function rollback()
-        {
-        }
+        public function rollback() {}
     }
 
     /**
@@ -172,9 +142,7 @@ namespace {
          * @param  string  $sql  The SQL query that produced this result.
          * @param  array  $parameters  The parameters for the SQL query (optional).
          */
-        public function __construct(string $config, string $sql, array $parameters = [])
-        {
-        }
+        public function __construct(string $config, string $sql, array $parameters = []) {}
 
         /**
          * Fetches the result set as an array.
@@ -182,27 +150,21 @@ namespace {
          * @param  int  $mode  The fetching mode (optional, default is 3).
          * @return array The fetched result set.
          */
-        public function fetchArray(int $mode = 3)
-        {
-        }
+        public function fetchArray(int $mode = 3) {}
 
         /**
          * Finalizes the result set and frees the associated resources.
          *
          * @return void
          */
-        public function finalize()
-        {
-        }
+        public function finalize() {}
 
         /**
          * Resets the result set for re-execution.
          *
          * @return void
          */
-        public function reset()
-        {
-        }
+        public function reset() {}
 
         /**
          * Retrieves the name of a column by its index.
@@ -210,9 +172,7 @@ namespace {
          * @param  int  $column  The index of the column.
          * @return string The name of the column.
          */
-        public function columnName(int $column)
-        {
-        }
+        public function columnName(int $column) {}
 
         /**
          * Retrieves the type of a column by its index.
@@ -220,18 +180,14 @@ namespace {
          * @param  int  $column  The index of the column.
          * @return string The type of the column.
          */
-        public function columnType(int $column)
-        {
-        }
+        public function columnType(int $column) {}
 
         /**
          * Retrieves the number of columns in the result set.
          *
          * @return int The number of columns.
          */
-        public function numColumns()
-        {
-        }
+        public function numColumns() {}
     }
 
     /**
@@ -341,9 +297,7 @@ namespace {
          *
          * With this Quick Start guide, you're ready to seamlessly integrate LibSQL PHP Extension into your projects, whether for local, remote, or distributed database connections.
          */
-        public function __construct(string|array $config, ?int $flags = 6, ?string $encryption_key = '')
-        {
-        }
+        public function __construct(string|array $config, ?int $flags = 6, ?string $encryption_key = '') {}
 
         /**
          * Retrieves the version of the LibSQL library.
@@ -360,9 +314,7 @@ namespace {
          *
          * @return string The version string.
          */
-        public static function version()
-        {
-        }
+        public static function version() {}
 
         /**
          * Retrieves the number of rows changed by the last SQL statement.
@@ -385,9 +337,7 @@ namespace {
          *
          * @return int The number of rows changed.
          */
-        public function changes()
-        {
-        }
+        public function changes() {}
 
         /**
          * Checks if autocommit mode is enabled for the connection.
@@ -409,9 +359,7 @@ namespace {
          *
          * @return bool True if autocommit is enabled, otherwise false.
          */
-        public function isAutocommit()
-        {
-        }
+        public function isAutocommit() {}
 
         /**
          * Executes an SQL statement on the database.
@@ -436,9 +384,7 @@ namespace {
          * @param  array  $parameters  The parameters for the statement (optional).
          * @return int The number of rows affected by the statement.
          */
-        public function execute(string $stmt, array $parameters = [])
-        {
-        }
+        public function execute(string $stmt, array $parameters = []) {}
 
         /**
          * Executes a batch of SQL statements on the database.
@@ -469,9 +415,7 @@ namespace {
          * @param  string  $stmt  The SQL statements to execute as a batch.
          * @return bool True if the batch execution was successful, otherwise false.
          */
-        public function executeBatch(string $stmt)
-        {
-        }
+        public function executeBatch(string $stmt) {}
 
         /**
          * Executes an SQL query on the database.
@@ -494,9 +438,7 @@ namespace {
          * @param  array  $parameters  The parameters for the query (optional).
          * @return LibSQLResult The result of the query.
          */
-        public function query(string $stmt, array $parameters = [])
-        {
-        }
+        public function query(string $stmt, array $parameters = []) {}
 
         /**
          * Initiates a new database transaction.
@@ -528,9 +470,7 @@ namespace {
          * @param  string  $behavior  The behavior of the transaction (optional).
          * @return \LibSQLTransaction The transaction object.
          */
-        public function transaction(string $behavior = 'DEFERRED')
-        {
-        }
+        public function transaction(string $behavior = 'DEFERRED') {}
 
         /**
          * Prepares an SQL statement for execution.
@@ -560,9 +500,7 @@ namespace {
          * @param  string  $sql  The SQL statement to prepare.
          * @return \LibSQLStatement The prepared statement object.
          */
-        public function prepare(string $sql)
-        {
-        }
+        public function prepare(string $sql) {}
 
         /**
          * Closes the database connection.
@@ -575,9 +513,7 @@ namespace {
          *
          * @return void The result of the close operation.
          */
-        public function close()
-        {
-        }
+        public function close() {}
 
         /**
          * Sync the database.
@@ -590,8 +526,6 @@ namespace {
          *
          * @return void The result of the sync operation.
          */
-        public function sync()
-        {
-        }
+        public function sync() {}
     }
 }

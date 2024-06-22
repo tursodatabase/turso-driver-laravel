@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
-use Darkterminal\LibSQL\Exceptions\FeatureNotSupportedException;
 use Illuminate\Database\Schema\SQLiteBuilder;
+use Turso\Driver\Laravel\Exceptions\FeatureNotSupportedException;
 
 class LibSQLSchemaBuilder extends SQLiteBuilder
 {
+    public function __construct(protected LibSQLDatabase $db, \Illuminate\Database\Connection $connection)
+    {
+        parent::__construct($connection);
+    }
+
     public function createDatabase($name)
     {
         throw new FeatureNotSupportedException('Creating database is not supported in LibSQL database.');
@@ -21,10 +26,11 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     protected function dropAllIndexes(): void
     {
-        $statement = $this->connection->getPdo()->query($this->grammar()->compileDropAllIndexes());
+        $statement = $this->db->prepare($this->grammar()->compileDropAllIndexes());
+        $statement->execute();
 
-        collect($statement['rows'])->each(function (array $query) {
-            $this->connection->select($query[0]);
+        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
+            $this->db->query($query[0]);
         });
     }
 
@@ -33,41 +39,42 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $this->dropAllTriggers();
         $this->dropAllIndexes();
 
-        $this->connection->select($this->grammar()->compileDisableForeignKeyConstraints());
+        $this->db->query($this->grammar()->compileDisableForeignKeyConstraints());
 
-        $statement = $this->connection->getPdo()->query($this->grammar()->compileDropAllTables());
+        $statement = $this->db->prepare($this->grammar()->compileDropAllTables());
+        $statement->execute();
 
-        collect($statement['rows'])->each(function (array $query) {
-            $this->connection->select($query[0]);
+        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
+            $this->db->query($query[0]);
         });
 
-        $this->connection->select($this->grammar()->compileEnableForeignKeyConstraints());
+        $this->db->query($this->grammar()->compileEnableForeignKeyConstraints());
     }
 
     protected function dropAllTriggers(): void
     {
-        $statement = $this->connection->getPdo()->query($this->grammar()->compileDropAllTriggers());
+        $statement = $this->db->prepare($this->grammar()->compileDropAllTriggers());
+        $statement->execute();
 
-        collect($statement['rows'])->each(function (array $query) {
-            $this->connection->select($query[0]);
+        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
+            $this->db->query($query[0]);
         });
     }
 
     public function dropAllViews(): void
     {
-        $statement = $this->connection->getPdo()->prepare($this->grammar()->compileDropAllViews());
+        $statement = $this->db->prepare($this->grammar()->compileDropAllViews());
+        $statement->execute();
 
-        collect($statement['rows'])->each(function (array $query) {
-            $this->connection->select($query[0]);
+        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
+            $this->db->query($query[0]);
         });
     }
 
     protected function grammar(): LibSQLSchemaGrammar
     {
-        if (! ($this->grammar instanceof LibSQLSchemaGrammar)) {
-            $this->grammar = new LibSQLSchemaGrammar();
-        }
+        $grammar = new LibSQLSchemaGrammar();
 
-        return $this->grammar;
+        return $grammar;
     }
 }

@@ -3,12 +3,14 @@
     "description": "A Turso Driver for Laravel",
     "version": "1.0.4",
     "keywords": [
-        "darkterminal",
+        "turso",
+        "tursodatabase",
+        "libsql",
         "laravel",
         "libsql-driver-laravel",
         "turso-driver-laravel"
     ],
-    "homepage": "https://github.com/darkterminal/libsql-driver-laravel",
+    "homepage": "https://github.com/tursodatabase/turso-driver-laravel",
     "license": "MIT",
     "authors": [
         {
@@ -26,10 +28,6 @@
         "laravel/pint": "^1.14",
         "nunomaduro/collision": "^8.1.1||^7.10.0",
         "larastan/larastan": "^2.9",
-        "orchestra/testbench": "^9.0.0||^8.22.0",
-        "pestphp/pest": "^2.34",
-        "pestphp/pest-plugin-arch": "^2.7",
-        "pestphp/pest-plugin-laravel": "^2.3",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan-deprecation-rules": "^1.1",
         "phpstan/phpstan-phpunit": "^1.3",
@@ -41,28 +39,7 @@
             "Turso\\Driver\\Laravel\\Database\\Factories\\": "database/factories/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Turso\\Driver\\Laravel\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/"
-        }
-    },
     "scripts": {
-        "post-autoload-dump": "@composer run prepare",
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "build": [
-            "@composer run prepare",
-            "@php vendor/bin/testbench workbench:build --ansi"
-        ],
-        "start": [
-            "Composer\\Config::disableProcessTimeout",
-            "@composer run build",
-            "@php vendor/bin/testbench serve"
-        ],
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
     },
     "config": {
@@ -76,10 +53,7 @@
         "laravel": {
             "providers": [
                 "Turso\\Driver\\Laravel\\LibSQLDriverServiceProvider"
-            ],
-            "aliases": {
-                "LibSQLPHP": "Turso\\Driver\\Laravel\\Facades\\LibSQLPHP"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

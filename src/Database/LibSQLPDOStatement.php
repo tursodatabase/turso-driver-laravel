@@ -23,8 +23,7 @@ class LibSQLPDOStatement extends PDOStatement
     public function __construct(
         protected LibSQL $db,
         protected string $query
-    ) {
-    }
+    ) {}
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
