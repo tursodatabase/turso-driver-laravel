@@ -1,19 +1,19 @@
 <p align="center">
-  <a href="https://darkterminal.mintlify.app/dark-packages/turso-driver-laravel/readme">
+  <a href="https://docs.turso.tech/sdk/php/guides/laravel">
     <img alt="Turso + Laravel" src="https://i.imgur.com/T2pzJid.png" width="1000">
     <h3 align="center">Turso + Laravel</h3>
   </a>
 </p>
 
 <p align="center">
-  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/darkterminal/libsql-extension">libSQL Extension</a> for PHP.
+  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/tursodatabase/turso-driver-laravel">libSQL Extension</a> for PHP.
 </p>
 
 <p align="center">
   <a href="https://turso.tech"><strong>Turso</strong></a> ·
-  <a href="https://darkterminal.mintlify.app/dark-packages/turso-driver-laravel/readme"><strong>Quickstart</strong></a> ·
-  <a href="https://darkterminal.mintlify.app/dark-packages/turso-driver-laravel/readme"><strong>Examples</strong></a> ·
-  <a href="https://darkterminal.mintlify.app/dark-packages/turso-driver-laravel/readme"><strong>Docs</strong></a> ·
+  <a href="https://docs.turso.tech/sdk/php/guides/laravel"><strong>Quickstart</strong></a> ·
+  <a href="https://docs.turso.tech/sdk/php/guides/laravel"><strong>Examples</strong></a> ·
+  <a href="https://docs.turso.tech/sdk/php/guides/laravel"><strong>Docs</strong></a> ·
   <a href="https://discord.com/invite/4B5D7hYwub"><strong>Discord</strong></a> ·
   <a href="https://blog.turso.tech/"><strong>Blog &amp; Tutorials</strong></a>
 </p>
@@ -26,7 +26,7 @@ LibSQL is a fork of SQLite and this package is **#1 LibSQL Driver** that run nat
 
 ## Requirement
 
-Before using this package, you need to install and configure LibSQL Native Extension for PHP. You can download from [LibSQL Extension - Release](https://github.com/darkterminal/libsql-extension)
+Before using this package, you need to install and configure LibSQL Native Extension for PHP. You can download from [LibSQL Extension - Release](https://github.com/tursodatabase/turso-driver-laravel)
 
 1. Download based on you distribution (Linux/Macos/Darwin)
 2. The archive is contains the extension and `libsql_php_extension.stubs.php`
@@ -34,6 +34,8 @@ Before using this package, you need to install and configure LibSQL Native Exten
 4. Save the `libsql_php_extension.stubs.php` in your project or somewhare that can help you to use stand-alone LibSQL driver as an IDE helper. By default this stubs is come inside this package.
 5. Configure `php.ini` file and added the extension address with relative path that pointed to the extension
 6. Enjoy!
+
+or you can use [Turso PHP Install](https://github.com/darkterminal/turso-php-installer) (Linux and MacOS Only) to install libSQL Extension for PHP without worry.
 
 ## Installation
 
@@ -43,10 +45,13 @@ You can install the package via composer:
 composer require tursodatabase/turso-driver-laravel
 ```
 
-You can publish package vendor using this command:
+Then register the service provider at `bootstrap/providers.php` array:
 
-```bash
-php artisan vendor:publish --tag=turso-driver-laravel
+```php
+return [
+    App\Providers\AppServiceProvider::class,
+    Turso\Driver\Laravel\LibSQLDriverServiceProvider::class, // Here
+];
 ```
 
 ## Environment Variable Overview
