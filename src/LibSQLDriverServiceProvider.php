@@ -3,7 +3,6 @@
 namespace Turso\Driver\Laravel;
 
 use Illuminate\Database\DatabaseManager;
-use Illuminate\Database\Connection;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Spatie\LaravelPackageTools\Package;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
@@ -16,6 +15,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
 
     public function boot(): void
     {
+        parent::boot();
         if (config('database.default') !== 'libsql' || config('database.connections.libsql.driver') === 'libsql') {
             return;
         }
@@ -34,6 +34,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
 
     public function register(): void
     {
+        parent::register();
         $this->app->singleton('db.factory', function ($app) {
             return new LibSQLConnectionFactory($app);
         });
@@ -42,9 +43,10 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
             return new LibSQLManager(config('database.connections.libsql'));
         });
 
-        $this->app->extend(DatabaseManager::class, function (DatabaseManager $manager) {
-            Connection::resolverFor('libsql', function ($connection, $database, $prefix, $config) {
+        $this->app->resolving('db', function (DatabaseManager $db) {
+            $db->extend('libsql', function ($config, $name) {
                 $config = config('database.connections.libsql');
+                $config['name'] = $name;
                 if (!isset($config['driver'])) {
                     $config['driver'] = 'libsql';
                 }
@@ -52,15 +54,13 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
                 $connector = new LibSQLConnector();
                 $db = $connector->connect($config);
 
-                $connection = new LibSQLConnection($db, $database ?? 'libsql', $prefix, $config);
+                $connection = new LibSQLConnection($db, $config['database'] ?? ':memory:', $config['prefix'], $config);
                 app()->instance(LibSQLConnection::class, $connection);
 
                 $connection->createReadPdo($config);
 
                 return $connection;
             });
-
-            return $manager;
         });
     }
 }
