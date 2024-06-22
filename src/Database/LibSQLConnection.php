@@ -8,7 +8,7 @@ use Illuminate\Filesystem\Filesystem;
 
 class LibSQLConnection extends Connection
 {
-    protected LibSQLDatabase $db;
+    public LibSQLDatabase $db;
 
     public function __construct(LibSQLDatabase $db, string $database = ':memory:', string $tablePrefix = '', array $config = [])
     {
@@ -80,7 +80,7 @@ class LibSQLConnection extends Connection
             $this->useDefaultSchemaGrammar();
         }
 
-        return new LibSQLSchemaBuilder($this);
+        return new LibSQLSchemaBuilder($this->db, $this);
     }
 
     public function getSchemaState(?Filesystem $files = null, ?callable $processFactory = null): LibSQLSchemaState
