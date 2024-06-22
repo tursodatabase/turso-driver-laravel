@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
-use Turso\Driver\Laravel\Exceptions\FeatureNotSupportedException;
 use Illuminate\Database\Schema\SQLiteBuilder;
+use Turso\Driver\Laravel\Exceptions\FeatureNotSupportedException;
 
 class LibSQLSchemaBuilder extends SQLiteBuilder
 {
@@ -70,10 +70,11 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
             $this->db->query($query[0]);
         });
     }
-    
+
     protected function grammar(): LibSQLSchemaGrammar
     {
         $grammar = new LibSQLSchemaGrammar();
+
         return $grammar;
     }
 }
