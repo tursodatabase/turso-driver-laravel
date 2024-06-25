@@ -97,8 +97,8 @@ class LibSQLConnection extends Connection
     {
         // DISCUSSION: Open PR if you have best approach
         $escaped_value = str_replace(
-            ["\\", "\x00", "\n", "\r", "\x1a", "'", '"'],
-            ["\\\\", "\\0", "\\n", "\\r", "\\Z", "\\'", '\\"'],
+            ['\\', "\x00", "\n", "\r", "\x1a", "'", '"'],
+            ['\\\\', '\\0', '\\n', '\\r', '\\Z', "\\'", '\\"'],
             $value
         );
 
