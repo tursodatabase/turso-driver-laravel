@@ -92,4 +92,21 @@ class LibSQLConnection extends Connection
     {
         return boolval(preg_match('#(column(s)? .* (is|are) not unique|UNIQUE constraint failed: .*)#i', $exception->getMessage()));
     }
+
+    public function escapeString($value)
+    {
+        // DISCUSSION: Open PR if you have best approach
+        $escaped_value = str_replace(
+            ["\\", "\x00", "\n", "\r", "\x1a", "'", '"'],
+            ["\\\\", "\\0", "\\n", "\\r", "\\Z", "\\'", '\\"'],
+            $value
+        );
+
+        return $escaped_value;
+    }
+
+    public function quote(string $value): string
+    {
+        return $this->escapeString($value);
+    }
 }
