@@ -23,7 +23,11 @@ class LibSQLPDOStatement extends PDOStatement
     public function __construct(
         protected LibSQL $db,
         protected string $query
-    ) {}
+    ) {
+        // Use regex to find and replace incorrect table prefixes in the SET clause
+        $correctedQuery = preg_replace('/(\s|,)"[a-zA-Z0-9_]+"."([a-zA-Z0-9_]+)"\s*=\s*\?/', ' "$2" = ?', $query);
+        $this->query = $correctedQuery;
+    }
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
