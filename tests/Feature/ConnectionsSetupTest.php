@@ -10,6 +10,7 @@ use Turso\Driver\Laravel\Database\LibSQLConnection;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
 use Turso\Driver\Laravel\Database\LibSQLDatabase;
 use Mockery;
+use Turso\Driver\Laravel\Exceptions\ConfigurationIsNotFound;
 
 class ConnectionsSetupTest extends TestCase
 {
@@ -36,8 +37,7 @@ class ConnectionsSetupTest extends TestCase
         config()->set('database.default', $defaultConnection);
         config()->set('database.connections.libsql', $config);
         try {
-            $connection = DB::connection('libsql');
-            dd($connection);
+            DB::connection('libsql');
         } catch (\Exception $e) {
             $this->assertEquals($error, $e->getMessage());
             return;
@@ -60,7 +60,7 @@ class ConnectionsSetupTest extends TestCase
                 'prefix' => '',
                 'database' => null,
             ],
-            'error' => 'URL not set, please check your configuration'
+            'error' => 'URL and database not set, please check your configuration'
         ];
         yield 'url should be correct for file' => [
             'defaultConnection' => 'libsql',
@@ -214,5 +214,72 @@ class ConnectionsSetupTest extends TestCase
         $this->assertEquals('remote_replica', $pdo->getConnectionMode());
 
         $this->assertTrue(File::exists('tests/_files/database.sqlite'), 'No file created or wrong path');
+    }
+
+    public function testConnectionRemote(): void
+    {
+        $config = [
+            'driver' => 'libsql',
+            'url' => 'libsql::dbname=libsql://database-org.turso.io',
+            'authToken' => 'your-database-auth-token-from-turso',
+            'remoteOnly' => true,
+            'prefix' => '',
+        ];
+        $expectedLibSQLParams = "libsql:dbname=libsql://database-org.turso.io;authToken=your-database-auth-token-from-turso";
+        $constructorConfig = [
+            "driver" => "libsql",
+            "authToken" => "your-database-auth-token-from-turso",
+            "remoteOnly" => true,
+            "prefix" => "",
+            "database" => "dbname=libsql://database-org.turso.io",
+        ];
+
+        $mockLibSQLDatabase = $this->getMockBuilder(LibSQLDatabase::class)
+            ->setConstructorArgs([$constructorConfig])
+            ->onlyMethods(['createLibSQL'])
+            ->getMock();
+        $mockLibSQLDatabase->expects($this->once())
+            ->method('createLibSQL')
+            ->with($this->equalTo($expectedLibSQLParams))
+            ->willReturn(new LibSQL($expectedLibSQLParams));
+
+        $mockConnector = $this->createPartialMock(LibSQLConnector::class, ['connect']);
+        $mockConnector->expects($this->once())
+            ->method('connect')
+            ->willReturnCallback(function () use ($mockLibSQLDatabase) {
+                $mockLibSQLDatabase->init();
+
+                return $mockLibSQLDatabase;
+            });
+        app()->instance(LibSQLConnector::class, $mockConnector);
+
+        config()->set('database.default', 'sqlite');
+        config()->set('database.connections.remote', $config);
+        $connection = DB::connection('remote');
+
+        // Assert that the connection is an instance of LibSQLConnection
+        $this->assertInstanceOf(LibSQLConnection::class, $connection);
+
+        // Get the PDO instance
+        $pdo = $connection->getPdo();
+
+        $this->assertInstanceOf(LibSQLDatabase::class, $pdo);
+        $this->assertEquals('remote', $pdo->getConnectionMode());
+    }
+
+    public function testNotFoundConfiguration()
+    {
+        config()->set('database.default', 'sqlite');
+        config()->set('database.connections.libsql', [
+            'driver' => 'libsql',
+            'url' => 'libsql::dbname=libsql://database-org.turso.io',
+            'remoteOnly' => false,
+        ]);
+        try {
+            DB::connection('libsql');
+        } catch (ConfigurationIsNotFound $e) {
+            $this->assertEquals('Connection not found!', $e->getMessage());
+            return;
+        }
     }
 }
