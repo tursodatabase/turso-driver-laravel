@@ -37,9 +37,13 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
             return new LibSQLConnectionFactory($app);
         });
 
-        $this->app->scoped(LibSQLManager::class, function () {
-            return new LibSQLManager(config('database.connections.libsql'));
-        });
+        // $this->app->scoped(LibSQLManager::class, function () {
+        //     return new LibSQLManager(config('database.connections.libsql'));
+        // });
+
+        // $this->app->singleton(LibSQLConnector::class, function ($app) {
+        //     $app['db.connector.libsql'] = (new LibSQLConnector())->connect(config('database.connections.libsql'));
+        // });
 
         $this->app->resolving('db', function (DatabaseManager $db) {
             $db->extend('libsql', function ($config, $name) {

@@ -24,4 +24,12 @@ class LibSQLConnectionFactory extends BaseConnectionFactory
 
         return parent::createConnector(config('database.connections.libsql'));
     }
+
+    private function checkPathOrFilename(string $string): string {
+        if (strpos($string, DIRECTORY_SEPARATOR) !== false || strpos($string, '/') !== false || strpos($string, '\\') !== false) {
+            return 'path';
+        } else {
+            return 'filename';
+        }
+    }
 }

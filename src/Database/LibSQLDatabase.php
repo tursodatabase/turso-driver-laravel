@@ -19,11 +19,12 @@ class LibSQLDatabase
 
     public function __construct(array $config = [])
     {
+        $config = config('database.connections.libsql');
+
         $url = str_replace('file:', '', $config['url']);
-        $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
-            'filename' => 'file:'.database_path($url),
-            default => $config['url'],
-        };
+        if ($this->checkPathOrFilename($config['url']) === 'filename') {
+            $config['url'] = 'file:' . database_path($url);
+        }
 
         $this->setConnectionMode($config['url'], $config['syncUrl'], $config['authToken'], $config['remoteOnly']);
 

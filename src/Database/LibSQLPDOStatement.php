@@ -110,10 +110,6 @@ class LibSQLPDOStatement extends PDOStatement
         $rows = array_shift($this->response['rows']);
         $rowValues = array_values($rows);
 
-        if ($rows === null) {
-            return false;
-        }
-
         return match ($mode) {
             PDO::FETCH_BOTH => array_merge(
                 $rows,
