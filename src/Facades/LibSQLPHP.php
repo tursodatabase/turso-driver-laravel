@@ -8,7 +8,6 @@ use Turso\Driver\Laravel\Database\LibSQLDatabase;
 /**
  * @see \Turso\Driver\Laravel\LibSQLDriver
  *
- * @mixin \Turso\Driver\Laravel\LibSQLManager
  * @mixin \Turso\Driver\Laravel\Database\LibSQLDatabase
  */
 class LibSQLPHP extends Facade
