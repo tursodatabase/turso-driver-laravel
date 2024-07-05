@@ -15,9 +15,8 @@ enum LibSQLType: string
         $result = match (gettype($value)) {
             'NULL' => self::NULL,
             'boolean', 'integer' => self::INTEGER,
-            'double', 'float' => self::FLOAT,
+            'double' => self::FLOAT,
             'string' => self::fromString($value),
-
             default => null,
         };
 

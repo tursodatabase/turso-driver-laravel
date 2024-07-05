@@ -9,45 +9,44 @@ class LibSQLDatabase
 {
     protected LibSQL $db;
 
-    protected array $config;
-
     protected string $connection_mode;
 
     protected array $lastInsertIds = [];
 
     protected bool $inTransaction = false;
 
-    public function __construct(array $config = [])
+    public function __construct(protected array $config = [])
     {
-        $config = config('database.connections.libsql');
-        $libsql = $this->checkConnectionMode($config['url'], $config['syncUrl'], $config['authToken'], $config['remoteOnly']);
+    }
 
+    public function init()
+    {
+        // actually path is database
+        $path = empty($this->config['url']) ? $this->config['database'] : $this->config['url'];
+        $libsql = $this->checkConnectionMode($path, $this->config['syncUrl'], $this->config['authToken'], $this->config['remoteOnly']);
         if ($this->connection_mode === 'local') {
-
-            $url = \str_replace('file:', '', database_path($config['url']));
-            $this->db = new LibSQL("file:$url", LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, $config['encryptionKey']);
-
+            $this->db = $this->createLibSQL($path, LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, $this->config['encryptionKey']);
         } elseif ($this->connection_mode === 'memory') {
-
-            $this->db = new LibSQL($libsql['uri']);
-
-        } elseif ($this->connection_mode === 'remote' && $config['remoteOnly'] === true) {
-
-            $this->db = new LibSQL("libsql:dbname={$config['syncUrl']};authToken={$config['authToken']}");
-
+            $this->db = $this->createLibSQL($libsql['uri']);
+        } elseif ($this->connection_mode === 'remote' && $this->config['remoteOnly'] === true) {
+            $this->db = $this->createLibSQL("libsql:dbname={$this->config['syncUrl']};authToken={$this->config['authToken']}");
         } elseif ($this->connection_mode === 'remote_replica') {
-
-            $config['url'] = 'file:'.str_replace('file:', '', database_path($config['url']));
-            $removeKeys = ['driver', 'name', 'prefix', 'name', 'database', 'remoteOnly'];
-            foreach ($removeKeys as $key) {
-                unset($config[$key]);
-            }
-            $this->db = new LibSQL($config);
-
+            $this->db = $this->createLibSQL([
+                "url" => $path,
+                "authToken" => $this->config['authToken'],
+                'syncUrl' => $this->config['syncUrl'],
+                'syncInterval' => $this->config['syncInterval'],
+                'read_your_writes' => $this->config['readYourWrites'],
+                'encryptionKey' => $this->config['encryptionKey'],
+            ]);
         } else {
-
             throw new ConfigurationIsNotFound('Connection not found!');
         }
+    }
+
+    protected function createLibSQL(string|array $config, ?int $flags = 6, ?string $encryptionKey = ''): LibSQL
+    {
+        return new LibSQL($config, $flags, $encryptionKey);
     }
 
     public function beginTransaction(): bool
@@ -151,43 +150,53 @@ class LibSQLDatabase
      */
     private function checkConnectionMode(string $path, string $url = '', string $token = '', bool $remoteOnly = false): array|false
     {
-        if ((strpos($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
+        if ((str_starts_with($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
             $this->connection_mode = 'remote_replica';
-            $path = [
+            $connectionData = [
                 'mode' => $this->connection_mode,
                 'uri' => $path,
                 'url' => $url,
                 'token' => $token,
             ];
-        } elseif (strpos($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
+        } elseif (str_starts_with($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
             $this->connection_mode = 'remote';
-            $path = [
+            $connectionData = [
                 'mode' => $this->connection_mode,
                 'uri' => $path,
                 'url' => $url,
                 'token' => $token,
             ];
-        } elseif (strpos($path, 'file:') !== false) {
+        } elseif (str_starts_with($path, 'file:') !== false) {
             $this->connection_mode = 'local';
-            $path = [
+            $connectionData = [
                 'mode' => $this->connection_mode,
                 'uri' => str_replace('file:', '', $path),
             ];
-        } elseif ($path === ':memory:') {
+        } elseif ($path === 'memory') {
             $this->connection_mode = 'memory';
-            $path = [
+            $connectionData = [
                 'mode' => $this->connection_mode,
-                'uri' => $path,
+                'uri' => ':memory:',
             ];
         } else {
-            $path = false;
+            $connectionData = false;
         }
 
-        return $path;
+        return $connectionData;
     }
 
     public function __destruct()
     {
         $this->db->close();
+    }
+
+    public function getDb(): LibSQL
+    {
+        return $this->db;
+    }
+
+    public function getConnectionMode(): string
+    {
+        return $this->connection_mode;
     }
 }

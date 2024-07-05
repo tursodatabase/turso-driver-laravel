@@ -1,0 +1,181 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to function is_null\\(\\) with Illuminate\\\\Database\\\\Schema\\\\Grammars\\\\Grammar will always evaluate to false\\.$#"
+			count: 2
+			path: src/Database/LibSQLConnection.php
+
+		-
+			message: "#^Method Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLConnection\\:\\:getDefaultSchemaGrammar\\(\\) should return Illuminate\\\\Database\\\\Schema\\\\Grammars\\\\Grammar but returns Illuminate\\\\Database\\\\Grammar\\.$#"
+			count: 1
+			path: src/Database/LibSQLConnection.php
+
+		-
+			message: "#^Parameter \\#1 \\$pdo of method Illuminate\\\\Database\\\\Connection\\:\\:__construct\\(\\) expects Closure\\|PDO, Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLDatabase given\\.$#"
+			count: 1
+			path: src/Database/LibSQLConnection.php
+
+		-
+			message: "#^Parameter \\#1 \\$pdo of method Illuminate\\\\Database\\\\Connection\\:\\:setReadPdo\\(\\) expects Closure\\|PDO\\|null, Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLDatabase given\\.$#"
+			count: 1
+			path: src/Database/LibSQLConnection.php
+
+		-
+			message: "#^Return type \\(Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLDatabase\\) of method Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLConnector\\:\\:connect\\(\\) should be compatible with return type \\(PDO\\) of method Illuminate\\\\Database\\\\Connectors\\\\ConnectorInterface\\:\\:connect\\(\\)$#"
+			count: 1
+			path: src/Database/LibSQLConnector.php
+
+		-
+			message: "#^Constructor of class LibSQL has an unused parameter \\$config\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQL has an unused parameter \\$encryption_key\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQL has an unused parameter \\$flags\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLResult has an unused parameter \\$config\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLResult has an unused parameter \\$parameters\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLResult has an unused parameter \\$sql\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLStatement has an unused parameter \\$conn_id\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLStatement has an unused parameter \\$sql\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLTransaction has an unused parameter \\$conn_id\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Constructor of class LibSQLTransaction has an unused parameter \\$trx_mode\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:changes\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:execute\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:executeBatch\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:isAutocommit\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:prepare\\(\\) should return LibSQLStatement but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:query\\(\\) should return LibSQLResult but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:transaction\\(\\) should return LibSQLTransaction but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQL\\:\\:version\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLResult\\:\\:columnName\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLResult\\:\\:columnType\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLResult\\:\\:fetchArray\\(\\) should return array but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLResult\\:\\:numColumns\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLStatement\\:\\:columns\\(\\) should return array but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLStatement\\:\\:execute\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLStatement\\:\\:parameterCount\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLStatement\\:\\:parameterName\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLStatement\\:\\:query\\(\\) should return LibSQLResult but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLTransaction\\:\\:changes\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLTransaction\\:\\:execute\\(\\) should return int but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLTransaction\\:\\:isAutocommit\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
+
+		-
+			message: "#^Method LibSQLTransaction\\:\\:query\\(\\) should return array but return statement is missing\\.$#"
+			count: 1
+			path: src/libsql_php_extension.stubs.php
