@@ -3,7 +3,6 @@
 namespace Turso\Driver\Laravel;
 
 use Illuminate\Database\DatabaseManager;
-use Illuminate\Support\Arr;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
@@ -37,8 +36,8 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
 
         $this->app->resolving('db', function (DatabaseManager $db) {
             $db->extend('libsql', function ($config, $name) {
-                Arr::add($config, 'prefix', '');
-                Arr::add($config, 'name', $name);
+                $config['prefix'] = $config['prefix'] ?: '';
+                $config['name'] = $name;
                 $pdoResolver = app()->get(LibSQLConnector::class)->connect($config);
 
                 return new LibSQLConnection($pdoResolver, $config['database'] ?? '', $config['prefix'], $config);

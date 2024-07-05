@@ -13,7 +13,6 @@ class LibSQLConnection extends Connection
     public function __construct(LibSQLDatabase $db, string $database = '', string $tablePrefix = '', array $config = [])
     {
         parent::__construct($db, $database, $tablePrefix, $config);
-
         $this->db = $db;
         $this->setReadPdo($db);
 

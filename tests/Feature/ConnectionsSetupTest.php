@@ -5,7 +5,6 @@ namespace Turso\Driver\Laravel\Tests\Feature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use LibSQL;
-use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
@@ -24,10 +23,12 @@ class ConnectionsSetupTest extends TestCase
         if (File::exists('tests/_files/test.db')) {
             File::delete('tests/_files/test.db');
         }
+        if (File::exists('tests/_files/local_file_default.db')) {
+            File::delete('tests/_files/local_file_default.db');
+        }
         if (File::exists('tests/_files/database.sqlite')) {
             File::delete('tests/_files/database.sqlite');
         }
-        Mockery::close();
         parent::tearDown();
     }
 
@@ -146,6 +147,40 @@ class ConnectionsSetupTest extends TestCase
         $this->assertNotEmpty($result, 'Failed to query SQLite version');
 
         $this->assertTrue(File::exists('tests/_files/test.db'), 'No file created or wrong path');
+    }
+
+    public function testConnectionLocalDefault(): void
+    {
+        config()->set('database.default', 'local_file_default');
+        config()->set('database.connections.local_file_default', [
+            'driver' => 'libsql',
+            'url' => 'libsql::file:tests/_files/local_file_default.db',
+            'authToken' => '',
+            'syncUrl' => '',
+            'syncInterval' => 5,
+            'readYourWrites' => true,
+            'encryptionKey' => '',
+            'remoteOnly' => false,
+            'prefix' => '',
+            'database' => null, // doesn't matter actually, since we use sqlite
+        ]);
+        $connection = DB::connection('local_file_default');
+
+        // Assert that the connection is an instance of LibSQLConnection
+        $this->assertInstanceOf(LibSQLConnection::class, $connection);
+
+        // Get the PDO instance
+        $pdo = $connection->getPdo();
+
+        $this->assertInstanceOf(LibSQLDatabase::class, $pdo);
+        $this->assertEquals('local', $pdo->getDb()->mode);
+        $this->assertEquals('local', $pdo->getConnectionMode());
+        $result = $connection->select('PRAGMA database_list');
+        $this->assertNotEmpty($result);
+        $result = $pdo->query('SELECT sqlite_version()');
+        $this->assertNotEmpty($result, 'Failed to query SQLite version');
+
+        $this->assertTrue(File::exists('tests/_files/local_file_default.db'), 'No file created or wrong path');
     }
 
     public function testConnectionRemoteReplica(): void
