@@ -5,11 +5,11 @@ namespace Turso\Driver\Laravel\Tests\Feature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use LibSQL;
+use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
 use Turso\Driver\Laravel\Database\LibSQLDatabase;
-use Mockery;
 use Turso\Driver\Laravel\Exceptions\ConfigurationIsNotFound;
 
 class ConnectionsSetupTest extends TestCase
@@ -40,6 +40,7 @@ class ConnectionsSetupTest extends TestCase
             DB::connection('libsql');
         } catch (\Exception $e) {
             $this->assertEquals($error, $e->getMessage());
+
             return;
         }
     }
@@ -60,7 +61,7 @@ class ConnectionsSetupTest extends TestCase
                 'prefix' => '',
                 'database' => null,
             ],
-            'error' => 'URL and database not set, please check your configuration'
+            'error' => 'URL and database not set, please check your configuration',
         ];
         yield 'url should be correct for file' => [
             'defaultConnection' => 'libsql',
@@ -76,7 +77,7 @@ class ConnectionsSetupTest extends TestCase
                 'prefix' => '',
                 'database' => null,
             ],
-            'error' => 'Got driver - file, please check your URL and driver config'
+            'error' => 'Got driver - file, please check your URL and driver config',
         ];
     }
 
@@ -107,10 +108,10 @@ class ConnectionsSetupTest extends TestCase
         $this->assertInstanceOf(LibSQLDatabase::class, $pdo);
         $this->assertEquals('local', $pdo->getDb()->mode);
         $this->assertEquals('memory', $pdo->getConnectionMode());
-        $result = $connection->select("PRAGMA database_list");
+        $result = $connection->select('PRAGMA database_list');
         $this->assertNotEmpty($result);
-        $result = $pdo->query("SELECT sqlite_version()");
-        $this->assertNotEmpty($result, "Failed to query SQLite version");
+        $result = $pdo->query('SELECT sqlite_version()');
+        $this->assertNotEmpty($result, 'Failed to query SQLite version');
     }
 
     public function testConnectionLocalFile(): void
@@ -139,10 +140,10 @@ class ConnectionsSetupTest extends TestCase
         $this->assertInstanceOf(LibSQLDatabase::class, $pdo);
         $this->assertEquals('local', $pdo->getDb()->mode);
         $this->assertEquals('local', $pdo->getConnectionMode());
-        $result = $connection->select("PRAGMA database_list");
+        $result = $connection->select('PRAGMA database_list');
         $this->assertNotEmpty($result);
-        $result = $pdo->query("SELECT sqlite_version()");
-        $this->assertNotEmpty($result, "Failed to query SQLite version");
+        $result = $pdo->query('SELECT sqlite_version()');
+        $this->assertNotEmpty($result, 'Failed to query SQLite version');
 
         $this->assertTrue(File::exists('tests/_files/test.db'), 'No file created or wrong path');
     }
@@ -159,26 +160,26 @@ class ConnectionsSetupTest extends TestCase
             'encryptionKey' => '',
             'remoteOnly' => false,
             'prefix' => '',
-            'database' => 'database.sqlite'
+            'database' => 'database.sqlite',
         ];
         $expectedLibSQLParams = [
-            "url" => 'file:tests/_files/database.sqlite',
-            "authToken" => $config['authToken'],
+            'url' => 'file:tests/_files/database.sqlite',
+            'authToken' => $config['authToken'],
             'syncUrl' => $config['syncUrl'],
             'syncInterval' => $config['syncInterval'],
             'read_your_writes' => $config['readYourWrites'],
             'encryptionKey' => $config['encryptionKey'],
         ];
         $constructorConfig = [
-            "driver" => "libsql",
-              "authToken" => "your-database-auth-token-from-turso",
-              "syncUrl" => "your-database-url-from-turso",
-              "syncInterval" => 5,
-              "readYourWrites" => true,
-              "encryptionKey" => "",
-              "remoteOnly" => false,
-              "prefix" => "",
-              "database" => "file:tests/_files/database.sqlite",
+            'driver' => 'libsql',
+            'authToken' => 'your-database-auth-token-from-turso',
+            'syncUrl' => 'your-database-url-from-turso',
+            'syncInterval' => 5,
+            'readYourWrites' => true,
+            'encryptionKey' => '',
+            'remoteOnly' => false,
+            'prefix' => '',
+            'database' => 'file:tests/_files/database.sqlite',
         ];
 
         $mockLibSQLDatabase = $this->getMockBuilder(LibSQLDatabase::class)
@@ -225,13 +226,13 @@ class ConnectionsSetupTest extends TestCase
             'remoteOnly' => true,
             'prefix' => '',
         ];
-        $expectedLibSQLParams = "libsql:dbname=libsql://database-org.turso.io;authToken=your-database-auth-token-from-turso";
+        $expectedLibSQLParams = 'libsql:dbname=libsql://database-org.turso.io;authToken=your-database-auth-token-from-turso';
         $constructorConfig = [
-            "driver" => "libsql",
-            "authToken" => "your-database-auth-token-from-turso",
-            "remoteOnly" => true,
-            "prefix" => "",
-            "database" => "dbname=libsql://database-org.turso.io",
+            'driver' => 'libsql',
+            'authToken' => 'your-database-auth-token-from-turso',
+            'remoteOnly' => true,
+            'prefix' => '',
+            'database' => 'dbname=libsql://database-org.turso.io',
         ];
 
         $mockLibSQLDatabase = $this->getMockBuilder(LibSQLDatabase::class)
@@ -279,6 +280,7 @@ class ConnectionsSetupTest extends TestCase
             DB::connection('libsql');
         } catch (ConfigurationIsNotFound $e) {
             $this->assertEquals('Connection not found!', $e->getMessage());
+
             return;
         }
     }

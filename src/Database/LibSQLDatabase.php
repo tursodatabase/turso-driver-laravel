@@ -15,9 +15,7 @@ class LibSQLDatabase
 
     protected bool $inTransaction = false;
 
-    public function __construct(protected array $config = [])
-    {
-    }
+    public function __construct(protected array $config = []) {}
 
     public function init(): void
     {
@@ -28,8 +26,8 @@ class LibSQLDatabase
             'memory' => $this->createLibSQL(':memory:'),
             'remote' => $this->createLibSQL("libsql:$path;authToken={$this->config['authToken']}"),
             'remote_replica' => $this->createLibSQL([
-                "url" => $path,
-                "authToken" => $this->config['authToken'],
+                'url' => $path,
+                'authToken' => $this->config['authToken'],
                 'syncUrl' => $this->config['syncUrl'],
                 'syncInterval' => $this->config['syncInterval'],
                 'read_your_writes' => $this->config['readYourWrites'],
@@ -143,7 +141,7 @@ class LibSQLDatabase
             $this->connection_mode = 'remote_replica';
         } elseif (str_starts_with($path, 'file:') !== false) {
             $this->connection_mode = 'local';
-        }  elseif (! empty($path) && ! empty($token) && $remoteOnly === true) {
+        } elseif (! empty($path) && ! empty($token) && $remoteOnly === true) {
             $this->connection_mode = 'remote';
         } elseif ($path === 'memory') {
             $this->connection_mode = 'memory';
