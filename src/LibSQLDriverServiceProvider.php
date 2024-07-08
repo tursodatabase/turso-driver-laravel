@@ -36,7 +36,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
 
         $this->app->resolving('db', function (DatabaseManager $db) {
             $db->extend('libsql', function ($config, $name) {
-                $config['prefix'] = $config['prefix'] ?: '';
+                $config['prefix'] = $config['prefix'] ?? '';
                 $config['name'] = $name;
                 $pdoResolver = app()->get(LibSQLConnector::class)->connect($config);
 

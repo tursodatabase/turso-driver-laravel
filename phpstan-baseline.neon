@@ -11,16 +11,6 @@ parameters:
 			path: src/Database/LibSQLConnection.php
 
 		-
-			message: "#^Parameter \\#1 \\$pdo of method Illuminate\\\\Database\\\\Connection\\:\\:__construct\\(\\) expects Closure\\|PDO, Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLDatabase given\\.$#"
-			count: 1
-			path: src/Database/LibSQLConnection.php
-
-		-
-			message: "#^Parameter \\#1 \\$pdo of method Illuminate\\\\Database\\\\Connection\\:\\:setReadPdo\\(\\) expects Closure\\|PDO\\|null, Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLDatabase given\\.$#"
-			count: 1
-			path: src/Database/LibSQLConnection.php
-
-		-
 			message: "#^Return type \\(Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLDatabase\\) of method Turso\\\\Driver\\\\Laravel\\\\Database\\\\LibSQLConnector\\:\\:connect\\(\\) should be compatible with return type \\(PDO\\) of method Illuminate\\\\Database\\\\Connectors\\\\ConnectorInterface\\:\\:connect\\(\\)$#"
 			count: 1
 			path: src/Database/LibSQLConnector.php

@@ -12,9 +12,12 @@ class LibSQLConnection extends Connection
 
     public function __construct(LibSQLDatabase $db, string $database = '', string $tablePrefix = '', array $config = [])
     {
-        parent::__construct($db, $database, $tablePrefix, $config);
+        $libsqlDatabase = function () use ($db) {
+            return $db;
+        };
+        parent::__construct($libsqlDatabase, $database, $tablePrefix, $config);
         $this->db = $db;
-        $this->setReadPdo($db);
+        $this->setReadPdo($libsqlDatabase);
 
         $this->schemaGrammar = $this->getDefaultSchemaGrammar();
     }
