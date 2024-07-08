@@ -113,6 +113,11 @@ class LibSQLDatabase
         return $result;
     }
 
+    public function inTransaction(): bool
+    {
+        return $this->inTransaction;
+    }
+
     public function sync(): void
     {
         if ($this->connection_mode !== 'remote_replica') {
