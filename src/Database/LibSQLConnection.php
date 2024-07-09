@@ -11,6 +11,7 @@ use LibSQL;
 class LibSQLConnection extends Connection
 {
     public LibSQLDatabase $db;
+
     protected array $bindings = [];
 
     public function __construct(LibSQLDatabase $db, string $database = ':memory:', string $tablePrefix = '', array $config = [])
@@ -42,6 +43,7 @@ class LibSQLConnection extends Connection
     public function statement($query, $bindings = [])
     {
         $this->select($query, $bindings);
+
         return $this->isRunningMigrations();
     }
 
@@ -76,6 +78,7 @@ class LibSQLConnection extends Connection
     protected function getDefaultSchemaGrammar()
     {
         ($grammar = new LibSQLSchemaGrammar)->setConnection($this);
+
         return $this->withTablePrefix($grammar);
     }
 
@@ -149,8 +152,9 @@ class LibSQLConnection extends Connection
     {
         $commands = [
             'tenants:migrate',
-            'tenants:rollback'
+            'tenants:rollback',
         ];
+
         return App::runningInConsole() && in_array($_SERVER['argv'][1], $commands);
     }
 }

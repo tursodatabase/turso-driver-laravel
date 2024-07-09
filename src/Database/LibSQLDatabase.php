@@ -23,7 +23,7 @@ class LibSQLDatabase
 
         $url = str_replace('file:', '', $config['url']);
         $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
-            'filename' => 'file:' . database_path($url),
+            'filename' => 'file:'.database_path($url),
             default => $config['url'],
         };
 
@@ -148,7 +148,7 @@ class LibSQLDatabase
     {
         if ((str_starts_with($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
             $this->connection_mode = 'remote_replica';
-        } elseif (strpos($path, 'file:') !== false && !empty($url) && !empty($token) && $remoteOnly === true) {
+        } elseif (strpos($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
             $this->connection_mode = 'remote';
         } elseif (strpos($path, 'file:') !== false) {
             $this->connection_mode = 'local';
