@@ -15,8 +15,8 @@ enum PdoParam: int
     public static function fromValue(mixed $value): static
     {
         return match (gettype($value)) {
-            'boolean' => self::BOOL,
-            'double', 'integer' => self::INT,
+            'boolean', 'integer' => self::BOOL,
+            'double', 'float' => self::INT,
             'resource' => self::LOB,
             'NULL' => self::NULL,
             default => self::STR,
