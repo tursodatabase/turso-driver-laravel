@@ -15,24 +15,31 @@ class LibSQLDatabase
 
     protected bool $inTransaction = false;
 
-    public function __construct(protected array $config = []) {}
-
-    public function init(): void
+    public function __construct(array $config = [])
     {
-        $path = $this->config['database'];
-        $this->setConnectionMode($path, $this->config['syncUrl'] ?? '', $this->config['authToken'] ?? '', $this->config['remoteOnly'] ?? false);
+        $config = config('database.connections.libsql');
+
+        $url = str_replace('file:', '', $config['url']);
+        $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
+            'filename' => 'file:'.database_path($url),
+            default => $config['url'],
+        };
+
+        $this->setConnectionMode($config['url'], $config['syncUrl'], $config['authToken'], $config['remoteOnly']);
+
         $this->db = match ($this->connection_mode) {
-            'local' => $this->createLibSQL($path, LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, $this->config['encryptionKey']),
+            'local' => $this->createLibSQL(
+                $config['url'],
+                LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE,
+                $config['encryptionKey']
+            ),
             'memory' => $this->createLibSQL(':memory:'),
-            'remote' => $this->createLibSQL("libsql:$path;authToken={$this->config['authToken']}"),
-            'remote_replica' => $this->createLibSQL([
-                'url' => $path,
-                'authToken' => $this->config['authToken'],
-                'syncUrl' => $this->config['syncUrl'],
-                'syncInterval' => $this->config['syncInterval'],
-                'read_your_writes' => $this->config['readYourWrites'],
-                'encryptionKey' => $this->config['encryptionKey'],
-            ]),
+            'remote' => $config['remoteOnly'] === true
+            ? $this->createLibSQL("libsql:dbname={$config['syncUrl']};authToken={$config['authToken']}")
+            : throw new ConfigurationIsNotFound('Connection not found!'),
+            'remote_replica' => $this->createLibSQL(
+                array_diff_key($config, array_flip(['driver', 'name', 'prefix', 'database', 'remoteOnly']))
+            ),
             default => throw new ConfigurationIsNotFound('Connection not found!'),
         };
     }
@@ -144,24 +151,23 @@ class LibSQLDatabase
     {
         if ((str_starts_with($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
             $this->connection_mode = 'remote_replica';
-        } elseif (str_starts_with($path, 'file:') !== false) {
-            $this->connection_mode = 'local';
-        } elseif (! empty($path) && ! empty($token) && $remoteOnly === true) {
+        } elseif (strpos($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
             $this->connection_mode = 'remote';
-        } elseif ($path === 'memory') {
+        } elseif (strpos($path, 'file:') !== false) {
+            $this->connection_mode = 'local';
+        } elseif ($path === ':memory:') {
             $this->connection_mode = 'memory';
         } else {
-            $this->connection_mode = '';
+            $this->connection_mode = false;
         }
     }
 
-    public function __destruct()
+    private function checkPathOrFilename(string $string): string
     {
-        // we have to check if it's actually was initialised
-        // for example if we had exception on initialization, this will be called but
-        // $this->db would be in uninitialized state, which will cause exception
-        if (isset($this->db)) {
-            $this->db->close();
+        if (strpos($string, DIRECTORY_SEPARATOR) !== false || strpos($string, '/') !== false || strpos($string, '\\') !== false) {
+            return 'path';
+        } else {
+            return 'filename';
         }
     }
 
@@ -173,5 +179,15 @@ class LibSQLDatabase
     public function getConnectionMode(): string
     {
         return $this->connection_mode;
+    }
+
+    public function __destruct()
+    {
+        // we have to check if it's actually was initialised
+        // for example if we had exception on initialization, this will be called but
+        // $this->db would be in uninitialized state, which will cause exception
+        if (isset($this->db)) {
+            $this->db->close();
+        }
     }
 }

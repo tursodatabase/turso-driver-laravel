@@ -44,6 +44,11 @@ class LibSQLPDOStatement extends PDOStatement
         return true;
     }
 
+    public function prepare(string $query)
+    {
+        return new self($this->db, $query);
+    }
+
     public function execute(?array $parameters = null): bool
     {
         collect((array) $parameters)
@@ -52,7 +57,7 @@ class LibSQLPDOStatement extends PDOStatement
                 $this->bindValue($key, $value, $type->value);
             });
 
-        if (str_starts_with(strtolower($this->query), 'select')) {
+        if (str_starts_with(strtolower($this->query), 'select') || str_starts_with(strtolower($this->query), 'drop')) {
             $this->response = $this->db->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
         } else {
             $statement = $this->db->prepare($this->query);
@@ -96,6 +101,10 @@ class LibSQLPDOStatement extends PDOStatement
     ): mixed {
         if ($mode === PDO::FETCH_DEFAULT) {
             $mode = $this->fetchMode;
+        }
+
+        if (empty($this->response['rows'])) {
+            return false;
         }
 
         $rows = array_shift($this->response['rows']);
