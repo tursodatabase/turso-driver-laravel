@@ -5,14 +5,20 @@ namespace Turso\Driver\Laravel\Database;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\App;
+use LibSQL;
 
 class LibSQLConnection extends Connection
 {
     public LibSQLDatabase $db;
+    protected array $bindings = [];
 
     public function __construct(LibSQLDatabase $db, string $database = ':memory:', string $tablePrefix = '', array $config = [])
     {
-        parent::__construct($db, $database, $tablePrefix, $config);
+        $libsqlDb = function () use ($db) {
+            return $db;
+        };
+        parent::__construct($libsqlDb, $database, $tablePrefix, $config);
 
         $this->db = $db;
         $this->schemaGrammar = $this->getDefaultSchemaGrammar();
@@ -21,6 +27,32 @@ class LibSQLConnection extends Connection
     public function sync(): void
     {
         $this->db->sync();
+    }
+
+    public function getDb(): LibSQL
+    {
+        return $this->db->getDb();
+    }
+
+    public function getConnectionMode(): string
+    {
+        return $this->db->getConnectionMode();
+    }
+
+    public function statement($query, $bindings = [])
+    {
+        $this->select($query, $bindings);
+        return $this->isRunningMigrations();
+    }
+
+    public function getPdo()
+    {
+        return $this->db;
+    }
+
+    public function getReadPdo()
+    {
+        return $this->db;
     }
 
     public function select($query, $bindings = [], $useReadPdo = true)
@@ -43,7 +75,8 @@ class LibSQLConnection extends Connection
      */
     protected function getDefaultSchemaGrammar()
     {
-        return $this->withTablePrefix(new LibSQLSchemaGrammar);
+        ($grammar = new LibSQLSchemaGrammar)->setConnection($this);
+        return $this->withTablePrefix($grammar);
     }
 
     // You might already have this method, but ensure it correctly sets the schema grammar
@@ -56,10 +89,12 @@ class LibSQLConnection extends Connection
 
     public function createReadPdo(array $config): ?LibSQLDatabase
     {
-        $db = new LibSQLDatabase($config);
+        $db = function () use ($config) {
+            return new LibSQLDatabase($config);
+        };
         $this->setReadPdo($db);
 
-        return $db;
+        return $db();
     }
 
     protected function escapeBinary(mixed $value): string
@@ -108,5 +143,14 @@ class LibSQLConnection extends Connection
     public function quote(string $value): string
     {
         return $this->escapeString($value);
+    }
+
+    protected function isRunningMigrations()
+    {
+        $commands = [
+            'tenants:migrate',
+            'tenants:rollback'
+        ];
+        return App::runningInConsole() && in_array($_SERVER['argv'][1], $commands);
     }
 }
