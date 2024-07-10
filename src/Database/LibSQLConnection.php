@@ -16,11 +16,10 @@ class LibSQLConnection extends Connection
 
     public function __construct(LibSQLDatabase $db, string $database = ':memory:', string $tablePrefix = '', array $config = [])
     {
-        $libsqlDb = function () use ($db) {
+        $libsqlDatabase = function () use ($db) {
             return $db;
         };
-        parent::__construct($libsqlDb, $database, $tablePrefix, $config);
-
+        parent::__construct($libsqlDatabase, $database, $tablePrefix, $config);
         $this->db = $db;
         $this->setReadPdo($libsqlDatabase);
 
@@ -30,33 +29,6 @@ class LibSQLConnection extends Connection
     public function sync(): void
     {
         $this->db->sync();
-    }
-
-    public function getDb(): LibSQL
-    {
-        return $this->db->getDb();
-    }
-
-    public function getConnectionMode(): string
-    {
-        return $this->db->getConnectionMode();
-    }
-
-    public function statement($query, $bindings = []): bool
-    {
-        $this->select($query, $bindings);
-
-        return $this->isRunningMigrations();
-    }
-
-    public function getPdo(): LibSQLDatabase
-    {
-        return $this->db;
-    }
-
-    public function getReadPdo(): LibSQLDatabase
-    {
-        return $this->db;
     }
 
     public function select($query, $bindings = [], $useReadPdo = true)
@@ -95,16 +67,6 @@ class LibSQLConnection extends Connection
         if (is_null($this->schemaGrammar)) {
             $this->schemaGrammar = $this->getDefaultSchemaGrammar();
         }
-    }
-
-    public function createReadPdo(array $config): ?LibSQLDatabase
-    {
-        $db = function () use ($config) {
-            return new LibSQLDatabase($config);
-        };
-        $this->setReadPdo($db);
-
-        return $db();
     }
 
     protected function escapeBinary(mixed $value): string
@@ -153,15 +115,5 @@ class LibSQLConnection extends Connection
     public function quote(string $value): string
     {
         return $this->escapeString($value);
-    }
-
-    protected function isRunningMigrations()
-    {
-        $commands = [
-            'tenants:migrate',
-            'tenants:rollback',
-        ];
-
-        return App::runningInConsole() && in_array($_SERVER['argv'][1], $commands);
     }
 }
