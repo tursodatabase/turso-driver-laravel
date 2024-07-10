@@ -89,7 +89,7 @@ class LibSQLPDOStatement extends PDOStatement
             $name = 'id';
         }
 
-        return (isset($this->lastInsertIds[$name]))
+        return isset($this->lastInsertIds[$name])
             ? (string) $this->lastInsertIds[$name]
             : false;
     }

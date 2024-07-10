@@ -40,29 +40,27 @@ class LibSQLConnection extends Connection
         return $this->db->getConnectionMode();
     }
 
-    public function statement($query, $bindings = [])
+    public function statement($query, $bindings = []): bool
     {
         $this->select($query, $bindings);
 
         return $this->isRunningMigrations();
     }
 
-    public function getPdo()
+    public function getPdo(): LibSQLDatabase
     {
         return $this->db;
     }
 
-    public function getReadPdo()
+    public function getReadPdo(): LibSQLDatabase
     {
         return $this->db;
     }
 
     public function select($query, $bindings = [], $useReadPdo = true)
     {
-        // Example method where query execution and fetching might occur
         $result = (array) parent::select($query, $bindings, $useReadPdo);
 
-        // Convert result objects to arrays if they are not already
         $resultArray = array_map(function ($item) {
             return (array) $item;
         }, $result);
