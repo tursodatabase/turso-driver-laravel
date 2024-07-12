@@ -5,7 +5,6 @@ namespace Turso\Driver\Laravel\Database;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\App;
 use LibSQL;
 
 class LibSQLConnection extends Connection
@@ -44,7 +43,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return !empty($res);
+        return ! empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
