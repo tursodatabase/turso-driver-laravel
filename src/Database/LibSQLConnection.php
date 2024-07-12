@@ -42,9 +42,9 @@ class LibSQLConnection extends Connection
 
     public function statement($query, $bindings = []): bool
     {
-        $this->select($query, $bindings);
+        $res = $this->select($query, $bindings);
 
-        return $this->isRunningMigrations();
+        return !empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -151,15 +151,5 @@ class LibSQLConnection extends Connection
     public function quote(string $value): string
     {
         return $this->escapeString($value);
-    }
-
-    protected function isRunningMigrations()
-    {
-        $commands = [
-            'tenants:migrate',
-            'tenants:rollback',
-        ];
-
-        return App::runningInConsole() && in_array($_SERVER['argv'][1], $commands);
     }
 }
