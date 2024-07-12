@@ -68,6 +68,13 @@ class LibSQLConnection extends Connection
         return $resultArray;
     }
 
+    protected function getDefaultQueryGrammar()
+    {
+        ($grammar = new LibSQLQueryGrammar())->setConnection($this);
+
+        return $grammar;
+    }
+
     /**
      * Get the default schema grammar instance.
      *
