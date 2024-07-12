@@ -19,8 +19,6 @@ class LibSQLDatabase
 
     public function __construct(array $config = [])
     {
-        $config = config('database.connections.libsql');
-
         $url = str_replace('file:', '', $config['url']);
         $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
             'filename' => 'file:'.database_path($url),
