@@ -12,7 +12,7 @@ class LibSQLPDOStatement extends PDOStatement
 {
     protected int $affectedRows = 0;
 
-    protected int $fetchMode = PDO::FETCH_BOTH;
+    protected int $fetchMode = PDO::FETCH_ASSOC;
 
     protected array $bindings = [];
 

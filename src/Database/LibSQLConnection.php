@@ -5,7 +5,6 @@ namespace Turso\Driver\Laravel\Database;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\App;
 use LibSQL;
 
 class LibSQLConnection extends Connection
@@ -30,6 +29,7 @@ class LibSQLConnection extends Connection
     {
         $this->db->sync();
     }
+
 
     public function select($query, $bindings = [], $useReadPdo = true)
     {

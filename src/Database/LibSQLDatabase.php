@@ -15,6 +15,7 @@ class LibSQLDatabase
 
     protected bool $inTransaction = false;
 
+
     public function __construct(protected array $config = []) {}
 
     public function init(): void
