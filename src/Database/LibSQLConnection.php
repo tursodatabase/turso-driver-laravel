@@ -125,21 +125,17 @@ class LibSQLConnection extends Connection
      */
     public function cursor($query, $bindings = [], $useReadPdo = true)
     {
-        $statement = $this->run($query, $bindings, function ($query, $bindings) {
-            if ($this->pretending()) {
-                return [];
-            }
+        if ($this->pretending()) {
+            return [];
+        }
 
-            $preparedQuery = $this->getRawPdo()->prepare($query);
+        $preparedQuery = $this->getRawPdo()->prepare($query);
 
-            if (! $preparedQuery) {
-                throw new Exception('Failed to prepare statement.');
-            }
+        if (! $preparedQuery) {
+            throw new Exception('Failed to prepare statement.');
+        }
 
-            $results = $preparedQuery->query($this->prepareBindings($bindings))->fetchArray(LibSQL::LIBSQL_ASSOC);
-
-            return $results;
-        });
+        $statement = $preparedQuery->query($bindings)->fetchArray(LibSQL::LIBSQL_ASSOC);
 
         foreach ($statement as $record) {
             yield $record;
