@@ -2,9 +2,9 @@
 
 namespace Turso\Driver\Laravel\Database;
 
-use LibSQL;
 use Exception;
 use Illuminate\Database\Connection;
+use LibSQL;
 
 class LibSQLConnection extends Connection
 {
@@ -44,7 +44,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return !empty($res);
+        return ! empty($res);
     }
 
     public function getRawPdo(): LibSQL
@@ -97,7 +97,7 @@ class LibSQLConnection extends Connection
 
     public function select($query, $bindings = [], $useReadPdo = true)
     {
-        return $this->run($query, $bindings, function ($query, $bindings) use ($useReadPdo) {
+        return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
                 return [];
             }
@@ -106,7 +106,7 @@ class LibSQLConnection extends Connection
 
             $results = $statement->query($bindings)->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-            return array_map(fn($result) => $result, $results);
+            return array_map(fn ($result) => $result, $results);
         });
     }
 
@@ -125,14 +125,14 @@ class LibSQLConnection extends Connection
      */
     public function cursor($query, $bindings = [], $useReadPdo = true)
     {
-        $statement = $this->run($query, $bindings, function ($query, $bindings) use ($useReadPdo) {
+        $statement = $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
                 return [];
             }
 
             $preparedQuery = $this->getRawPdo()->prepare($query);
 
-            if (!$preparedQuery) {
+            if (! $preparedQuery) {
                 throw new Exception('Failed to prepare statement.');
             }
 
@@ -319,7 +319,7 @@ class LibSQLConnection extends Connection
 
     private function isArrayAssoc(array $data)
     {
-        if (empty($data) || !is_array($data)) {
+        if (empty($data) || ! is_array($data)) {
             return false;
         }
 
@@ -334,11 +334,12 @@ class LibSQLConnection extends Connection
     {
         foreach ($named_params as $key => $value) {
             if (is_string($value) || is_resource($value)) {
-                $value = "'" . $value . "'";
+                $value = "'".$value."'";
             }
             $placeholders = [":$key", "@$key", "$$key"];
             $stmt = str_replace($placeholders, $value, $stmt);
         }
+
         return $stmt;
     }
 }
