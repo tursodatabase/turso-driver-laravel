@@ -9,7 +9,7 @@ use LibSQL;
 
 class LibSQLConnection extends Connection
 {
-    public LibSQLDatabase $db;
+    protected LibSQLDatabase $db;
 
     protected array $bindings = [];
 
@@ -30,6 +30,32 @@ class LibSQLConnection extends Connection
         $this->db->sync();
     }
 
+    public function getDb(): LibSQL
+    {
+        return $this->db->getDb();
+    }
+
+    public function getConnectionMode(): string
+    {
+        return $this->db->getConnectionMode();
+    }
+
+    public function statement($query, $bindings = []): bool
+    {
+        $res = $this->select($query, $bindings);
+
+        return ! empty($res);
+    }
+
+    public function getPdo(): LibSQLDatabase
+    {
+        return $this->db;
+    }
+
+    public function getReadPdo(): LibSQLDatabase
+    {
+        return $this->getPdo();
+    }
 
     public function select($query, $bindings = [], $useReadPdo = true)
     {
