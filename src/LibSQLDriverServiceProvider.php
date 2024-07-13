@@ -6,7 +6,6 @@ use Illuminate\Database\DatabaseManager;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
-use Turso\Driver\Laravel\Database\LibSQLConnectionFactory;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
 
 class LibSQLDriverServiceProvider extends PackageServiceProvider
@@ -14,9 +13,6 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
     public function boot(): void
     {
         parent::boot();
-        if (config('database.default') !== 'libsql' || config('database.connections.libsql.driver') === 'libsql') {
-            return;
-        }
     }
 
     public function configurePackage(Package $package): void
@@ -33,31 +29,18 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
     public function register(): void
     {
         parent::register();
-        $this->app->singleton('db.factory', function ($app) {
-            return new LibSQLConnectionFactory($app);
-        });
 
-        $this->app->scoped(LibSQLManager::class, function () {
-            return new LibSQLManager(config('database.connections.libsql'));
+        $this->app->singleton(LibSQLConnector::class, function ($app) {
+            return new LibSQLConnector();
         });
 
         $this->app->resolving('db', function (DatabaseManager $db) {
             $db->extend('libsql', function ($config, $name) {
-                $config = config('database.connections.libsql');
+                $config['prefix'] = $config['prefix'] ?? '';
                 $config['name'] = $name;
-                if (! isset($config['driver'])) {
-                    $config['driver'] = 'libsql';
-                }
+                $pdoResolver = app()->get(LibSQLConnector::class)->connect($config);
 
-                $connector = new LibSQLConnector();
-                $db = $connector->connect($config);
-
-                $connection = new LibSQLConnection($db, $config['database'] ?? ':memory:', $config['prefix'], $config);
-                app()->instance(LibSQLConnection::class, $connection);
-
-                $connection->createReadPdo($config);
-
-                return $connection;
+                return new LibSQLConnection($pdoResolver, $config['database'] ?? '', $config['prefix'], $config);
             });
         });
     }

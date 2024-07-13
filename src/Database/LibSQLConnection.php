@@ -15,12 +15,13 @@ class LibSQLConnection extends Connection
 
     public function __construct(LibSQLDatabase $db, string $database = ':memory:', string $tablePrefix = '', array $config = [])
     {
-        $libsqlDb = function () use ($db) {
+        $libsqlDatabase = function () use ($db) {
             return $db;
         };
-        parent::__construct($libsqlDb, $database, $tablePrefix, $config);
-
+        parent::__construct($libsqlDatabase, $database, $tablePrefix, $config);
         $this->db = $db;
+        $this->setReadPdo($libsqlDatabase);
+
         $this->schemaGrammar = $this->getDefaultSchemaGrammar();
     }
 
@@ -92,16 +93,6 @@ class LibSQLConnection extends Connection
         if (is_null($this->schemaGrammar)) {
             $this->schemaGrammar = $this->getDefaultSchemaGrammar();
         }
-    }
-
-    public function createReadPdo(array $config): ?LibSQLDatabase
-    {
-        $db = function () use ($config) {
-            return new LibSQLDatabase($config);
-        };
-        $this->setReadPdo($db);
-
-        return $db();
     }
 
     protected function escapeBinary(mixed $value): string

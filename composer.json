@@ -25,9 +25,10 @@
         "illuminate/contracts": "^10.0||^11.0"
     },
     "require-dev": {
+        "larastan/larastan": "^2.9",
         "laravel/pint": "^1.14",
         "nunomaduro/collision": "^8.1.1||^7.10.0",
-        "larastan/larastan": "^2.9",
+        "orchestra/testbench": "^9.1",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan-deprecation-rules": "^1.1",
         "phpstan/phpstan-phpunit": "^1.3",
@@ -36,11 +37,40 @@
     "autoload": {
         "psr-4": {
             "Turso\\Driver\\Laravel\\": "src/",
+            "Turso\\Driver\\Laravel\\Tests\\": "tests/",
             "Turso\\Driver\\Laravel\\Database\\Factories\\": "database/factories/"
         }
     },
     "scripts": {
-        "format": "vendor/bin/pint"
+        "format": "vendor/bin/pint",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/pint",
+            "@php vendor/bin/phpstan analyse"
+        ],
+        "phpstan-baseline": [
+            "@php vendor/bin/phpstan -b"
+        ],
+        "test": [
+            "@php vendor/bin/phpunit"
+        ],
+        "test-feature": [
+            "@php vendor/bin/phpunit --testsuite=Feature"
+        ],
+        "test-unit": [
+            "@php vendor/bin/phpunit --testsuite=Unit"
+        ]
     },
     "config": {
         "sort-packages": true,
