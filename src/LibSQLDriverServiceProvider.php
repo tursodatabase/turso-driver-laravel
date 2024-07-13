@@ -11,6 +11,14 @@ use Turso\Driver\Laravel\Database\LibSQLConnector;
 
 class LibSQLDriverServiceProvider extends PackageServiceProvider
 {
+    public function boot(): void
+    {
+        parent::boot();
+        if (config('database.default') !== 'libsql' || config('database.connections.libsql.driver') === 'libsql') {
+            return;
+        }
+    }
+
     public function configurePackage(Package $package): void
     {
         /*
@@ -29,6 +37,10 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
             return new LibSQLConnectionFactory($app);
         });
 
+        $this->app->scoped(LibSQLManager::class, function () {
+            return new LibSQLManager(config('database.connections.libsql'));
+        });
+
         $this->app->resolving('db', function (DatabaseManager $db) {
             $db->extend('libsql', function ($config, $name) {
                 $config = config('database.connections.libsql');
@@ -36,7 +48,9 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
                 if (! isset($config['driver'])) {
                     $config['driver'] = 'libsql';
                 }
-                $db = app()->get(LibSQLConnector::class)->connect($config);
+
+                $connector = new LibSQLConnector();
+                $db = $connector->connect($config);
 
                 $connection = new LibSQLConnection($db, $config['database'] ?? ':memory:', $config['prefix'], $config);
                 app()->instance(LibSQLConnection::class, $connection);
