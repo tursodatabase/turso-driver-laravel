@@ -6,6 +6,7 @@ use Illuminate\Database\DatabaseManager;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
+use Turso\Driver\Laravel\Database\LibSQLConnectionFactory;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
 
 class LibSQLDriverServiceProvider extends PackageServiceProvider
@@ -24,9 +25,8 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
     public function register(): void
     {
         parent::register();
-
-        $this->app->singleton(LibSQLConnector::class, function ($app) {
-            return new LibSQLConnector();
+        $this->app->singleton('db.factory', function ($app) {
+            return new LibSQLConnectionFactory($app);
         });
 
         $this->app->resolving('db', function (DatabaseManager $db) {
