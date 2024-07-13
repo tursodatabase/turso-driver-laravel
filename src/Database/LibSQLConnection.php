@@ -136,7 +136,7 @@ class LibSQLConnection extends Connection
                 throw new Exception('Failed to prepare statement.');
             }
 
-            $results = $preparedQuery->query($this->prepareBindings($bindings));
+            $results = $preparedQuery->query($this->prepareBindings($bindings))->fetchArray(LibSQL::LIBSQL_ASSOC);
 
             return $results;
         });
