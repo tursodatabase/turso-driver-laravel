@@ -164,7 +164,7 @@ For database operation usage, everything have same interface like usual when you
 use Illuminate\Support\Facades\DB;
 
 // Create
-DB::table('users')->create([
+DB::table('users')->insert([
     'name' => 'Budi Dalton',
     'email' => 'budi.dalton@duck.com'
 ]);
@@ -219,7 +219,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [Imam Ali Mustofa](https://github.com/:darkterminal)
+- [Imam Ali Mustofa](https://github.com/darkterminal)
 - [All Contributors](../../contributors)
 
 ## License
