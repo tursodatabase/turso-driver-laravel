@@ -322,7 +322,7 @@ class LibSQLConnection extends Connection
 
     public function quote(string $value): string
     {
-        return "'" . $this->escapeString($value) . "'";
+        return "'".$this->escapeString($value)."'";
     }
 
     private function isArrayAssoc(array $data)
