@@ -298,11 +298,23 @@ class LibSQLConnection extends Connection
 
     public function escapeString($value)
     {
-        // DISCUSSION: Open PR if you have best approach
-        $escaped_value = str_replace(
-            ['\\', "\x00", "\n", "\r", "\x1a", "'", '"'],
-            ['\\\\', '\\0', '\\n', '\\r', '\\Z', "\\'", '\\"'],
-            $value
+        // Handle NULL values
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        // Use strtr for more efficient character replacement
+        $escaped_value = strtr(
+            $value,
+            [
+                '\\' => '\\\\',
+                "\x00" => '\\0',
+                "\n" => '\\n',
+                "\r" => '\\r',
+                "\x1a" => '\\Z',
+                "'" => "\\'",
+                '"' => '\\"',
+            ]
         );
 
         return $escaped_value;
@@ -310,7 +322,7 @@ class LibSQLConnection extends Connection
 
     public function quote(string $value): string
     {
-        return $this->escapeString($value);
+        return "'" . $this->escapeString($value) . "'";
     }
 
     private function isArrayAssoc(array $data)
