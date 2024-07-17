@@ -80,6 +80,39 @@ class CreateRecordsTest extends TestCase
         $this->assertEquals('text2', $data[1]['text']);
     }
 
+    public function testWithBLOBType(): void
+    {
+        $modelClass = new class extends Model
+        {
+            protected $connection = 'local_file';
+
+            protected $table = 'test';
+
+            protected $fillable = ['text'];
+
+            public function casts()
+            {
+                return [
+                    'json' => 'array',
+                ];
+            }
+        };
+
+        $model = new $modelClass(['text' => str_repeat('{SOME TEST CONTENT HERE!}', 2)]);
+        $model->json = ['test' => 'test'];
+        $model->string = 'string';
+
+        $model->save();
+
+        $data = DB::connection('local_file')
+            ->table('test')
+            ->select()
+            ->get()
+            ->first();
+
+        $this->assertEquals(str_repeat('{SOME TEST CONTENT HERE!}', 2), $data['text']);
+    }
+
     public function testCreateViaEloquent(): void
     {
         $modelClass = new class extends Model
