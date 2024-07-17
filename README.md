@@ -143,7 +143,7 @@ Add this configuration at `config/database.php` inside the `connections` array:
 ```php
 'libsql' => [
     'driver' => 'libsql',
-    'url' => 'file:' . env('DB_DATABASE', database_path('database.sqlite')),
+    'url' => env('DB_DATABASE', database_path('database.sqlite')),
     'authToken' => env('DB_AUTH_TOKEN', ''),
     'syncUrl' => env('DB_SYNC_URL', ''),
     'syncInterval' => env('DB_SYNC_INTERVAL', 5),
