@@ -4,6 +4,7 @@ namespace Turso\Driver\Laravel\Database;
 
 use Exception;
 use Illuminate\Database\Connection;
+use Illuminate\Filesystem\Filesystem;
 use LibSQL;
 
 class LibSQLConnection extends Connection
@@ -16,6 +17,8 @@ class LibSQLConnection extends Connection
      * @var LibSQLDatabase|\Closure
      */
     protected $readPdo;
+
+    protected array $lastInsertIds = [];
 
     protected array $bindings = [];
 
@@ -46,31 +49,32 @@ class LibSQLConnection extends Connection
 
         return ! empty($res);
     }
-
-    public function getRawPdo(): LibSQL
-    {
-        return $this->db->getDb();
-    }
-
+    
     public function getPdo(): LibSQLDatabase
     {
         return $this->db;
+        
     }
 
     public function getReadPdo(): LibSQLDatabase
     {
         return $this->getPdo();
     }
+    
+    public function getRawPdo(): LibSQLDatabase
+    {
+        return $this->getPdo();
+    }
 
-    public function getRawReadPdo(): LibSQL
+    public function getRawReadPdo(): LibSQLDatabase
     {
         return $this->getRawPdo();
     }
 
     /**
-     * Set the LibSQLDatabase connection.
+     * Set the LibSQL connection.
      *
-     * @param  LibSQLDatabase|\Closure|null  $pdo
+     * @param  LibSQL|\Closure|null  $pdo
      * @return $this
      */
     public function setPdo($pdo)
@@ -83,9 +87,9 @@ class LibSQLConnection extends Connection
     }
 
     /**
-     * Set the LibSQLDatabase connection used for reading.
+     * Set the LibSQL connection used for reading.
      *
-     * @param  LibSQLDatabase|\Closure|null  $pdo
+     * @param  LibSQL|\Closure|null  $pdo
      * @return $this
      */
     public function setReadPdo($pdo)
@@ -104,7 +108,7 @@ class LibSQLConnection extends Connection
 
             $statement = $this->getRawPdo()->prepare($query);
 
-            $results = $statement->query($bindings)->fetchArray(LibSQL::LIBSQL_ASSOC);
+            $results = $statement->query($bindings);
 
             return array_map(fn ($result) => $result, $results);
         });
@@ -135,7 +139,7 @@ class LibSQLConnection extends Connection
             throw new Exception('Failed to prepare statement.');
         }
 
-        $statement = $preparedQuery->query($bindings)->fetchArray(LibSQL::LIBSQL_ASSOC);
+        $statement = $preparedQuery->query($bindings);
 
         foreach ($statement as $record) {
             yield $record;
@@ -144,7 +148,7 @@ class LibSQLConnection extends Connection
 
     public function insert($query, $bindings = [])
     {
-        return $this->statement($query, $bindings);
+        return $this->affectingStatement($query, $bindings);
     }
 
     /**
@@ -185,12 +189,10 @@ class LibSQLConnection extends Connection
                 return 0;
             }
 
-            $statement = $this->getRawPdo()->prepare($query);
-
-            $rowCount = $statement->execute($bindings);
+            $result = $this->getPdo()->prepare($query)->execute($bindings);
 
             $this->recordsHaveBeenModified(
-                ($count = $rowCount) > 0
+                ($count = (int) $result) > 0
             );
 
             return $count;
@@ -210,8 +212,7 @@ class LibSQLConnection extends Connection
                 return true;
             }
 
-            // Assuming $this->libSQL is an instance of LibSQL
-            $result = $this->getRawPdo()->execute($query);
+            $result = $this->getRawPdo()->exec($query);
 
             $this->recordsHaveBeenModified($change = $result !== false);
 
@@ -227,6 +228,7 @@ class LibSQLConnection extends Connection
     protected function getDefaultQueryGrammar()
     {
         ($grammar = new LibSQLQueryGrammar())->setConnection($this);
+        $this->withTablePrefix($grammar);
 
         return $grammar;
     }
@@ -244,8 +246,9 @@ class LibSQLConnection extends Connection
     protected function getDefaultSchemaGrammar()
     {
         ($grammar = new LibSQLSchemaGrammar)->setConnection($this);
+        $this->withTablePrefix($grammar);
 
-        return $this->withTablePrefix($grammar);
+        return $grammar;
     }
 
     public function useDefaultSchemaGrammar()
@@ -291,6 +294,11 @@ class LibSQLConnection extends Connection
         return new LibSQLSchemaBuilder($this->db, $this);
     }
 
+    public function getSchemaState(?Filesystem $files = null, ?callable $processFactory = null): LibSQLSchemaState
+    {
+        return new LibSQLSchemaState($this, $files, $processFactory);
+    }
+
     protected function isUniqueConstraintError(Exception $exception): bool
     {
         return boolval(preg_match('#(column(s)? .* (is|are) not unique|UNIQUE constraint failed: .*)#i', $exception->getMessage()));
@@ -323,31 +331,5 @@ class LibSQLConnection extends Connection
     public function quote(string $value): string
     {
         return "'".$this->escapeString($value)."'";
-    }
-
-    private function isArrayAssoc(array $data)
-    {
-        if (empty($data) || ! is_array($data)) {
-            return false;
-        }
-
-        if (array_keys($data) !== range(0, count($data) - 1)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private function intoParams($stmt, $named_params)
-    {
-        foreach ($named_params as $key => $value) {
-            if (is_string($value) || is_resource($value)) {
-                $value = "'".$value."'";
-            }
-            $placeholders = [":$key", "@$key", "$$key"];
-            $stmt = str_replace($placeholders, $value, $stmt);
-        }
-
-        return $stmt;
     }
 }

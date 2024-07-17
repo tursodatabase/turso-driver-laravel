@@ -4,11 +4,10 @@ namespace Turso\Driver\Laravel\Database;
 
 use LibSQL;
 use PDO;
-use PDOStatement;
 use Turso\Driver\Laravel\Enums\LibSQLType;
 use Turso\Driver\Laravel\Enums\PdoParam;
 
-class LibSQLPDOStatement extends PDOStatement
+class LibSQLPDOStatement
 {
     protected int $affectedRows = 0;
 
@@ -21,7 +20,7 @@ class LibSQLPDOStatement extends PDOStatement
     protected array $lastInsertIds = [];
 
     public function __construct(
-        protected LibSQL $db,
+        protected LibSQLDatabase $db,
         protected string $query
     ) {
         // Use regex to find and replace incorrect table prefixes in the SET clause
@@ -49,7 +48,12 @@ class LibSQLPDOStatement extends PDOStatement
         return new self($this->db, $query);
     }
 
-    public function execute(?array $parameters = null): bool
+    public function query(array $parameters = []): array
+    {
+        return $this->db->getDb()->query($this->query, $parameters)->fetchArray(LibSQL::LIBSQL_ALL);
+    }
+
+    public function execute(array $parameters = []): bool
     {
         collect((array) $parameters)
             ->each(function (mixed $value, int $key) {
@@ -58,40 +62,20 @@ class LibSQLPDOStatement extends PDOStatement
             });
 
         if (str_starts_with(strtolower($this->query), 'select') || str_starts_with(strtolower($this->query), 'drop')) {
-            $this->response = $this->db->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
+            $this->response = $this->db->getDb()->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
         } else {
-            $statement = $this->db->prepare($this->query);
+            $statement = $this->db->getDb()->prepare($this->query);
             $this->response = $statement->query(array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
         }
 
         $lastId = (int) $this->response['last_insert_rowid'];
         if ($lastId > 0) {
-            $this->setLastInsertId(value: $lastId);
+            $this->db->setLastInsertId(value: $lastId);
         }
 
         $this->affectedRows = $this->response['rows_affected'];
 
         return $this->affectedRows > 0;
-    }
-
-    public function setLastInsertId(?string $name = null, ?int $value = null): void
-    {
-        if ($name === null) {
-            $name = 'id';
-        }
-
-        $this->lastInsertIds[$name] = $value;
-    }
-
-    public function lastInsertId(?string $name = null): string|false
-    {
-        if ($name === null) {
-            $name = 'id';
-        }
-
-        return isset($this->lastInsertIds[$name])
-            ? (string) $this->lastInsertIds[$name]
-            : false;
     }
 
     public function fetch(

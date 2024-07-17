@@ -27,10 +27,11 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
     protected function dropAllIndexes(): void
     {
         $statement = $this->db->prepare($this->grammar()->compileDropAllIndexes());
-        $statement->execute();
+        $results = $statement->query();
 
-        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
-            $this->db->query($query[0]);
+        collect($results['rows'])->each(function (array $query) {
+            $query = array_values($query)[0];
+            $this->db->query($query);
         });
     }
 
@@ -39,35 +40,38 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $this->dropAllTriggers();
         $this->dropAllIndexes();
 
-        $this->db->query($this->grammar()->compileDisableForeignKeyConstraints());
+        $this->db->exec($this->grammar()->compileDisableForeignKeyConstraints());
 
         $statement = $this->db->prepare($this->grammar()->compileDropAllTables());
-        $statement->execute();
+        $results = $statement->query();
 
-        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
-            $this->db->query($query[0]);
+        collect($results['rows'])->each(function (array $query) {
+            $query = array_values($query)[0];
+            $this->db->query($query);
         });
 
-        $this->db->query($this->grammar()->compileEnableForeignKeyConstraints());
+        $this->db->exec($this->grammar()->compileEnableForeignKeyConstraints());
     }
 
     protected function dropAllTriggers(): void
     {
         $statement = $this->db->prepare($this->grammar()->compileDropAllTriggers());
-        $statement->execute();
+        $results = $statement->query();
 
-        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
-            $this->db->query($query[0]);
+        collect($results['rows'])->each(function (array $query) {
+            $query = array_values($query)[0];
+            $this->db->query($query);
         });
     }
 
     public function dropAllViews(): void
     {
         $statement = $this->db->prepare($this->grammar()->compileDropAllViews());
-        $statement->execute();
+        $results = $statement->query();
 
-        collect($statement->fetchAll(\PDO::FETCH_NUM))->each(function (array $query) {
-            $this->db->query($query[0]);
+        collect($results['rows'])->each(function (array $query) {
+            $query = array_values($query)[0];
+            $this->db->query($query);
         });
     }
 

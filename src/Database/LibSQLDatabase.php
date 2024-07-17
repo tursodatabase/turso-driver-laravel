@@ -19,11 +19,13 @@ class LibSQLDatabase
 
     public function __construct(array $config = [])
     {
-        $url = str_replace('file:', '', $config['url']);
-        $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
-            'filename' => 'file:'.database_path($url),
-            default => $config['url'],
-        };
+        if ($config['url'] !== ':memory:') {
+            $url = str_replace('file:', '', $config['url']);
+            $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
+                'filename' => 'file:' . database_path($url),
+                default => $config['url'],
+            };
+        }
 
         $this->setConnectionMode($config['url'], $config['syncUrl'], $config['authToken'], $config['remoteOnly']);
 
@@ -47,6 +49,11 @@ class LibSQLDatabase
     protected function createLibSQL(string|array $config, ?int $flag = 6, ?string $encryptionKey = ''): LibSQL
     {
         return new LibSQL($config, $flag, $encryptionKey);
+    }
+
+    public function version(): string
+    {
+        return $this->getDb()->version();
     }
 
     public function beginTransaction(): bool
@@ -75,7 +82,7 @@ class LibSQLDatabase
 
     public function prepare(string $sql): LibSQLPDOStatement
     {
-        return new LibSQLPDOStatement($this->db, $sql);
+        return new LibSQLPDOStatement($this, $sql);
     }
 
     public function query(string $sql, array $params = [])
@@ -98,7 +105,7 @@ class LibSQLDatabase
             $name = 'id';
         }
 
-        return (isset($this->lastInsertIds[$name]))
+        return isset($this->lastInsertIds[$name])
             ? (string) $this->lastInsertIds[$name]
             : false;
     }
@@ -144,9 +151,9 @@ class LibSQLDatabase
 
     private function setConnectionMode(string $path, string $url = '', string $token = '', bool $remoteOnly = false): void
     {
-        if ((str_starts_with($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
+        if ((str_starts_with($path, 'file:') !== false || $path !== 'file:') && !empty($url) && !empty($token) && $remoteOnly === false) {
             $this->connection_mode = 'remote_replica';
-        } elseif (strpos($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
+        } elseif (strpos($path, 'file:') !== false && !empty($url) && !empty($token) && $remoteOnly === true) {
             $this->connection_mode = 'remote';
         } elseif (strpos($path, 'file:') !== false) {
             $this->connection_mode = 'local';
