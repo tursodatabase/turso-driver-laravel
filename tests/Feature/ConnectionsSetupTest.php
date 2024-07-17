@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\File;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
 use Turso\Driver\Laravel\Database\LibSQLDatabase;
 
-
 class ConnectionsSetupTest extends TestCase
 {
     public function setUp(): void
@@ -17,18 +16,19 @@ class ConnectionsSetupTest extends TestCase
 
     public function tearDown(): void
     {
-        if (File::exists('tests/_files/test.db')) {
-            File::delete('tests/_files/test.db');
+        $dbFile = getcwd().'/tests/_files/test.db';
+        if (File::exists($dbFile)) {
+            File::delete($dbFile);
         }
         parent::tearDown();
     }
 
     public function testConnectionInMemory(): void
     {
-        config()->set('database.default', 'libsql');
+        config()->set('database.default', 'sqlite');
         config()->set('database.connections.libsql', [
             'driver' => 'libsql',
-            'url' => 'file::memory:', // Taken from README docs
+            'url' => ':memory:', // Taken from README docs
             'authToken' => '', // This should be defied even with memory, which is not right
             'syncUrl' => '', // This should be defied even with memory, which is not right
             'encryptionKey' => '', // This should be defied even with memory, which is not right
@@ -43,6 +43,9 @@ class ConnectionsSetupTest extends TestCase
         $this->assertInstanceOf(LibSQLConnection::class, $connection);
 
         // Get the PDO instance
+        /**
+         * @var LibSQLConnection $connection
+         */
         $pdo = $connection->getPdo();
 
         $this->assertInstanceOf(LibSQLDatabase::class, $pdo);
@@ -58,10 +61,12 @@ class ConnectionsSetupTest extends TestCase
 
     public function testConnectionLocalFile(): void
     {
+
+        $dbFile = getcwd().'/tests/_files/test.db';
         config()->set('database.default', 'sqlite');
-        config()->set('database.connections.local_file', [
+        config()->set('database.connections.libsql', [
             'driver' => 'libsql',
-            'url' => 'file:/tests/_files/test.db',
+            'url' => "file:$dbFile",
             'authToken' => '',
             'syncUrl' => '',
             'syncInterval' => 5,
@@ -72,12 +77,15 @@ class ConnectionsSetupTest extends TestCase
             'database' => null, // doesn't matter actually, since we use sqlite
         ]);
 
-        $connection = DB::connection('local_file');
+        $connection = DB::connection('libsql');
 
         // Assert that the connection is an instance of LibSQLConnection
         $this->assertInstanceOf(LibSQLConnection::class, $connection);
 
         // Get the PDO instance
+        /**
+         * @var LibSQLConnection $connection
+         */
         $pdo = $connection->getPdo();
 
         $this->assertInstanceOf(LibSQLDatabase::class, $pdo);
@@ -88,6 +96,6 @@ class ConnectionsSetupTest extends TestCase
         $result = $pdo->query('SELECT sqlite_version()');
         $this->assertNotEmpty($result, 'Failed to query SQLite version');
 
-        $this->assertTrue(File::exists('tests/_files/test.db'), 'No file created or wrong path');
+        $this->assertTrue(File::exists($dbFile), 'No file created or wrong path');
     }
 }

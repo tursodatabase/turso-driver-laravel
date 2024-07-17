@@ -12,10 +12,11 @@ class CreateRecordsTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        $dbFile = getcwd().'/tests/_files/test.db';
         config()->set('database.default', 'sqlite');
-        config()->set('database.connections.local_file', [
+        config()->set('database.connections.libsql', [
             'driver' => 'libsql',
-            'url' => 'file:/tests/_files/test.db',
+            'url' => "file:$dbFile",
             'authToken' => '',
             'syncUrl' => '',
             'syncInterval' => 5,
@@ -25,9 +26,9 @@ class CreateRecordsTest extends TestCase
             'prefix' => '',
             'database' => null, // doesn't matter actually, since we use sqlite
         ]);
-        Schema::connection('local_file')
+        Schema::connection('libsql')
             ->dropIfExists('test');
-        Schema::connection('local_file')
+        Schema::connection('libsql')
             ->create('test', function (\Illuminate\Database\Schema\Blueprint $table) {
                 $table->id();
                 $table->text('text');
@@ -40,19 +41,20 @@ class CreateRecordsTest extends TestCase
 
     public function tearDown(): void
     {
-        if (File::exists('tests/_files/test.db')) {
-            File::delete('tests/_files/test.db');
+        $dbFile = getcwd().'/tests/_files/test.db';
+        if (File::exists($dbFile)) {
+            File::delete($dbFile);
         }
         parent::tearDown();
     }
 
     public function testCreateViaDB(): void
     {
-        DB::connection('local_file')
+        DB::connection('libsql')
             ->table('test')
             ->delete();
 
-        $id = DB::connection('local_file')
+        $id = DB::connection('libsql')
             ->table('test')
             ->insertGetId([
                 'text' => 'text',
@@ -62,7 +64,7 @@ class CreateRecordsTest extends TestCase
         $this->assertEquals(1, $id);
         // not working, since insertGetId returns false instead of 1
 
-        DB::connection('local_file')
+        DB::connection('libsql')
             ->table('test')
             ->insert([
                 'text' => 'text2',
@@ -70,8 +72,7 @@ class CreateRecordsTest extends TestCase
                 'string' => 'string2',
             ]);
 
-
-        $data = DB::connection('local_file')
+        $data = DB::connection('libsql')
             ->table('test')
             ->select()
             ->get();
@@ -84,7 +85,7 @@ class CreateRecordsTest extends TestCase
     {
         $modelClass = new class extends Model
         {
-            protected $connection = 'local_file';
+            protected $connection = 'libsql';
 
             protected $table = 'test';
 
@@ -104,7 +105,7 @@ class CreateRecordsTest extends TestCase
 
         $model->save();
 
-        $data = DB::connection('local_file')
+        $data = DB::connection('libsql')
             ->table('test')
             ->select()
             ->get()
@@ -117,7 +118,7 @@ class CreateRecordsTest extends TestCase
     {
         $modelClass = new class extends Model
         {
-            protected $connection = 'local_file';
+            protected $connection = 'libsql';
 
             protected $table = 'test';
 
@@ -141,7 +142,7 @@ class CreateRecordsTest extends TestCase
 
         $this->assertNotEmpty($model->created_at);
 
-        $data = DB::connection('local_file')
+        $data = DB::connection('libsql')
             ->table('test')
             ->select()
             ->get();

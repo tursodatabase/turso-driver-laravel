@@ -49,18 +49,18 @@ class LibSQLConnection extends Connection
 
         return ! empty($res);
     }
-    
+
     public function getPdo(): LibSQLDatabase
     {
         return $this->db;
-        
+
     }
 
     public function getReadPdo(): LibSQLDatabase
     {
         return $this->getPdo();
     }
-    
+
     public function getRawPdo(): LibSQLDatabase
     {
         return $this->getPdo();
