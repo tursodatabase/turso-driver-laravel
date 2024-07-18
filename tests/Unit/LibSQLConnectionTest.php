@@ -68,7 +68,7 @@ class LibSQLConnectionTest extends TestCase
             'string with null byte' => ["Null\x00Byte", "'Null\\0Byte'"],
             'string with substitute character' => ["Sub\x1aChar", "'Sub\\ZChar'"],
             'multi-byte characters' => ['こんにちは', "'こんにちは'"],
-            'very long string' => [str_repeat('a', 1000000), "'" . str_repeat('a', 1000000) . "'"],
+            'very long string' => [str_repeat('a', 1000000), "'".str_repeat('a', 1000000)."'"],
         ];
     }
 
@@ -93,8 +93,8 @@ class LibSQLConnectionTest extends TestCase
                 "'OR \\\"1\\\"=\\\"1;'",
             ],
             'Latin1 to UTF-8 Single Quote' => [
-                utf8_encode("¿'") . ";",
-                "'Â¿\\';'"
+                utf8_encode("¿'").';',
+                "'Â¿\\';'",
             ],
             'Unicode Code Points' => [
                 "' OR 1=1--;",

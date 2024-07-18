@@ -47,7 +47,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return !empty($res);
+        return ! empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -110,7 +110,7 @@ class LibSQLConnection extends Connection
 
             $results = $statement->query($bindings);
 
-            return array_map(fn($result) => $result, $results);
+            return array_map(fn ($result) => $result, $results);
         });
     }
 
@@ -135,7 +135,7 @@ class LibSQLConnection extends Connection
 
         $preparedQuery = $this->getRawPdo()->prepare($query);
 
-        if (!$preparedQuery) {
+        if (! $preparedQuery) {
             throw new Exception('Failed to prepare statement.');
         }
 
@@ -312,12 +312,12 @@ class LibSQLConnection extends Connection
         }
 
         // Convert Latin1 to UTF-8
-        $utf8_value = mb_convert_encoding($value, "UTF-8", "UTF-8, ISO-8859-9");
+        $utf8_value = mb_convert_encoding($value, 'UTF-8', 'UTF-8, ISO-8859-9');
 
         // Check if the string contains 'Â¿''
         if (strpos($utf8_value, "Â¿'") !== false) {
             // Replace 'Â¿'' with 'Â¿\'
-           $utf8_value = str_replace("Â¿'", "Â¿\\'", $utf8_value);
+            $utf8_value = str_replace("Â¿'", "Â¿\\'", $utf8_value);
         }
 
         // Use strtr for more efficient character replacement
@@ -339,6 +339,6 @@ class LibSQLConnection extends Connection
 
     public function quote(string $value): string
     {
-        return "'" . $this->escapeString($value) . "'";
+        return "'".$this->escapeString($value)."'";
     }
 }
