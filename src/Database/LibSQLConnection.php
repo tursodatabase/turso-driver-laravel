@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
 use LibSQL;
+use Normalizer;
 
 class LibSQLConnection extends Connection
 {
@@ -304,41 +305,25 @@ class LibSQLConnection extends Connection
         return boolval(preg_match('#(column(s)? .* (is|are) not unique|UNIQUE constraint failed: .*)#i', $exception->getMessage()));
     }
 
-    public function escapeString($value)
+    public function escapeString($input)
     {
-        // Handle NULL values
-        if ($value === null) {
+        if ($input === null) {
             return 'NULL';
         }
 
-        // Convert Latin1 to UTF-8
-        $utf8_value = mb_convert_encoding($value, 'UTF-8', 'UTF-8, ISO-8859-9');
+        // This is standard SQLite Escaped based on this
+        // source: https://github.com/tursodatabase/libsql/blob/main/libsql-sqlite3/ext/crr/rs/core/src/util.rs#L121L123
+        $output = str_replace("'", "''", $input);
 
-        // Check if the string contains 'Â¿''
-        if (strpos($utf8_value, "Â¿'") !== false) {
-            // Replace 'Â¿'' with 'Â¿\'
-            $utf8_value = str_replace("Â¿'", "Â¿\\'", $utf8_value);
-        }
-
-        // Use strtr for more efficient character replacement
-        $escaped_value = strtr(
-            $utf8_value,
-            [
-                '\\' => '\\\\',
-                "\x00" => '\\0',
-                "\n" => '\\n',
-                "\r" => '\\r',
-                "\x1a" => '\\Z',
-                "'" => "\\'",
-                '"' => '\\"',
-            ]
-        );
-
-        return $escaped_value;
+        return $output;
     }
 
-    public function quote(string $value): string
+    public function quote($input)
     {
-        return "'".$this->escapeString($value)."'";
+        if ($input === null) {
+            return 'NULL';
+        }
+
+        return "'" . $this->escapeString($input) . "'";
     }
 }
