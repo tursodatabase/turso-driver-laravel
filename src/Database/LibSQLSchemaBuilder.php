@@ -77,7 +77,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     protected function grammar(): LibSQLSchemaGrammar
     {
-        $grammar = new LibSQLSchemaGrammar();
+        $grammar = new LibSQLSchemaGrammar;
 
         return $grammar;
     }

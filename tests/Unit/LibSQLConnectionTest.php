@@ -12,7 +12,6 @@ use Turso\Driver\Laravel\Database\LibSQLDatabase;
  * All commented providers still in discussion, if you have any cool idea
  * you can adjust this test and make it more robust. Thxy
  */
-
 class LibSQLConnectionTest extends TestCase
 {
     private LibSQLConnection $connection;

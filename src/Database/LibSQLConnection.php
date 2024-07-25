@@ -6,7 +6,6 @@ use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
 use LibSQL;
-use Normalizer;
 
 class LibSQLConnection extends Connection
 {
@@ -228,7 +227,7 @@ class LibSQLConnection extends Connection
 
     protected function getDefaultQueryGrammar()
     {
-        ($grammar = new LibSQLQueryGrammar())->setConnection($this);
+        ($grammar = new LibSQLQueryGrammar)->setConnection($this);
         $this->withTablePrefix($grammar);
 
         return $grammar;
@@ -278,7 +277,7 @@ class LibSQLConnection extends Connection
 
     protected function getDefaultPostProcessor(): LibSQLQueryProcessor
     {
-        return new LibSQLQueryProcessor();
+        return new LibSQLQueryProcessor;
     }
 
     public function useDefaultPostProcessor()
@@ -324,6 +323,6 @@ class LibSQLConnection extends Connection
             return 'NULL';
         }
 
-        return "'" . $this->escapeString($input) . "'";
+        return "'".$this->escapeString($input)."'";
     }
 }
