@@ -20,6 +20,12 @@
 
 ---
 
+<p align="center">
+  <a href="https://tur.so/dt" target="_blank">🚀 I'll give you 10% off Turso Scaler and Pro for 1 Year 🚀</a>
+</p>
+
+---
+
 <h1 id="a-libsql-driver-for-laravel" align="center">A LibSQL Driver for Laravel</h1>
 
 LibSQL is a fork of SQLite and this package is **#1 LibSQL Driver** that run natively using LibSQL Native Extension/Driver/Whatever and support Laravel Ecosystem.
