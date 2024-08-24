@@ -23,9 +23,6 @@ class LibSQLPDOStatement
         protected LibSQLDatabase $db,
         protected string $query
     ) {
-        // Use regex to find and replace incorrect table prefixes in the SET clause
-        $correctedQuery = preg_replace('/(\s|,)"[a-zA-Z0-9_]+"."([a-zA-Z0-9_]+)"\s*=\s*\?/', ' "$2" = ?', $query);
-        $this->query = $correctedQuery;
     }
 
     public function setFetchMode(int $mode, mixed ...$args): bool
@@ -50,7 +47,13 @@ class LibSQLPDOStatement
 
     public function query(array $parameters = []): array
     {
-        return $this->db->getDb()->query($this->query, $parameters)->fetchArray(LibSQL::LIBSQL_ALL);
+        collect((array) $parameters)
+            ->each(function (mixed $value, int $key) {
+                $type = PdoParam::fromValue($value);
+                $this->bindValue($key, $value, $type->value);
+            });
+
+        return $this->db->getDb()->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
     }
 
     public function execute(array $parameters = []): bool
