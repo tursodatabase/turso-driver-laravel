@@ -19,6 +19,8 @@ class LibSQLDatabase
 
     public function __construct(array $config = [])
     {
+        $config = $this->createConfig($config);
+
         if ($config['url'] !== ':memory:') {
             $url = str_replace('file:', '', $config['url']);
             $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
@@ -44,6 +46,19 @@ class LibSQLDatabase
             ),
             default => throw new ConfigurationIsNotFound('Connection not found!'),
         };
+    }
+
+    protected function createConfig(array $config): array
+    {
+        return [
+            'url' => $config['url'],
+            'authToken' => $config['authToken'] ?? '',
+            'syncUrl' => $config['syncUrl'] ?? '',
+            'syncInterval' => $config['syncInterval'] ?? 5,
+            'read_your_writes' => $config['read_your_writes'] ?? true,
+            'encryptionKey' => $config['encryptionKey'] ?? '',
+            'remoteOnly' => $config['remoteOnly'] ?? false,
+        ];
     }
 
     protected function createLibSQL(string|array $config, ?int $flag = 6, ?string $encryptionKey = ''): LibSQL
@@ -164,6 +179,24 @@ class LibSQLDatabase
     public function getConnectionMode(): string
     {
         return $this->connection_mode;
+    }
+
+    public function escapeString($input)
+    {
+        if ($input === null) {
+            return 'NULL';
+        }
+
+        return \SQLite3::escapeString($input);
+    }
+
+    public function quote($input)
+    {
+        if ($input === null) {
+            return 'NULL';
+        }
+
+        return "'".$this->escapeString($input)."'";
     }
 
     public function __destruct()
