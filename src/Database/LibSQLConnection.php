@@ -310,11 +310,7 @@ class LibSQLConnection extends Connection
             return 'NULL';
         }
 
-        // This is standard SQLite Escaped based on this
-        // source: https://github.com/tursodatabase/libsql/blob/main/libsql-sqlite3/ext/crr/rs/core/src/util.rs#L121L123
-        $output = str_replace("'", "''", $input);
-
-        return $output;
+        return \SQLite3::escapeString($input);
     }
 
     public function quote($input)
