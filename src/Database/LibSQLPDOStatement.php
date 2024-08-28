@@ -20,8 +20,7 @@ class LibSQLPDOStatement
     public function __construct(
         protected LibSQLDatabase $db,
         protected string $query
-    ) {
-    }
+    ) {}
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {

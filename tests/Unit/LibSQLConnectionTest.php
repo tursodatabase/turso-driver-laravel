@@ -73,7 +73,7 @@ class LibSQLConnectionTest extends TestCase
             'string with null byte' => ["Null\x00Byte", "'Null\x00Byte'"],
             'string with substitute character' => ["Sub\x1aChar", "'Sub\x1aChar'"],
             'multi-byte characters' => ['こんにちは', "'こんにちは'"],
-            'very long string' => [str_repeat('a', 1000000), "'" . str_repeat('a', 1000000) . "'"],
+            'very long string' => [str_repeat('a', 1000000), "'".str_repeat('a', 1000000)."'"],
         ];
     }
 
