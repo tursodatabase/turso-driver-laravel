@@ -4,8 +4,6 @@ namespace Turso\Driver\Laravel\Database;
 
 use LibSQL;
 use PDO;
-use Turso\Driver\Laravel\Enums\LibSQLType;
-use Turso\Driver\Laravel\Enums\PdoParam;
 
 class LibSQLPDOStatement
 {
@@ -32,14 +30,6 @@ class LibSQLPDOStatement
         return true;
     }
 
-    public function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR): bool
-    {
-        $type = LibSQLType::fromValue($value);
-        $this->bindings[$param] = $type->bind($value);
-
-        return true;
-    }
-
     public function prepare(string $query)
     {
         return new self($this->db, $query);
@@ -47,28 +37,16 @@ class LibSQLPDOStatement
 
     public function query(array $parameters = []): array
     {
-        collect((array) $parameters)
-            ->each(function (mixed $value, int $key) {
-                $type = PdoParam::fromValue($value);
-                $this->bindValue($key, $value, $type->value);
-            });
-
-        return $this->db->getDb()->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
+        return $this->db->getDb()->prepare($this->query)->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
     }
 
     public function execute(array $parameters = []): bool
     {
-        collect((array) $parameters)
-            ->each(function (mixed $value, int $key) {
-                $type = PdoParam::fromValue($value);
-                $this->bindValue($key, $value, $type->value);
-            });
-
         if (str_starts_with(strtolower($this->query), 'select') || str_starts_with(strtolower($this->query), 'drop')) {
-            $this->response = $this->db->getDb()->query($this->query, array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
+            $this->response = $this->db->getDb()->prepare($this->query)->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
         } else {
             $statement = $this->db->getDb()->prepare($this->query);
-            $this->response = $statement->query(array_column($this->bindings, 'value'))->fetchArray(LibSQL::LIBSQL_ALL);
+            $this->response = $statement->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
         }
 
         $lastId = (int) $this->response['last_insert_rowid'];
