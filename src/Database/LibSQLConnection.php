@@ -47,7 +47,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return ! empty($res);
+        return !empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -110,7 +110,7 @@ class LibSQLConnection extends Connection
 
             $results = $statement->query($bindings);
 
-            return array_map(fn ($result) => $result, $results);
+            return array_map(fn($result) => $result, $results);
         });
     }
 
@@ -135,7 +135,7 @@ class LibSQLConnection extends Connection
 
         $preparedQuery = $this->getRawPdo()->prepare($query);
 
-        if (! $preparedQuery) {
+        if (!$preparedQuery) {
             throw new Exception('Failed to prepare statement.');
         }
 
@@ -301,7 +301,7 @@ class LibSQLConnection extends Connection
 
     protected function isUniqueConstraintError(Exception $exception): bool
     {
-        return boolval(preg_match('#(column(s)? .* (is|are) not unique|UNIQUE constraint failed: .*)#i', $exception->getMessage()));
+        return (bool) preg_match('#(column(s)? .* (is|are) not unique|UNIQUE constraint failed: .*)#i', $exception->getMessage());
     }
 
     public function escapeString($input)
@@ -319,6 +319,6 @@ class LibSQLConnection extends Connection
             return 'NULL';
         }
 
-        return "'".$this->escapeString($input)."'";
+        return "'" . $this->escapeString($input) . "'";
     }
 }
