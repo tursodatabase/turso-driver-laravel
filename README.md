@@ -36,7 +36,7 @@ LibSQL is a fork of SQLite and this package is **#1 LibSQL Driver** that run nat
 
 ## Requirement
 
-Before using this package, you need to install and configure LibSQL Native Extension for PHP. You can download from [LibSQL Extension - Release](https://github.com/tursodatabase/turso-driver-laravel)
+Before using this package, you need to install and configure LibSQL Native Extension for PHP. You can download from [LibSQL Extension - Release](https://github.com/tursodatabase/turso-client-php/releases)
 
 1. Download based on you distribution (Linux/Macos/Darwin)
 2. The archive is contains the extension and `libsql_php_extension.stubs.php`
