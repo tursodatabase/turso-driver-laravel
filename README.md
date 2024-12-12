@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/tursodatabase/turso-driver-laravel">libSQL Extension</a> for PHP.
+  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/tursodatabase/turso-client-php/">libSQL Extension</a> for PHP.
 </p>
 
 <p align="center">
