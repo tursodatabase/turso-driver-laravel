@@ -1,3 +1,6 @@
+> [!CAUTION]
+> There is a new adapter coming soon for Laravel that doesn't require using an extension. This extension doesn't support offline writes beta. Join us on Discord to talk more - https://discord.gg/turso
+
 <p align="center">
   <a href="https://docs.turso.tech/sdk/php/guides/laravel">
     <img alt="Turso + Laravel" src="https://i.imgur.com/T2pzJid.png" width="1000">
