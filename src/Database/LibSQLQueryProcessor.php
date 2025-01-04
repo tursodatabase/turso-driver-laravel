@@ -14,17 +14,22 @@ class LibSQLQueryProcessor extends SQLiteProcessor
      */
     public function processTables($results): array
     {
-        $results = (array) $results['rows'];
-
         return array_map(function ($result) {
+            $result = (object) $result;
+
             return [
-                'name' => $result['name'],
+                'name' => $result->name,
+                'schema' => $result->schema ?? null, // PostgreSQL and SQL Server
+                'size' => isset($result->size) ? (int) $result->size : null,
+                'comment' => $result->comment ?? null, // MySQL and PostgreSQL
+                'collation' => $result->collation ?? null, // MySQL only
+                'engine' => $result->engine ?? null, // MySQL only
             ];
         }, $results);
     }
 
     public function processSelect(Builder $query, $results)
     {
-        return $results['rows'];
+        return $results;
     }
 }

@@ -3,6 +3,7 @@
 namespace Turso\Driver\Laravel\Database;
 
 use LibSQL;
+use LibSQLTransaction;
 use Turso\Driver\Laravel\Exceptions\ConfigurationIsNotFound;
 
 class LibSQLDatabase
@@ -15,7 +16,9 @@ class LibSQLDatabase
 
     protected array $lastInsertIds = [];
 
-    protected bool $inTransaction = false;
+    protected LibSQLTransaction $tx;
+
+    protected bool $in_transaction = false;
 
     public function __construct(array $config = [])
     {
@@ -23,32 +26,17 @@ class LibSQLDatabase
 
         if ($config['url'] !== ':memory:') {
             $url = str_replace('file:', '', $config['url']);
-            $config['url'] = match ($this->checkPathOrFilename($config['url'])) {
-                'filename' => 'file:'.database_path($url),
-                default => $config['url'],
-            };
+            $config['url'] = $this->checkPathOrFilename($config['url']) === 'filename' ? "file:$url" : "";
         }
 
-        $this->setConnectionMode($config['url'], $config['syncUrl'], $config['authToken'], $config['remoteOnly']);
+        $this->setConnectionMode($config);
 
-        $this->db = match ($this->connection_mode) {
-            'local' => $this->createLibSQL(
-                $config['url'],
-                LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE,
-                $config['encryptionKey']
-            ),
-            'memory' => $this->createLibSQL(':memory:'),
-            'remote' => $config['remoteOnly'] === true
-            ? $this->createLibSQL("libsql:dbname={$config['syncUrl']};authToken={$config['authToken']}")
-            : throw new ConfigurationIsNotFound('Connection not found!'),
-            'remote_replica' => $this->createLibSQL(
-                array_diff_key($config, array_flip(['driver', 'name', 'prefix', 'database', 'remoteOnly']))
-            ),
-            default => throw new ConfigurationIsNotFound('Connection not found!'),
-        };
+        $this->in_transaction = false;
+
+        $this->db = new LibSQL($config);
     }
 
-    protected function createConfig(array $config): array
+    private function createConfig(array $config): array
     {
         return [
             'url' => $config['url'],
@@ -61,9 +49,60 @@ class LibSQLDatabase
         ];
     }
 
-    protected function createLibSQL(string|array $config, ?int $flag = 6, ?string $encryptionKey = ''): LibSQL
+    private function setConnectionMode(array $config): void
     {
-        return new LibSQL($config, $flag, $encryptionKey);
+        $url = $config['url'] ?? '';
+        $authToken = $config['authToken'] ?? '';
+        $syncUrl = $config['syncUrl'] ?? '';
+        $remoteOnly = $config['remoteOnly'] ?? false;
+
+        $isValidFilename = function (string $url): bool {
+            $filename = basename($url);
+            return str_ends_with($filename, '.db') !== false || str_ends_with($filename, '.sqlite') !== false;
+        };
+
+        $mode = match (true) {
+            // Check for remote_replica
+            $isValidFilename($url) &&
+            !empty($authToken) &&
+            !empty($syncUrl) &&
+            !$remoteOnly => 'remote_replica',
+
+            // Check for remote
+            $isValidFilename($url) &&
+            !empty($authToken) &&
+            !empty($syncUrl) &&
+            $remoteOnly => 'remote',
+
+            // Check for local
+            $isValidFilename($url) &&
+            empty($authToken) &&
+            empty($syncUrl) => 'local',
+
+            // Default to memory
+            default => 'memory',
+        };
+
+        $this->connection_mode = $mode;
+    }
+
+    private function checkPathOrFilename(string $string): string|false
+    {
+        $filename = basename($string);
+
+        if (strpos($filename, '.db') !== false || strpos($filename, '.sqlite') !== false) {
+            return 'filename';
+        }
+
+        if (filter_var($string, FILTER_VALIDATE_URL)) {
+            return 'url';
+        }
+
+        if (!pathinfo($filename, PATHINFO_EXTENSION)) {
+            return 'directory';
+        }
+
+        return 'unknown';
     }
 
     public function version(): string
@@ -73,18 +112,46 @@ class LibSQLDatabase
 
     public function beginTransaction(): bool
     {
-        $this->inTransaction = $this->prepare('BEGIN')->execute();
+        if ($this->inTransaction()) {
+            throw new \PDOException("Already in a transaction");
+        }
 
-        return $this->inTransaction;
+        $this->in_transaction = true;
+        $this->tx = $this->db->transaction();
+
+        return true;
     }
 
     public function commit(): bool
     {
-        $result = $this->prepare('COMMIT')->execute();
+        if (!$this->inTransaction()) {
+            throw new \PDOException("No active transaction");
+        }
 
-        $this->inTransaction = false;
+        $this->tx->commit();
+        $this->in_transaction = false;
 
-        return $result;
+        return true;
+    }
+
+    public function rollback(): bool
+    {
+        if (!$this->inTransaction()) {
+            throw new \PDOException("No active transaction");
+        }
+
+        $this->tx->rollback();
+        $this->in_transaction = false;
+
+        return true;
+    }
+
+    public function prepare(string $sql): LibSQLPDOStatement
+    {
+        return new LibSQLPDOStatement(
+            ($this->inTransaction() ? $this->tx : $this->db)->prepare($sql),
+            $sql
+        );
     }
 
     public function exec(string $queryStatement): int
@@ -93,11 +160,6 @@ class LibSQLDatabase
         $statement->execute();
 
         return $statement->rowCount();
-    }
-
-    public function prepare(string $sql): LibSQLPDOStatement
-    {
-        return new LibSQLPDOStatement($this, $sql);
     }
 
     public function query(string $sql, array $params = [])
@@ -125,18 +187,9 @@ class LibSQLDatabase
             : false;
     }
 
-    public function rollBack(): bool
-    {
-        $result = $this->prepare('ROLLBACK')->execute();
-
-        $this->inTransaction = false;
-
-        return $result;
-    }
-
     public function inTransaction(): bool
     {
-        return $this->inTransaction;
+        return $this->in_transaction;
     }
 
     public function sync(): void
@@ -145,30 +198,6 @@ class LibSQLDatabase
             throw new \Exception("[LibSQL:{$this->connection_mode}] Sync is only available for Remote Replica Connection.", 1);
         }
         $this->db->sync();
-    }
-
-    private function setConnectionMode(string $path, string $url = '', string $token = '', bool $remoteOnly = false): void
-    {
-        if ((str_starts_with($path, 'file:') !== false || $path !== 'file:') && ! empty($url) && ! empty($token) && $remoteOnly === false) {
-            $this->connection_mode = 'remote_replica';
-        } elseif (strpos($path, 'file:') !== false && ! empty($url) && ! empty($token) && $remoteOnly === true) {
-            $this->connection_mode = 'remote';
-        } elseif (strpos($path, 'file:') !== false) {
-            $this->connection_mode = 'local';
-        } elseif ($path === ':memory:') {
-            $this->connection_mode = 'memory';
-        } else {
-            $this->connection_mode = false;
-        }
-    }
-
-    private function checkPathOrFilename(string $string): string
-    {
-        if (strpos($string, DIRECTORY_SEPARATOR) !== false || strpos($string, '/') !== false || strpos($string, '\\') !== false) {
-            return 'path';
-        } else {
-            return 'filename';
-        }
     }
 
     public function getDb(): LibSQL
@@ -196,7 +225,7 @@ class LibSQLDatabase
             return 'NULL';
         }
 
-        return "'".$this->escapeString($input)."'";
+        return "'" . $this->escapeString($input) . "'";
     }
 
     public function __destruct()

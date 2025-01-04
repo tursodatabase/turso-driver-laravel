@@ -9,7 +9,7 @@ class LibSQLPDOStatement
 {
     protected int $affectedRows = 0;
 
-    protected int $fetchMode = PDO::FETCH_ASSOC;
+    protected int $mode = PDO::FETCH_ASSOC;
 
     protected array $bindings = [];
 
@@ -18,72 +18,101 @@ class LibSQLPDOStatement
     protected array $lastInsertIds = [];
 
     public function __construct(
-        protected LibSQLDatabase $db,
+        private \LibSQLStatement $statement,
         protected string $query
-    ) {}
+    ) {
+    }
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
-        $this->fetchMode = $mode;
+        $this->mode = $mode;
 
         return true;
     }
 
+    public function bindValue($parameter, $value, $type = PDO::PARAM_STR)
+    {
+        if (is_int($parameter)) {
+            $this->bindings[$parameter] = $value;
+        } elseif (is_string($parameter)) {
+            $this->bindings[$parameter] = $value;
+        } else {
+            throw new \InvalidArgumentException("Parameter must be an integer or string.");
+        }
+        return $this;
+    }
+
     public function prepare(string $query)
     {
-        return new self($this->db, $query);
+        return new self($this->statement, $query);
     }
 
     public function query(array $parameters = []): array
     {
-        return $this->db->getDb()->prepare($this->query)->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
+        if (empty($parameters)) {
+            $parameters = $this->bindings;
+        }
+
+        // Determine if parameters are named or positional
+        if ($this->hasNamedParameters($parameters)) {
+            $this->statement->bindNamed($parameters);
+        } else {
+            $this->statement->bindPositional(array_values($parameters));
+        }
+
+        return $this->statement->query()->fetchArray(LibSQL::LIBSQL_ALL);
     }
 
     public function execute(array $parameters = []): bool
     {
-        if (str_starts_with(strtolower($this->query), 'select') || str_starts_with(strtolower($this->query), 'drop')) {
-            $this->response = $this->db->getDb()->prepare($this->query)->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
-        } else {
-            $statement = $this->db->getDb()->prepare($this->query);
-            $this->response = $statement->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
+        if (empty($parameters)) {
+            $parameters = $this->bindings;
         }
 
-        $lastId = (int) $this->response['last_insert_rowid'];
-        if ($lastId > 0) {
-            $this->db->setLastInsertId(value: $lastId);
+        try {
+            // Determine if parameters are named or positional
+            if ($this->hasNamedParameters($parameters)) {
+                $this->statement->bindNamed($parameters);
+            } else {
+                $this->statement->bindPositional(array_values($parameters));
+            }
+
+            $this->affectedRows = $this->statement->execute($parameters);
+            return true;
+        } catch (\Exception $e) {
+            // Handle exceptions as needed
+            return false;
         }
-
-        $this->affectedRows = $this->response['rows_affected'];
-
-        return $this->affectedRows > 0;
     }
 
-    public function fetch(
-        int $mode = PDO::FETCH_DEFAULT,
-        int $cursorOrientation = PDO::FETCH_ORI_NEXT,
-        int $cursorOffset = 0
-    ): mixed {
+    #[\ReturnTypeWillChange]
+    public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): array|false
+    {
         if ($mode === PDO::FETCH_DEFAULT) {
-            $mode = $this->fetchMode;
+            $mode = $this->mode;
         }
 
-        if (empty($this->response['rows'])) {
+        $parameters = $this->bindings;
+        if ($this->hasNamedParameters($parameters)) {
+            $this->statement->bindNamed($parameters);
+        } else {
+            $this->statement->bindPositional(array_values($parameters));
+        }
+        $result = $this->statement->query();
+        $rows = $result->fetchArray(LibSQL::LIBSQL_ASSOC);
+
+        if (!$rows) {
             return false;
         }
 
-        $rows = array_shift($this->response['rows']);
-        $rowValues = array_values($rows);
+        $row = $rows[$cursorOffset];
+        $mode = $this->mode ?? $mode;
 
         return match ($mode) {
-            PDO::FETCH_BOTH => array_merge(
-                $rows,
-                $rowValues
-            ),
-            PDO::FETCH_ASSOC, PDO::FETCH_NAMED => $rows,
-            PDO::FETCH_NUM => $rowValues,
-            PDO::FETCH_OBJ => (object) $rows,
-
-            default => throw new \PDOException('Unsupported fetch mode.'),
+            PDO::FETCH_ASSOC => $row,
+            PDO::FETCH_OBJ => (object) $row,
+            PDO::FETCH_NUM => array_values($row),
+            default => $row
         };
     }
 
@@ -91,7 +120,7 @@ class LibSQLPDOStatement
     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, ...$args): array
     {
         if ($mode === PDO::FETCH_DEFAULT) {
-            $mode = $this->fetchMode;
+            $mode = $this->mode;
         }
 
         $allRows = $this->response['rows'];
@@ -108,6 +137,12 @@ class LibSQLPDOStatement
         return $response;
     }
 
+    public function fetchColumn(int $columnIndex = 0)
+    {
+        $row = $this->fetch();
+        return $row ? array_values($row)[$columnIndex] : null;
+    }
+
     public function getAffectedRows(): int
     {
         return $this->affectedRows;
@@ -121,6 +156,21 @@ class LibSQLPDOStatement
 
     public function rowCount(): int
     {
-        return max((int) count($this->response['rows']), $this->affectedRows);
+        return $this->affectedRows;
+    }
+
+    public function closeCursor(): void
+    {
+        $this->statement->reset();
+    }
+
+    private function hasNamedParameters(array $parameters): bool
+    {
+        foreach (array_keys($parameters) as $key) {
+            if (is_string($key)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

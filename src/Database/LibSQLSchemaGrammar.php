@@ -30,6 +30,6 @@ class LibSQLSchemaGrammar extends SQLiteGrammar
     #[Override]
     public function wrap($value, $prefixAlias = false): string
     {
-        return str_replace('"', '\'', parent::wrap($value, $prefixAlias));
+        return str_replace('"', '\'', parent::wrap($value));
     }
 }
