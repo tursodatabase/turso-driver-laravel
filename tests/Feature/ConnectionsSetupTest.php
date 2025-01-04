@@ -9,12 +9,12 @@ use Turso\Driver\Laravel\Database\LibSQLDatabase;
 
 class ConnectionsSetupTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $dbFile = getcwd().'/tests/_files/test.db';
         if (File::exists($dbFile)) {
@@ -23,7 +23,7 @@ class ConnectionsSetupTest extends TestCase
         parent::tearDown();
     }
 
-    public function testConnectionInMemory(): void
+    public function test_connection_in_memory(): void
     {
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.libsql', [
@@ -59,7 +59,7 @@ class ConnectionsSetupTest extends TestCase
         $this->assertNotEmpty($result, 'Failed to query SQLite version');
     }
 
-    public function testConnectionLocalFile(): void
+    public function test_connection_local_file(): void
     {
 
         $dbFile = getcwd().'/tests/_files/test.db';

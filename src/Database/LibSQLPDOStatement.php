@@ -20,8 +20,7 @@ class LibSQLPDOStatement
     public function __construct(
         private \LibSQLStatement $statement,
         protected string $query
-    ) {
-    }
+    ) {}
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
@@ -37,8 +36,9 @@ class LibSQLPDOStatement
         } elseif (is_string($parameter)) {
             $this->bindings[$parameter] = $value;
         } else {
-            throw new \InvalidArgumentException("Parameter must be an integer or string.");
+            throw new \InvalidArgumentException('Parameter must be an integer or string.');
         }
+
         return $this;
     }
 
@@ -78,6 +78,7 @@ class LibSQLPDOStatement
             }
 
             $this->affectedRows = $this->statement->execute($parameters);
+
             return true;
         } catch (\Exception $e) {
             // Handle exceptions as needed
@@ -101,7 +102,7 @@ class LibSQLPDOStatement
         $result = $this->statement->query();
         $rows = $result->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-        if (!$rows) {
+        if (! $rows) {
             return false;
         }
 
@@ -140,6 +141,7 @@ class LibSQLPDOStatement
     public function fetchColumn(int $columnIndex = 0)
     {
         $row = $this->fetch();
+
         return $row ? array_values($row)[$columnIndex] : null;
     }
 
@@ -171,6 +173,7 @@ class LibSQLPDOStatement
                 return true;
             }
         }
+
         return false;
     }
 }
