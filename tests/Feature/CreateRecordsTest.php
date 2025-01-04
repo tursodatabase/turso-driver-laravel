@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateRecordsTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $dbFile = getcwd().'/tests/_files/test.db';
@@ -39,7 +39,7 @@ class CreateRecordsTest extends TestCase
             });
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $dbFile = getcwd().'/tests/_files/test.db';
         if (File::exists($dbFile)) {
@@ -48,7 +48,7 @@ class CreateRecordsTest extends TestCase
         parent::tearDown();
     }
 
-    public function testCreateViaDB(): void
+    public function test_create_via_db(): void
     {
         DB::connection('libsql')
             ->table('test')
@@ -81,7 +81,7 @@ class CreateRecordsTest extends TestCase
         $this->assertEquals('text2', $data[1]['text']);
     }
 
-    public function testWithBLOBType(): void
+    public function test_with_blob_type(): void
     {
         $modelClass = new class extends Model
         {
@@ -114,7 +114,7 @@ class CreateRecordsTest extends TestCase
         $this->assertEquals(str_repeat('{SOME TEST CONTENT HERE!}', 2), $data['text']);
     }
 
-    public function testCreateViaEloquent(): void
+    public function test_create_via_eloquent(): void
     {
         $modelClass = new class extends Model
         {

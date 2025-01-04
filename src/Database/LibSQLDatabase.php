@@ -4,7 +4,6 @@ namespace Turso\Driver\Laravel\Database;
 
 use LibSQL;
 use LibSQLTransaction;
-use Turso\Driver\Laravel\Exceptions\ConfigurationIsNotFound;
 
 class LibSQLDatabase
 {
@@ -26,7 +25,7 @@ class LibSQLDatabase
 
         if ($config['url'] !== ':memory:') {
             $url = str_replace('file:', '', $config['url']);
-            $config['url'] = $this->checkPathOrFilename($config['url']) === 'filename' ? "file:$url" : "";
+            $config['url'] = $this->checkPathOrFilename($config['url']) === 'filename' ? "file:$url" : '';
         }
 
         $this->setConnectionMode($config);
@@ -58,20 +57,21 @@ class LibSQLDatabase
 
         $isValidFilename = function (string $url): bool {
             $filename = basename($url);
+
             return str_ends_with($filename, '.db') !== false || str_ends_with($filename, '.sqlite') !== false;
         };
 
         $mode = match (true) {
             // Check for remote_replica
             $isValidFilename($url) &&
-            !empty($authToken) &&
-            !empty($syncUrl) &&
-            !$remoteOnly => 'remote_replica',
+            ! empty($authToken) &&
+            ! empty($syncUrl) &&
+            ! $remoteOnly => 'remote_replica',
 
             // Check for remote
             $isValidFilename($url) &&
-            !empty($authToken) &&
-            !empty($syncUrl) &&
+            ! empty($authToken) &&
+            ! empty($syncUrl) &&
             $remoteOnly => 'remote',
 
             // Check for local
@@ -98,7 +98,7 @@ class LibSQLDatabase
             return 'url';
         }
 
-        if (!pathinfo($filename, PATHINFO_EXTENSION)) {
+        if (! pathinfo($filename, PATHINFO_EXTENSION)) {
             return 'directory';
         }
 
@@ -113,7 +113,7 @@ class LibSQLDatabase
     public function beginTransaction(): bool
     {
         if ($this->inTransaction()) {
-            throw new \PDOException("Already in a transaction");
+            throw new \PDOException('Already in a transaction');
         }
 
         $this->in_transaction = true;
@@ -124,8 +124,8 @@ class LibSQLDatabase
 
     public function commit(): bool
     {
-        if (!$this->inTransaction()) {
-            throw new \PDOException("No active transaction");
+        if (! $this->inTransaction()) {
+            throw new \PDOException('No active transaction');
         }
 
         $this->tx->commit();
@@ -136,8 +136,8 @@ class LibSQLDatabase
 
     public function rollback(): bool
     {
-        if (!$this->inTransaction()) {
-            throw new \PDOException("No active transaction");
+        if (! $this->inTransaction()) {
+            throw new \PDOException('No active transaction');
         }
 
         $this->tx->rollback();
@@ -225,7 +225,7 @@ class LibSQLDatabase
             return 'NULL';
         }
 
-        return "'" . $this->escapeString($input) . "'";
+        return "'".$this->escapeString($input)."'";
     }
 
     public function __destruct()

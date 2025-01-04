@@ -16,21 +16,21 @@ class LibSQLConnectionTest extends TestCase
 {
     private LibSQLConnection $connection;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $mockDatabase = $this->createMock(LibSQLDatabase::class);
         $this->connection = new LibSQLConnection($mockDatabase);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         unset($this->connection);
         parent::tearDown();
     }
 
     #[DataProvider(methodName: 'escapeStringProvider')]
-    public function testEscapeString($string, $expected): void
+    public function test_escape_string($string, $expected): void
     {
         $result = $this->connection->escapeString($string);
         $this->assertEquals($expected, $result);
@@ -54,7 +54,7 @@ class LibSQLConnectionTest extends TestCase
     }
 
     #[DataProvider(methodName: 'quoteProvider')]
-    public function testQuote($string, $expected): void
+    public function test_quote($string, $expected): void
     {
         $result = $this->connection->quote($string);
         $this->assertEquals($expected, $result);
@@ -78,7 +78,7 @@ class LibSQLConnectionTest extends TestCase
     }
 
     #[DataProvider(methodName: 'sqlInjectionEncodingProvider')]
-    public function testSQLInjectionViaEncoding($input, $expected)
+    public function test_sql_injection_via_encoding($input, $expected)
     {
         $result = $this->connection->escapeString($input);
         $this->assertEquals($expected, $result);

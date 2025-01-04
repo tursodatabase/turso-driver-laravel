@@ -47,7 +47,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return !empty($res);
+        return ! empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -110,7 +110,7 @@ class LibSQLConnection extends Connection
 
             $results = $statement->query($bindings);
 
-            return array_map(fn($result) => $result, $results['rows']);
+            return array_map(fn ($result) => $result, $results['rows']);
         });
     }
 
@@ -135,7 +135,7 @@ class LibSQLConnection extends Connection
 
         $preparedQuery = $this->getRawPdo()->prepare($query);
 
-        if (!$preparedQuery) {
+        if (! $preparedQuery) {
             throw new Exception('Failed to prepare statement.');
         }
 
@@ -319,6 +319,6 @@ class LibSQLConnection extends Connection
             return 'NULL';
         }
 
-        return "'" . $this->escapeString($input) . "'";
+        return "'".$this->escapeString($input)."'";
     }
 }
