@@ -1,95 +1,95 @@
 {
-    "name": "tursodatabase/turso-driver-laravel",
-    "description": "A Turso Driver for Laravel",
-    "version": "1.0.14",
-    "keywords": [
-        "turso",
-        "tursodatabase",
-        "libsql",
-        "laravel",
-        "libsql-driver-laravel",
-        "turso-driver-laravel"
+  "name": "tursodatabase/turso-driver-laravel",
+  "description": "A Turso Driver for Laravel",
+  "version": "1.1.0",
+  "keywords": [
+    "turso",
+    "tursodatabase",
+    "libsql",
+    "laravel",
+    "libsql-driver-laravel",
+    "turso-driver-laravel"
+  ],
+  "homepage": "https://github.com/tursodatabase/turso-driver-laravel",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Imam Ali Mustofa",
+      "email": "darkterminal@duck.com",
+      "role": "Software Freestyle Engineer"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "illuminate/contracts": "^10.0||^11.0",
+    "spatie/laravel-package-tools": "^1.16",
+    "darkterminal/turso-php-installer": "^2.0"
+  },
+  "require-dev": {
+    "larastan/larastan": "^2.9",
+    "laravel/pint": "^1.14",
+    "nunomaduro/collision": "^8.1.1||^7.10.0",
+    "orchestra/testbench": "^9.1",
+    "phpstan/extension-installer": "^1.3",
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "phpstan/phpstan-phpunit": "^1.3",
+    "spatie/laravel-ray": "^1.35"
+  },
+  "autoload": {
+    "psr-4": {
+      "Turso\\Driver\\Laravel\\": "src/",
+      "Turso\\Driver\\Laravel\\Tests\\": "tests/",
+      "Turso\\Driver\\Laravel\\Database\\Factories\\": "database/factories/"
+    }
+  },
+  "scripts": {
+    "release:patch": "./build.sh patch",
+    "release:minor": "./build.sh minor",
+    "release:major": "./build.sh major",
+    "format": "vendor/bin/pint",
+    "post-autoload-dump": [
+      "@clear",
+      "@prepare"
     ],
-    "homepage": "https://github.com/tursodatabase/turso-driver-laravel",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Imam Ali Mustofa",
-            "email": "darkterminal@duck.com",
-            "role": "Software Freestyle Engineer"
-        }
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve"
     ],
-    "require": {
-        "php": "^8.2",
-        "illuminate/contracts": "^10.0||^11.0",
-        "spatie/laravel-package-tools": "^1.16",
-        "darkterminal/turso-php-installer": "^2.0"
-    },
-    "require-dev": {
-        "larastan/larastan": "^2.9",
-        "laravel/pint": "^1.14",
-        "nunomaduro/collision": "^8.1.1||^7.10.0",
-        "orchestra/testbench": "^9.1",
-        "phpstan/extension-installer": "^1.3",
-        "phpstan/phpstan-deprecation-rules": "^1.1",
-        "phpstan/phpstan-phpunit": "^1.3",
-        "spatie/laravel-ray": "^1.35"
-    },
-    "autoload": {
-        "psr-4": {
-            "Turso\\Driver\\Laravel\\": "src/",
-            "Turso\\Driver\\Laravel\\Tests\\": "tests/",
-            "Turso\\Driver\\Laravel\\Database\\Factories\\": "database/factories/"
-        }
-    },
-    "scripts": {
-        "release:patch": "./build.sh patch",
-        "release:minor": "./build.sh minor",
-        "release:major": "./build.sh major",
-        "format": "vendor/bin/pint",
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare"
-        ],
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "build": "@php vendor/bin/testbench workbench:build --ansi",
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@build",
-            "@php vendor/bin/testbench serve"
-        ],
-        "lint": [
-            "@php vendor/bin/pint",
-            "@php vendor/bin/phpstan analyse"
-        ],
-        "phpstan-baseline": [
-            "@php vendor/bin/phpstan -b"
-        ],
-        "test": [
-            "@php vendor/bin/phpunit"
-        ],
-        "test-feature": [
-            "@php vendor/bin/phpunit --testsuite=Feature"
-        ],
-        "test-unit": [
-            "@php vendor/bin/phpunit --testsuite=Unit"
-        ]
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Turso\\Driver\\Laravel\\LibSQLDriverServiceProvider"
-            ]
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "lint": [
+      "@php vendor/bin/pint",
+      "@php vendor/bin/phpstan analyse"
+    ],
+    "phpstan-baseline": [
+      "@php vendor/bin/phpstan -b"
+    ],
+    "test": [
+      "@php vendor/bin/phpunit"
+    ],
+    "test-feature": [
+      "@php vendor/bin/phpunit --testsuite=Feature"
+    ],
+    "test-unit": [
+      "@php vendor/bin/phpunit --testsuite=Unit"
+    ]
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Turso\\Driver\\Laravel\\LibSQLDriverServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
