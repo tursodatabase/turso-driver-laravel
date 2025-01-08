@@ -2,14 +2,20 @@
 
 namespace Turso\Driver\Laravel\Database;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Connectors\ConnectionFactory;
 
 class LibSQLConnectionFactory extends ConnectionFactory
 {
+    public function __construct(Container $container)
+    {
+        parent::__construct($container);
+    }
+
     protected function createConnection($driver, $connection, $database, $prefix = '', array $config = [])
     {
         $config['driver'] = 'libsql';
-        $config['url'] = 'file:'.$config['database'];
+        $config['url'] = 'file:' . $config['database'];
         $connection = function () use ($config) {
             return new LibSQLDatabase($config);
         };
