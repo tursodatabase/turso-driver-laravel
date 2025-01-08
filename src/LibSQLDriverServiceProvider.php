@@ -8,6 +8,7 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Turso\Driver\Laravel\Database\LibSQLConnection;
 use Turso\Driver\Laravel\Database\LibSQLConnectionFactory;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
+use Turso\Driver\Laravel\Factories\CommandFactory;
 
 class LibSQLDriverServiceProvider extends PackageServiceProvider
 {
@@ -27,7 +28,8 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('turso-driver-laravel');
+            ->name('turso-driver-laravel')
+            ->hasCommands(CommandFactory::collect());
     }
 
     public function register(): void
@@ -45,7 +47,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
             $db->extend('libsql', function ($config, $name) {
                 $config = config('database.connections.libsql');
                 $config['name'] = $name;
-                if (! isset($config['driver'])) {
+                if (!isset($config['driver'])) {
                     $config['driver'] = 'libsql';
                 }
 
