@@ -38,6 +38,7 @@ class CreateToken extends Command
 
         if ($process->failed()) {
             $this->error('Failed to create token.');
+
             return;
         }
     }

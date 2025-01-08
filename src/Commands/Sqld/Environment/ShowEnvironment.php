@@ -30,6 +30,7 @@ class ShowEnvironment extends Command
 
         if ($process->failed()) {
             $this->error('Failed to list environments.');
+
             return;
         }
     }

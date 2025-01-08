@@ -47,7 +47,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
             $db->extend('libsql', function ($config, $name) {
                 $config = config('database.connections.libsql');
                 $config['name'] = $name;
-                if (!isset($config['driver'])) {
+                if (! isset($config['driver'])) {
                     $config['driver'] = 'libsql';
                 }
 

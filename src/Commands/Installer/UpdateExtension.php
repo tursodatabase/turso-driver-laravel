@@ -16,8 +16,9 @@ class UpdateExtension extends Command
 
     public function handle(): void
     {
-        if (!$this->checkIfLibsqlAlreadyInstalled()) {
+        if (! $this->checkIfLibsqlAlreadyInstalled()) {
             $this->info('LibSQL Extension for PHP is not installed.');
+
             return;
         }
 
@@ -29,6 +30,7 @@ class UpdateExtension extends Command
 
         if ($process->failed()) {
             $this->error('Failed to update LibSQL Extension for PHP.');
+
             return;
         }
 

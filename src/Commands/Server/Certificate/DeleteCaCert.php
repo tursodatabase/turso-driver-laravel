@@ -38,6 +38,7 @@ class DeleteCaCert extends Command
 
         if ($process->failed()) {
             $this->error('Failed to delete CA certificate.');
+
             return;
         }
     }

@@ -7,14 +7,15 @@ class CommandFactory
     public static function collect(): array
     {
         $classes = self::getClassesUnderNamespace();
+
         return $classes;
     }
 
     protected static function getClassesUnderNamespace(): array
     {
-        $directory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Commands';
+        $directory = dirname(__DIR__).DIRECTORY_SEPARATOR.'Commands';
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             throw new \RuntimeException("Directory not found at $directory");
         }
 
@@ -24,7 +25,7 @@ class CommandFactory
 
         foreach ($files as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
-                $relativePath = str_replace($directory . DIRECTORY_SEPARATOR, '', $file->getPathname());
+                $relativePath = str_replace($directory.DIRECTORY_SEPARATOR, '', $file->getPathname());
 
                 $className = str_replace([DIRECTORY_SEPARATOR, '.php'], ['\\', ''], $relativePath);
 
@@ -38,5 +39,4 @@ class CommandFactory
 
         return $classes;
     }
-
 }

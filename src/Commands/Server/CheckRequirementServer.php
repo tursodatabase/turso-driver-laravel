@@ -22,6 +22,7 @@ class CheckRequirementServer extends Command
 
         if ($process->failed()) {
             $this->error('Failed to check libSQL Server requirements.');
+
             return;
         }
     }

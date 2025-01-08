@@ -30,6 +30,7 @@ class EditEnvironment extends Command
 
         if ($process->failed()) {
             $this->error('Failed to list environments.');
+
             return;
         }
     }

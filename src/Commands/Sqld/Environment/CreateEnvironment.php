@@ -43,6 +43,7 @@ class CreateEnvironment extends Command
 
         if ($process->failed()) {
             $this->error('Failed to create environment.');
+
             return;
         }
     }

@@ -38,6 +38,7 @@ class CreateCaCert extends Command
 
         if ($process->failed()) {
             $this->error('Failed to create CA certificate.');
+
             return;
         }
     }

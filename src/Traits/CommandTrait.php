@@ -10,6 +10,7 @@ trait CommandTrait
     {
         $command = PHP_OS_FAMILY === 'Windows' ? 'php -m | findstr libsql' : 'php -m | grep libsql';
         $output = Process::run($command);
+
         return $output->output() !== '';
     }
 
@@ -26,6 +27,7 @@ trait CommandTrait
         }
 
         $vendor_name = 'tursodatabase/turso-driver-laravel/vendor/darkterminal/turso-php-installer';
+
         return base_path("vendor/{$vendor_name}/builds/turso-php-installer");
     }
 }

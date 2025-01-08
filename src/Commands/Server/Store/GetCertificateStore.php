@@ -22,6 +22,7 @@ class GetCertificateStore extends Command
 
         if ($process->failed()) {
             $this->error('Failed to get certificate store.');
+
             return;
         }
     }

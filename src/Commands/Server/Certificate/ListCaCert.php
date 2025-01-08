@@ -22,6 +22,7 @@ class ListCaCert extends Command
 
         if ($process->failed()) {
             $this->error('Failed to list CA certificate.');
+
             return;
         }
     }

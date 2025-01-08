@@ -29,6 +29,7 @@ class ShowCaCert extends Command
 
         if ($process->failed()) {
             $this->error('Failed to show CA certificate.');
+
             return;
         }
     }

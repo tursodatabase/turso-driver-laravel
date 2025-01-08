@@ -24,6 +24,7 @@ class ListToken extends Command
 
         if ($process->failed()) {
             $this->error('Failed to list token.');
+
             return;
         }
     }

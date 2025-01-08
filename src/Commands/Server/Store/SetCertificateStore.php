@@ -30,6 +30,7 @@ class SetCertificateStore extends Command
 
         if ($process->failed()) {
             $this->error('Failed to set certificate store.');
+
             return;
         }
     }

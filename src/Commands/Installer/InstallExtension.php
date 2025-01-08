@@ -24,6 +24,7 @@ class InstallExtension extends Command
     {
         if ($this->checkIfLibsqlAlreadyInstalled()) {
             $this->info('LibSQL Extension for PHP is already installed');
+
             return;
         }
 
@@ -52,6 +53,7 @@ class InstallExtension extends Command
 
         if ($process->failed()) {
             $this->error('Failed to install LibSQL Extension for PHP.');
+
             return;
         }
 

@@ -38,6 +38,7 @@ class CreateCaPeerCert extends Command
 
         if ($process->failed()) {
             $this->error('Failed to create peer CA certificate.');
+
             return;
         }
     }
