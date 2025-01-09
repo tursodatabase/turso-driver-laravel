@@ -1,3 +1,9 @@
+## [1.1.1] - 2025-01-10
+
+- release: patch version 1.1.1 [Imam Ali Mustofa]
+- feat(vector): add vector data type support [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for minor version 1.1.0 [Imam Ali Mustofa]
+
 ## [1.1.0] - 2025-01-09
 
 - release: minor version 1.1.0 [Imam Ali Mustofa]
