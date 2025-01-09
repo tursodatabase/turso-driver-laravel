@@ -2,8 +2,8 @@
 
 namespace Turso\Driver\Laravel\Macros;
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 
 class VectorMacro
@@ -16,7 +16,7 @@ class VectorMacro
 
         Builder::macro('nearest', function ($indexName, $vector, $limit = 10) {
             return $this->joinSub(
-                DB::table(DB::raw("vector_top_k('$indexName', '[" . implode(',', $vector) . "]', $limit)")),
+                DB::table(DB::raw("vector_top_k('$indexName', '[".implode(',', $vector)."]', $limit)")),
                 'v',
                 "{$this->from}.rowid",
                 '=',
