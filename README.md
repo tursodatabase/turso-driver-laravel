@@ -54,13 +54,17 @@ return [
 ];
 ```
 
-The package now include the `turso-php-installer`, so you can now install the LibSQL Extension via artisan command:
+The package now include the `turso-php-installer`, so you can install the LibSQL Extension via artisan command:
 
 ```
 php artisan turso-php:install
 ```
 
 And you can read the all command using `php artisan | grep turso-php` or read the [manual](https://darkstation.mintlify.app/dark-extensions/tools/installer/reference)
+
+## Laravel Sail
+
+Don't worry, we also provide Laravel Sail step by step guide for you read: [Sailing with LibSQL](https://darkstation.mintlify.app/dark-extensions/tools/installer/platforms/laravel-sail)
 
 ## Environment Variable Overview
 
