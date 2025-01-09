@@ -3,6 +3,7 @@
 namespace Turso\Driver\Laravel\Database;
 
 use Illuminate\Database\Schema\Grammars\SQLiteGrammar;
+use Illuminate\Support\Fluent;
 use Override;
 
 class LibSQLSchemaGrammar extends SQLiteGrammar
@@ -31,5 +32,15 @@ class LibSQLSchemaGrammar extends SQLiteGrammar
     public function wrap($value, $prefixAlias = false): string
     {
         return str_replace('"', '\'', parent::wrap($value));
+    }
+
+    #[Override]
+    public function typeVector(Fluent $column): string
+    {
+        if (!empty($column->dimensions)) {
+            return "F32_BLOB({$column->dimensions})";
+        }
+
+        throw new \RuntimeException('Dimension must be set for vector embedding');
     }
 }

@@ -9,6 +9,7 @@ use Turso\Driver\Laravel\Database\LibSQLConnection;
 use Turso\Driver\Laravel\Database\LibSQLConnectionFactory;
 use Turso\Driver\Laravel\Database\LibSQLConnector;
 use Turso\Driver\Laravel\Factories\CommandFactory;
+use Turso\Driver\Laravel\Macros\VectorMacro;
 
 class LibSQLDriverServiceProvider extends PackageServiceProvider
 {
@@ -35,6 +36,9 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
     public function register(): void
     {
         parent::register();
+
+        VectorMacro::register();
+
         $this->app->singleton('db.factory', function ($app) {
             return new LibSQLConnectionFactory($app);
         });
