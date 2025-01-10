@@ -2,30 +2,6 @@
 > There is a new adapter coming soon for Laravel that doesn't require using an extension. This extension doesn't support offline writes beta. Join us on Discord to talk more - https://discord.gg/turso
 
 <p align="center">
-  <a href="https://docs.turso.tech/sdk/php/guides/laravel">
-    <img alt="Turso + Laravel" src="https://i.imgur.com/T2pzJid.png" width="1000">
-    <h3 align="center">Turso + Laravel (Community SDK)</h3>
-  </a>
-</p>
-
-<p align="center">
-  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/tursodatabase/turso-client-php/">libSQL Extension</a> for PHP.
-</p>
-
-<p align="center">
-  <a href="https://turso.tech"><strong>Turso</strong></a> ·
-  <a href="https://docs.turso.tech/sdk/php/guides/laravel"><strong>Quickstart</strong></a> ·
-  <a href="https://docs.turso.tech/sdk/php/guides/laravel"><strong>Examples</strong></a> ·
-  <a href="https://docs.turso.tech/sdk/php/guides/laravel"><strong>Docs</strong></a> ·
-  <a href="https://discord.com/invite/4B5D7hYwub"><strong>Discord</strong></a> ·
-  <a href="https://blog.turso.tech/"><strong>Blog &amp; Tutorials</strong></a>
-</p>
-
----
-
-<h1 id="a-libsql-driver-for-laravel" align="center">A LibSQL Driver for Laravel</h1>
-
-<p align="center">
   <a href="https://discord.gg/turso">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
@@ -35,7 +11,47 @@
   </a>
 </p>
 
-LibSQL is a fork of SQLite and this package is **#1 LibSQL Driver** that run natively using LibSQL Native Extension/Driver/Whatever and support Laravel Ecosystem.
+<p align="center">
+  <img alt="Turso + Laravel" src="https://i.imgur.com/dpml6YK.png" width="1000">
+</p>
+
+<p align="center">
+  <a href="LICENSE">
+    <picture>
+      <img src="https://img.shields.io/github/license/tursodatabase/turso-driver-laravel?color=F05340" alt="MIT License" />
+    </picture>
+  </a>
+  <a href="https://tur.so/discord-php">
+    <picture>
+      <img src="https://img.shields.io/discord/933071162680958986?color=F05340" alt="Discord" />
+    </picture>
+  </a>
+  <a href="#contributors">
+    <picture>
+      <img src="https://img.shields.io/github/contributors/tursodatabase/turso-driver-laravel?color=F05340" alt="Contributors" />
+    </picture>
+  </a>
+  <a href="https://packagist.org/packages/tursodatabase/turso-driver-laravel">
+    <picture>
+      <img src="https://img.shields.io/packagist/dt/tursodatabase/turso-driver-laravel?color=F05340" alt="Total downloads" />
+    </picture>
+  </a>
+  <a href="https://github.com/tursodatabase/turso-driver-laravel/tags">
+    <picture>
+      <img src="https://img.shields.io/github/v/tag/tursodatabase/turso-driver-laravel?label=version&color=F05340" alt="Version Tag" />
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/tursodatabase/turso-client-php/">libSQL Extension</a> for PHP.
+</p>
+
+<p align="center">
+  LibSQL is a fork of SQLite and this package is <b>#1 LibSQL Driver</b> that run natively using LibSQL Native Extension/Driver/Whatever and support Laravel Ecosystem.
+</p>
+
+---
 
 ## Installation
 
@@ -93,64 +109,95 @@ DB_REMOTE_ONLY=false
 
 Create a new Turso Database [here](https://docs.turso.tech/quickstart)
 
--   `DB_AUTH_TOKEN` - You can generate using `turso db tokens create <database-name>` command or you can visit your Turso Dashboard and select database you want to used and generate the token from there.
--   `DB_SYNC_URL` - This generate by Turso when you craete a new database, you can get the database URL by using this command `turso db show --url <database-name>`
--   `DB_SYNC_INTERVAL` - This variable defines the interval at which an embedded replica synchronizes with the primary database. It sets a duration for automatic synchronization of the database in the background. When configured, the embedded replica will periodically sync its local state with the state of the primary database to ensure it has the latest data. This is particularly useful for ensuring that replicas remain up-to-date with minimal manual intervention. Default is: 5 seconds.
--   `DB_READ_YOUR_WRITES` - This variable configures the database connection to ensure that writes made by a connection are immediately visible to subsequent read operations initiated by the same connection. This is important in distributed systems to ensure consistency from the perspective of the writing process. When enabled, after a write operation is performed, any reads that follow from the same connection will see the results of that write. **This option is typically enabled by default** to ensure that clients always see their latest writes.
--   `DB_ENCRYPTION_KEY` - This variable is defined for specifying the encryption key used in database encryption. It represents the secret key that is used to encrypt and decrypt the database content, ensuring that the data stored in the database is protected and can only be accessed by individuals who possess the correct key. This key is a critical component of encryption-at-rest strategies, where the goal is to secure data while it is stored on disk, preventing unauthorized access. Default is: empty.
--   `DB_REMOTE_ONLY` - This variable is define to use remote connection only, if you only want to read and write the database from remote database. Default: false.
+Here’s the information in a nicely formatted markdown section for a README:
 
-## Configure The Connection
+---
 
-LibSQL has 3 types of connections to interact with the database: _In-Memory Connection_, _Local Connection_, _Remote Connection_, and _Remote Replica Connection (Embedded Replica)_
+### Environment Variables for Turso Driver
 
-### In-Memory Connection
+Below is a list of environment variables used to configure the Turso driver. Each variable plays a role in defining database connection and behavior:
 
-To be able to use LibSQL in-memory as if you were using SQLite, simply change the following `.env`:
+-   **`DB_AUTH_TOKEN`**  
+    You can generate this token using the following command:
 
-```env
-DB_CONNECTION=libsql
+    ```bash
+    turso db tokens create <database-name>
+    ```
+
+    Alternatively, visit your [Turso Dashboard](https://dashboard.turso.io), select the desired database, and generate the token from there.
+
+-   **`DB_SYNC_URL`**  
+    This URL is automatically generated by Turso when you create a new database. Retrieve the database URL using the command:
+
+    ```bash
+    turso db show --url <database-name>
+    ```
+
+-   **`DB_SYNC_INTERVAL`**  
+    This variable defines the interval (in seconds) at which an embedded replica synchronizes with the primary database. It ensures automatic synchronization of the database in the background.  
+    **Default:** `5 seconds`  
+    **Use case:** Keeps replicas up-to-date with minimal manual intervention.
+
+-   **`DB_READ_YOUR_WRITES`**  
+    Ensures that writes made by a connection are immediately visible to subsequent reads from the same connection. This is vital for maintaining consistency in distributed systems.  
+    **Default:** `true`  
+    **Use case:** Guarantees clients always see their latest writes.
+
+-   **`DB_ENCRYPTION_KEY`**  
+    Specifies the encryption key used for database encryption. This key is critical for securing data at rest, ensuring only authorized individuals can decrypt the database content.  
+    **Default:** Empty  
+    **Use case:** Protects sensitive data stored on disk.
+
+-   **`DB_REMOTE_ONLY`**  
+    Determines if only the remote database should be used for read and write operations.  
+    **Default:** `false`  
+    **Use case:** Set to `true` to strictly use a remote connection without local synchronization.
+
+## Choose Your Connection Needs
+
+**LibSQL** has **4 types of connections** to interact with the database: _In-Memory Connection_, _Local Connection_, _Remote Connection_, and _Remote Replica Connection (Embedded Replica)_
+
+<details>
+  <summary><strong>💾 &mdash; In-Memory Connection</strong></summary>
+  <p>To be able to use LibSQL in-memory as if you were using SQLite, simply change the following <code>.env</code>:</p>
+  <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=:memory:
-```
+  </code></pre>
+</details>
 
-### Local Connection
-
-To be able to use LibSQL locally as if you were using SQLite, simply change the following `.env`:
-
-```env
-DB_CONNECTION=libsql
+<details>
+  <summary><strong>🖥 &mdash; Local Connection</strong></summary>
+  <p>To be able to use LibSQL locally as if you were using SQLite, simply change the following <code>.env</code>:</p>
+  <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=database.sqlite
-```
+  </code></pre>
+  <p>Ignore other LibSQL <code>.env</code> variables.</p>
+</details>
 
-Ignore other LibSQL `.env` variables.
-
-### Remote Connection
-
-To use LibSQL Remote Connection only, you can define the following `.env` variables:
-
-```env
-DB_CONNECTION=libsql
-DB_AUTH_TOKEN=<your-database-auth-token-from-turso>
-DB_SYNC_URL=<your-database-url-from-turso>
+<details>
+  <summary><strong>🌏 &mdash; Remote Connection</strong></summary>
+  <p>To use LibSQL Remote Connection only, you can define the following <code>.env</code> variables:</p>
+  <pre><code>DB_CONNECTION=libsql
+DB_AUTH_TOKEN=&lt;your-database-auth-token-from-turso&gt;
+DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 DB_REMOTE_ONLY=true
-```
+  </code></pre>
+</details>
 
-### Remote Replica Connection (Embedded Replica)
-
-To configure remote replica connection (embedded replica), you can simply use the following `.env`:
-
-```env
-DB_CONNECTION=libsql
+<details>
+  <summary><strong>🌱 &mdash; Remote Replica Connection (Embedded Replica)</strong></summary>
+  <p>To configure remote replica connection (embedded replica), you can simply use the following <code>.env</code>:</p>
+  <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=database.sqlite
-DB_AUTH_TOKEN=<your-database-auth-token-from-turso>
-DB_SYNC_URL=<your-database-url-from-turso>
+DB_AUTH_TOKEN=&lt;your-database-auth-token-from-turso&gt;
+DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 DB_SYNC_INTERVAL=5
 DB_READ_YOUR_WRITES=true
 DB_ENCRYPTION_KEY=
 DB_REMOTE_ONLY=false
-```
-
-That's it! How easy to make different connection using LibSQL Driver in Laravel, right?!
+  </code></pre>
+  <p>That's it! How easy to make different connection using LibSQL Driver in Laravel, right?!</p>
+</details>
 
 ## Database Configuration
 
@@ -234,10 +281,9 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
-## Credits
+## Contributors
 
--   [Imam Ali Mustofa](https://github.com/darkterminal)
--   [All Contributors](../../contributors)
+![Contributors](https://contrib.nn.ci/api?no_bot=true&repo=tursodatabase/turso-driver-laravel)
 
 ## License
 
