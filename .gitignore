@@ -1,5 +1,6 @@
 .idea
 .phpunit.cache
+.vscode/
 build
 composer.lock
 coverage
@@ -10,3 +11,5 @@ testbench.yaml
 vendor
 node_modules
 package_versioning.php
+tests/database/*
+!tests/database/.gitkeep

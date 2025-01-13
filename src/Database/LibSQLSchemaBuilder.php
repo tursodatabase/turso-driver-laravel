@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -29,7 +28,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $statement = $this->db->prepare($this->grammar()->compileDropAllIndexes());
         $results = $statement->query();
 
-        collect($results['rows'])->each(function (array $query) {
+        collect($results->rows)->each(function (array $query) {
             $query = array_values($query)[0];
             $this->db->query($query);
         });
@@ -45,7 +44,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $statement = $this->db->prepare($this->grammar()->compileDropAllTables());
         $results = $statement->query();
 
-        collect($results['rows'])->each(function (array $query) {
+        collect($results->rows)->each(function (array $query) {
             $query = array_values($query)[0];
             $this->db->query($query);
         });
@@ -58,7 +57,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $statement = $this->db->prepare($this->grammar()->compileDropAllTriggers());
         $results = $statement->query();
 
-        collect($results['rows'])->each(function (array $query) {
+        collect($results->rows)->each(function (array $query) {
             $query = array_values($query)[0];
             $this->db->query($query);
         });
@@ -69,7 +68,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $statement = $this->db->prepare($this->grammar()->compileDropAllViews());
         $results = $statement->query();
 
-        collect($results['rows'])->each(function (array $query) {
+        collect($results->rows)->each(function (array $query) {
             $query = array_values($query)[0];
             $this->db->query($query);
         });

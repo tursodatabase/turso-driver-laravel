@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
@@ -10,6 +11,8 @@ class LibSQLDatabase
     protected LibSQL $db;
 
     protected array $config;
+
+    protected int $mode = \PDO::FETCH_OBJ;
 
     protected string $connection_mode;
 
@@ -23,86 +26,83 @@ class LibSQLDatabase
     {
         $config = $this->createConfig($config);
 
-        if ($config['url'] !== ':memory:') {
-            $url = str_replace('file:', '', $config['url']);
-            $config['url'] = $this->checkPathOrFilename($config['url']) === 'filename' ? "file:$url" : '';
-        }
-
         $this->setConnectionMode($config);
+
+        $config = $this->buildConfig($this->connection_mode, $config);
+
+        $this->db = new LibSQL($config);
 
         $this->in_transaction = false;
 
-        $this->db = new LibSQL($config);
     }
 
     private function createConfig(array $config): array
     {
         return [
-            'url' => $config['url'],
-            'authToken' => $config['authToken'] ?? '',
-            'syncUrl' => $config['syncUrl'] ?? '',
+            'database' => $config['database'] ?? null,
+            'url' => $config['url'] ?? null,
+            'authToken' => $config['authToken'] ?? null,
+            'encryptionKey' => $config['encryptionKey'] ?? null,
             'syncInterval' => $config['syncInterval'] ?? 5,
             'read_your_writes' => $config['read_your_writes'] ?? true,
-            'encryptionKey' => $config['encryptionKey'] ?? '',
-            'remoteOnly' => $config['remoteOnly'] ?? false,
+        ];
+    }
+
+    private function buildConfig(string $mode, $config): array|string
+    {
+        if ($mode === 'local' || $mode === 'memory') {
+            return $mode === 'local' ? "file:{$config['database']}" : $config['database'];
+        }
+
+        if ($mode === 'remote') {
+            return [
+                'url' => $config['url'],
+                'authToken' => $config['authToken'],
+            ];
+        }
+
+        return [
+            "url" => "file:{$config['database']}",
+            "authToken" => $config['authToken'],
+            "syncUrl" => $config['url'],
+            "syncInterval" => $config['syncInterval'],
+            "read_your_writes" => $config['read_your_writes'],
+            "encryptionKey" => $config['encryptionKey']
         ];
     }
 
     private function setConnectionMode(array $config): void
     {
-        $url = $config['url'] ?? '';
-        $authToken = $config['authToken'] ?? '';
-        $syncUrl = $config['syncUrl'] ?? '';
-        $remoteOnly = $config['remoteOnly'] ?? false;
+        $database = $config['database'];
+        $url = $config['url'];
+        $authToken = $config['authToken'];
 
-        $isValidFilename = function (string $url): bool {
-            $filename = basename($url);
+        $mode = 'unknown';
 
-            return str_ends_with($filename, '.db') !== false || str_ends_with($filename, '.sqlite') !== false;
-        };
+        if ($database === ':memory:') {
+            $mode = 'memory';
+        }
 
-        $mode = match (true) {
-            // Check for remote_replica
-            $isValidFilename($url) &&
-            ! empty($authToken) &&
-            ! empty($syncUrl) &&
-            ! $remoteOnly => 'remote_replica',
+        if (empty($database) && !empty($url) && !empty($authToken)) {
+            $mode = 'remote';
+        }
 
-            // Check for remote
-            $isValidFilename($url) &&
-            ! empty($authToken) &&
-            ! empty($syncUrl) &&
-            $remoteOnly => 'remote',
+        if (!empty($database) && $database !== ':memory:' && empty($url) && empty($authToken) && empty($url)) {
+            $mode = 'local';
+        }
 
-            // Check for local
-            $isValidFilename($url) &&
-            empty($authToken) &&
-            empty($syncUrl) => 'local',
-
-            // Default to memory
-            default => 'memory',
-        };
+        if (!empty($database) && $database !== ':memory:' && !empty($authToken) && !empty($url)) {
+            $mode = 'remote_replica';
+        }
 
         $this->connection_mode = $mode;
     }
 
-    private function checkPathOrFilename(string $string): string|false
+    public function setFetchMode(int $mode, mixed ...$args): bool
     {
-        $filename = basename($string);
+        $this->mode = $mode;
 
-        if (strpos($filename, '.db') !== false || strpos($filename, '.sqlite') !== false) {
-            return 'filename';
-        }
-
-        if (filter_var($string, FILTER_VALIDATE_URL)) {
-            return 'url';
-        }
-
-        if (! pathinfo($filename, PATHINFO_EXTENSION)) {
-            return 'directory';
-        }
-
-        return 'unknown';
+        return true;
     }
 
     public function version(): string
@@ -124,7 +124,7 @@ class LibSQLDatabase
 
     public function commit(): bool
     {
-        if (! $this->inTransaction()) {
+        if (!$this->inTransaction()) {
             throw new \PDOException('No active transaction');
         }
 
@@ -134,9 +134,9 @@ class LibSQLDatabase
         return true;
     }
 
-    public function rollback(): bool
+    public function rollBack(): bool
     {
-        if (! $this->inTransaction()) {
+        if (!$this->inTransaction()) {
             throw new \PDOException('No active transaction');
         }
 
@@ -164,7 +164,22 @@ class LibSQLDatabase
 
     public function query(string $sql, array $params = [])
     {
-        return $this->db->query($sql, $params)->fetchArray();
+        $result = $this->db->query($sql, $params)->fetchArray();
+
+        $rows = array_map(function ($row) {
+            return array_map(function ($value) {
+                return is_string($value) && base64_encode(base64_decode($value, true)) === $value
+                    ? base64_decode($value)
+                    : $value;
+            }, $row);
+        }, $result);
+
+        return match ($this->mode) {
+            \PDO::FETCH_ASSOC => collect($rows),
+            \PDO::FETCH_OBJ => (object) $rows,
+            \PDO::FETCH_NUM => array_values($rows),
+            default => collect($rows)
+        };
     }
 
     public function setLastInsertId(?string $name = null, ?int $value = null): void
@@ -176,7 +191,7 @@ class LibSQLDatabase
         $this->lastInsertIds[$name] = $value;
     }
 
-    public function lastInsertId(?string $name = null): string|false
+    public function lastInsertId(?string $name = null): int|string
     {
         if ($name === null) {
             $name = 'id';
@@ -184,7 +199,8 @@ class LibSQLDatabase
 
         return isset($this->lastInsertIds[$name])
             ? (string) $this->lastInsertIds[$name]
-            : false;
+            : $this->db->lastInsertedId();
+        ;
     }
 
     public function inTransaction(): bool
@@ -225,7 +241,7 @@ class LibSQLDatabase
             return 'NULL';
         }
 
-        return "'".$this->escapeString($input)."'";
+        return "'" . $this->escapeString($input) . "'";
     }
 
     public function __destruct()

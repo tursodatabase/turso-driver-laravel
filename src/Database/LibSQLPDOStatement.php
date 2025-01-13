@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Illuminate\Support\Carbon;
 use LibSQL;
 use PDO;
 
@@ -9,18 +11,19 @@ class LibSQLPDOStatement
 {
     protected int $affectedRows = 0;
 
-    protected int $mode = PDO::FETCH_ASSOC;
+    protected int $mode = PDO::FETCH_OBJ;
 
     protected array $bindings = [];
 
-    protected array $response = [];
+    protected array|object $response = [];
 
     protected array $lastInsertIds = [];
 
     public function __construct(
         private \LibSQLStatement $statement,
         protected string $query
-    ) {}
+    ) {
+    }
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
@@ -29,7 +32,7 @@ class LibSQLPDOStatement
         return true;
     }
 
-    public function bindValue($parameter, $value, $type = PDO::PARAM_STR)
+    public function bindValue($parameter, $value, $type = PDO::PARAM_STR): self
     {
         if (is_int($parameter)) {
             $this->bindings[$parameter] = $value;
@@ -42,25 +45,122 @@ class LibSQLPDOStatement
         return $this;
     }
 
-    public function prepare(string $query)
+    public function prepare(string $query): self
     {
         return new self($this->statement, $query);
     }
 
-    public function query(array $parameters = []): array
+    public function query(array $parameters = []): mixed
     {
         if (empty($parameters)) {
             $parameters = $this->bindings;
+
+            // Determine if parameters are named or positional
+            if ($this->hasNamedParameters($parameters)) {
+                $this->statement->bindNamed($parameters);
+            } else {
+                $parameters = $this->parameterCasting($parameters);
+                $this->statement->bindPositional(array_values($parameters));
+            }
+
+            $result = $this->statement->query()->fetchArray(LibSQL::LIBSQL_ALL);
+            $rows = $this->decodeDoubleBase64($result);
+
+            return match ($this->mode) {
+                PDO::FETCH_ASSOC => collect($rows),
+                PDO::FETCH_OBJ => (object) $rows,
+                PDO::FETCH_NUM => array_values($rows),
+                default => collect($rows)
+            };
         }
 
-        // Determine if parameters are named or positional
-        if ($this->hasNamedParameters($parameters)) {
-            $this->statement->bindNamed($parameters);
-        } else {
-            $this->statement->bindPositional(array_values($parameters));
+        $parameters = $this->parameterCasting($parameters);
+        $result = $this->statement->query($parameters)->fetchArray(LibSQL::LIBSQL_ALL);
+        $rows = $this->decodeDoubleBase64($result);
+
+        return match ($this->mode) {
+            PDO::FETCH_ASSOC => collect($rows),
+            PDO::FETCH_OBJ => (object) $rows,
+            PDO::FETCH_NUM => array_values($rows),
+            default => collect($rows)
+        };
+    }
+
+    private function parameterCasting(array $parameters): array
+    {
+        $parameters = collect(array_values($parameters))->map(function ($value) {
+            $type = match (true) {
+                is_string($value) && (!ctype_print($value) || !mb_check_encoding($value, 'UTF-8')) => 'blob',
+                is_float($value) || is_double($value) => 'float',
+                is_int($value) => 'integer',
+                is_bool($value) => 'boolean',
+                $value === null => 'null',
+                $value instanceof Carbon => 'datetime',
+                default => 'text',
+            };
+
+            if ($type === 'blob') {
+                $value = base64_encode(base64_encode($value));
+            }
+
+            if ($type === 'boolean') {
+                $value = (int) $value;
+            }
+
+            if ($type === 'datetime') {
+                $value = $value->toDateTimeString();
+            }
+
+            return $value;
+        })->toArray();
+
+        return $parameters;
+    }
+
+    private function decodeDoubleBase64(array $result): array
+    {
+        if (isset($result['rows']) && is_array($result['rows'])) {
+            foreach ($result['rows'] as &$row) {
+                foreach ($row as $key => &$value) {
+                    if (is_string($value) && $this->isValidDateOrTimestamp($value)) {
+                        continue;
+                    }
+
+                    if (is_string($value) && $this->isValidBlob($value)) {
+                        $value = base64_decode(base64_decode($value));
+                    }
+                }
+            }
         }
 
-        return $this->statement->query()->fetchArray(LibSQL::LIBSQL_ALL);
+        return $result;
+    }
+
+    private function isValidBlob(mixed $value): bool
+    {
+        return (bool) preg_match('/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/', $value);
+    }
+
+    private function isValidDateOrTimestamp($string, $format = null): bool
+    {
+        if (is_numeric($string) && (int) $string > 0 && (int) $string <= PHP_INT_MAX) {
+            return true;
+        }
+
+        if (is_numeric($string) && strlen($string) === 4 && (int) $string >= 1000 && (int) $string <= 9999) {
+            return true;
+        }
+
+        $formats = $format ? [$format] : ['Y-m-d H:i:s', 'Y-m-d'];
+
+        foreach ($formats as $fmt) {
+            $dateTime = \DateTime::createFromFormat($fmt, $string);
+            if ($dateTime && $dateTime->format($fmt) === $string) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function execute(array $parameters = []): bool
@@ -74,6 +174,7 @@ class LibSQLPDOStatement
             if ($this->hasNamedParameters($parameters)) {
                 $this->statement->bindNamed($parameters);
             } else {
+                $parameters = $this->parameterCasting($parameters);
                 $this->statement->bindPositional(array_values($parameters));
             }
 
@@ -81,7 +182,6 @@ class LibSQLPDOStatement
 
             return true;
         } catch (\Exception $e) {
-            // Handle exceptions as needed
             return false;
         }
     }
@@ -97,23 +197,29 @@ class LibSQLPDOStatement
         if ($this->hasNamedParameters($parameters)) {
             $this->statement->bindNamed($parameters);
         } else {
+            $parameters = $this->parameterCasting($parameters);
             $this->statement->bindPositional(array_values($parameters));
         }
         $result = $this->statement->query();
         $rows = $result->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-        if (! $rows) {
+        if (!$rows) {
             return false;
         }
 
         $row = $rows[$cursorOffset];
+        $row = array_map(function ($value) {
+            return is_string($value) && base64_encode(base64_decode($value, true)) === $value
+                ? base64_decode($value)
+                : $value;
+        }, $row);
         $mode = $this->mode ?? $mode;
 
         return match ($mode) {
-            PDO::FETCH_ASSOC => $row,
+            PDO::FETCH_ASSOC => collect($row),
             PDO::FETCH_OBJ => (object) $row,
             PDO::FETCH_NUM => array_values($row),
-            default => $row
+            default => collect($row)
         };
     }
 
@@ -124,11 +230,12 @@ class LibSQLPDOStatement
             $mode = $this->mode;
         }
 
-        $allRows = $this->response['rows'];
-        $rowValues = \array_map('array_values', $allRows);
+        $allRows = $this->response->rows;
+        $decodedRows = $this->parameterCasting($allRows);
+        $rowValues = \array_map('array_values', $decodedRows);
 
         $response = match ($mode) {
-            PDO::FETCH_BOTH => array_merge($allRows, $rowValues),
+            PDO::FETCH_BOTH => [...$allRows, ...$rowValues],
             PDO::FETCH_ASSOC, PDO::FETCH_NAMED => $allRows,
             PDO::FETCH_NUM => $rowValues,
             PDO::FETCH_OBJ => $allRows,

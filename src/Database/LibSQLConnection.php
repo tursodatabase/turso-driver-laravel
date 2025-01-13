@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
@@ -6,10 +7,13 @@ use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
 use LibSQL;
+use LibSQLTransaction;
 
 class LibSQLConnection extends Connection
 {
     protected LibSQLDatabase $db;
+
+    protected LibSQLTransaction $tx;
 
     /**
      * The active PDO connection used for reads.
@@ -22,6 +26,10 @@ class LibSQLConnection extends Connection
 
     protected array $bindings = [];
 
+    protected int $mode = \PDO::FETCH_OBJ;
+
+    protected bool $in_transaction = false;
+
     public function __construct(LibSQLDatabase $db, string $database = ':memory:', string $tablePrefix = '', array $config = [])
     {
         $libsqlDb = function () use ($db) {
@@ -31,6 +39,19 @@ class LibSQLConnection extends Connection
 
         $this->db = $db;
         $this->schemaGrammar = $this->getDefaultSchemaGrammar();
+        $this->in_transaction = false;
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->in_transaction;
+    }
+
+    public function setFetchMode(int $mode, mixed ...$args): bool
+    {
+        $this->mode = $mode;
+
+        return true;
     }
 
     public function sync(): void
@@ -47,7 +68,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return ! empty($res);
+        return !empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -99,19 +120,64 @@ class LibSQLConnection extends Connection
         return $this;
     }
 
+    public function prepare(string $sql): LibSQLPDOStatement
+    {
+        return new LibSQLPDOStatement(
+            ($this->inTransaction() ? $this->tx : $this->db->getDb())->prepare($sql),
+            $sql
+        );
+    }
+
     public function select($query, $bindings = [], $useReadPdo = true)
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
+        $bindings = array_map(function ($binding) {
+            return is_bool($binding) ? (int) $binding : $binding;
+        }, $bindings);
+
+        $data = $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
                 return [];
             }
 
             $statement = $this->getRawPdo()->prepare($query);
-
             $results = $statement->query($bindings);
 
-            return array_map(fn ($result) => $result, $results['rows']);
+            return array_map(function ($row) {
+                return $this->decodeBlobs($row);
+            }, $results->rows);
         });
+
+        $rows = match ($this->mode) {
+            \PDO::FETCH_ASSOC => collect($data),
+            \PDO::FETCH_OBJ => $this->arrayToStdClass($data),
+            \PDO::FETCH_NUM => array_values($data),
+            default => $data
+        };
+
+        return $rows;
+    }
+
+    private function arrayToStdClass(array $array): \stdClass
+    {
+        $object = new \stdClass();
+
+        foreach ($array as $key => $value) {
+            // Recursively convert nested arrays to stdClass
+            if (is_array($value)) {
+                $object->{$key} = $this->arrayToStdClass($value);
+            } else {
+                $object->{$key} = $value;
+            }
+        }
+
+        return $object;
+    }
+
+    private function decodeBlobs(array $row): array
+    {
+        return array_map(function ($value) {
+            return is_resource($value) ? stream_get_contents($value) : $value;
+        }, $row);
     }
 
     public function selectResultSets($query, $bindings = [], $useReadPdo = true)
@@ -135,7 +201,7 @@ class LibSQLConnection extends Connection
 
         $preparedQuery = $this->getRawPdo()->prepare($query);
 
-        if (! $preparedQuery) {
+        if (!$preparedQuery) {
             throw new Exception('Failed to prepare statement.');
         }
 
@@ -146,9 +212,9 @@ class LibSQLConnection extends Connection
         }
     }
 
-    public function insert($query, $bindings = [])
+    public function insert($query, $bindings = []): bool
     {
-        return $this->affectingStatement($query, $bindings);
+        return $this->affectingStatement($query, $bindings) > 0;
     }
 
     /**
@@ -184,16 +250,25 @@ class LibSQLConnection extends Connection
      */
     public function affectingStatement($query, $bindings = [])
     {
+        $bindings = array_map(function ($binding) {
+            return is_bool($binding) ? (int) $binding : $binding;
+        }, $bindings);
+
         return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
                 return 0;
             }
 
-            $result = $this->getPdo()->prepare($query)->execute($bindings);
+            $statement = $this->getPdo()->prepare($query);
 
-            $this->recordsHaveBeenModified(
-                ($count = (int) $result) > 0
-            );
+            foreach ($bindings as $key => $value) {
+                $type = is_resource($value) ? \PDO::PARAM_LOB : \PDO::PARAM_STR;
+                $statement->bindValue($key, $value, $type);
+            }
+
+            $statement->execute();
+
+            $this->recordsHaveBeenModified(($count = $statement->rowCount()) > 0);
 
             return $count;
         });
@@ -238,6 +313,18 @@ class LibSQLConnection extends Connection
         $this->queryGrammar = $this->getDefaultQueryGrammar();
     }
 
+    public function query()
+    {
+        $grammar = $this->getQueryGrammar();
+        $processor = $this->getPostProcessor();
+
+        return new LibSQLQueryBuilder(
+            $this,
+            $grammar,
+            $processor
+        );
+    }
+
     #[\ReturnTypeWillChange]
     protected function getDefaultSchemaGrammar(): LibSQLSchemaGrammar
     {
@@ -264,10 +351,9 @@ class LibSQLConnection extends Connection
         return $db();
     }
 
-    protected function escapeBinary(mixed $value): string
+    public function escapeBinary(mixed $value): string
     {
         $hex = bin2hex($value);
-
         return "x'{$hex}'";
     }
 
@@ -315,6 +401,14 @@ class LibSQLConnection extends Connection
             return 'NULL';
         }
 
-        return "'".$this->escapeString($input)."'";
+        if (is_string($input)) {
+            return "'" . $this->escapeString($input) . "'";
+        }
+
+        if (is_resource($input)) {
+            return $this->escapeBinary(stream_get_contents($input));
+        }
+
+        return $this->escapeBinary($input);
     }
 }

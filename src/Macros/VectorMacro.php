@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Macros;
 
@@ -18,7 +19,7 @@ class VectorMacro
         Builder::macro('nearest', function ($indexName, $vector, $limit = 10) {
             /** @var Builder $this * */
             return $this->joinSub(
-                DB::table(DB::raw("vector_top_k('$indexName', '[".implode(',', $vector)."]', $limit)")),
+                DB::table(DB::raw("vector_top_k('$indexName', '[" . implode(',', $vector) . "]', $limit)")),
                 'v',
                 "{$this->from}.rowid",
                 '=',

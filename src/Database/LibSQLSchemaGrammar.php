@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
@@ -37,7 +38,7 @@ class LibSQLSchemaGrammar extends SQLiteGrammar
     #[Override]
     public function typeVector(Fluent $column): string
     {
-        if (! empty($column->dimensions)) {
+        if (!empty($column->dimensions)) {
             return "F32_BLOB({$column->dimensions})";
         }
 
