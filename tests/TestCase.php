@@ -47,6 +47,7 @@ class TestCase extends Orchestra
                 'database' => null,
                 'prefix' => '',
                 'url' => 'http://127.0.0.1:8081',
+                // Replace the token with yours
                 'authToken' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ',
             ],
             // Embedded Replica
@@ -58,6 +59,7 @@ class TestCase extends Orchestra
                 'database' => test_database_path('otherdb2.db'),
                 'prefix' => '',
                 'url' => 'http://127.0.0.1:8081',
+                // Replace the token with yours
                 'authToken' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ',
             ]
         ]);
