@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Commands\Installer;
@@ -17,7 +18,7 @@ class UpdateExtension extends Command
 
     public function handle(): void
     {
-        if (!$this->checkIfLibsqlAlreadyInstalled()) {
+        if (! $this->checkIfLibsqlAlreadyInstalled()) {
             $this->info('LibSQL Extension for PHP is not installed.');
 
             return;

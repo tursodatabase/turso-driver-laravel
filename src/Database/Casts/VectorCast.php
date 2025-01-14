@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database\Casts;
@@ -10,7 +11,7 @@ class VectorCast implements CastsAttributes
 {
     public function set($model, $key, $value, $attributes)
     {
-        return DB::raw("vector32('[" . implode(',', $value) . "]')");
+        return DB::raw("vector32('[".implode(',', $value)."]')");
     }
 
     public function get($model, $key, $value, $attributes)

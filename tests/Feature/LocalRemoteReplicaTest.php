@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
 NOTE:
     Before activated this tests, make sure you've libsql server or turso url provider
     is setup in TestCase.php file in getEnvironmentSetUp methods for Embedded Replica Connection

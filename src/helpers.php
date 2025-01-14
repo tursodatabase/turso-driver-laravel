@@ -8,7 +8,7 @@ function arrayToStdClass(array $array): array
         $formattedItem = [];
 
         foreach ($item as $key => $value) {
-            if (is_array($value) && !is_vector($value)) {
+            if (is_array($value) && ! is_vector($value)) {
                 // Encode only the nested array as a JSON string
                 $formattedItem[$key] = json_encode($value);
             } else {
@@ -29,7 +29,7 @@ function stdClassToArray(\stdClass|array $object): array
         return array_map('stdClassToArray', $object);
     }
 
-    if (!$object instanceof \stdClass) {
+    if (! $object instanceof \stdClass) {
         return $object;
     }
 
@@ -55,18 +55,19 @@ function reorderArrayKeys(array $data, array $keyOrder): array
 {
     return array_map(function ($item) use ($keyOrder) {
         $ordered = array_fill_keys($keyOrder, null);
+
         return array_merge($ordered, $item);
     }, $data);
 }
 
 function is_vector($value): bool
 {
-    if (!is_array($value)) {
+    if (! is_array($value)) {
         return false;
     }
 
     foreach ($value as $element) {
-        if (!is_numeric($element)) {
+        if (! is_numeric($element)) {
             return false;
         }
     }

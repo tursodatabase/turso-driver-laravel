@@ -39,8 +39,6 @@ class Comment extends Model
 
     /**
      * Get the user who created the comment.
-     *
-     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -49,8 +47,6 @@ class Comment extends Model
 
     /**
      * Get the post the comment belongs to.
-     *
-     * @return BelongsTo
      */
     public function post(): BelongsTo
     {

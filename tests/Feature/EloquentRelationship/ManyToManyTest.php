@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Schema;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\Role;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\User;
 

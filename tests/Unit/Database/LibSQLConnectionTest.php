@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\DB;
 
-
 test('it can enable query logging feature', function () {
     DB::connection('libsql')->enableQueryLog();
 

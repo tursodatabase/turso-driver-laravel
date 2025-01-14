@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -22,8 +23,7 @@ class LibSQLPDOStatement
     public function __construct(
         private \LibSQLStatement $statement,
         protected string $query
-    ) {
-    }
+    ) {}
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
@@ -90,8 +90,8 @@ class LibSQLPDOStatement
     {
         $parameters = collect(array_values($parameters))->map(function ($value) {
             $type = match (true) {
-                is_string($value) && (!ctype_print($value) || !mb_check_encoding($value, 'UTF-8')) => 'blob',
-                is_float($value) || is_double($value) => 'float',
+                is_string($value) && (! ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) => 'blob',
+                is_float($value) || is_float($value) => 'float',
                 is_int($value) => 'integer',
                 is_bool($value) => 'boolean',
                 $value === null => 'null',
@@ -219,11 +219,11 @@ class LibSQLPDOStatement
         $result = $this->statement->query();
         $rows = $result->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-        if (!$rows) {
+        if (! $rows) {
             $anotherStatement = $this->statement->query($parameters);
             $rows = $anotherStatement->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-            if (!$rows) {
+            if (! $rows) {
                 return false;
             }
 

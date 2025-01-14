@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Database\Eloquent\Casts\AsStringable;
 use Illuminate\Support\Facades\Schema;
 use Turso\Driver\Laravel\Tests\Feature\EloquentAttributeCasting\CastingModels\StringableCastingModel;
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -62,12 +63,12 @@ class LibSQLDatabase
         }
 
         return [
-            "url" => "file:{$config['database']}",
-            "authToken" => $config['authToken'],
-            "syncUrl" => $config['url'],
-            "syncInterval" => $config['syncInterval'],
-            "read_your_writes" => $config['read_your_writes'],
-            "encryptionKey" => $config['encryptionKey']
+            'url' => "file:{$config['database']}",
+            'authToken' => $config['authToken'],
+            'syncUrl' => $config['url'],
+            'syncInterval' => $config['syncInterval'],
+            'read_your_writes' => $config['read_your_writes'],
+            'encryptionKey' => $config['encryptionKey'],
         ];
     }
 
@@ -83,15 +84,15 @@ class LibSQLDatabase
             $mode = 'memory';
         }
 
-        if (empty($database) && !empty($url) && !empty($authToken)) {
+        if (empty($database) && ! empty($url) && ! empty($authToken)) {
             $mode = 'remote';
         }
 
-        if (!empty($database) && $database !== ':memory:' && empty($url) && empty($authToken) && empty($url)) {
+        if (! empty($database) && $database !== ':memory:' && empty($url) && empty($authToken) && empty($url)) {
             $mode = 'local';
         }
 
-        if (!empty($database) && $database !== ':memory:' && !empty($authToken) && !empty($url)) {
+        if (! empty($database) && $database !== ':memory:' && ! empty($authToken) && ! empty($url)) {
             $mode = 'remote_replica';
         }
 
@@ -124,7 +125,7 @@ class LibSQLDatabase
 
     public function commit(): bool
     {
-        if (!$this->inTransaction()) {
+        if (! $this->inTransaction()) {
             throw new \PDOException('No active transaction');
         }
 
@@ -136,7 +137,7 @@ class LibSQLDatabase
 
     public function rollBack(): bool
     {
-        if (!$this->inTransaction()) {
+        if (! $this->inTransaction()) {
             throw new \PDOException('No active transaction');
         }
 
@@ -200,7 +201,7 @@ class LibSQLDatabase
         return isset($this->lastInsertIds[$name])
             ? (string) $this->lastInsertIds[$name]
             : $this->db->lastInsertedId();
-        ;
+
     }
 
     public function inTransaction(): bool
@@ -241,7 +242,7 @@ class LibSQLDatabase
             return 'NULL';
         }
 
-        return "'" . $this->escapeString($input) . "'";
+        return "'".$this->escapeString($input)."'";
     }
 
     public function __destruct()

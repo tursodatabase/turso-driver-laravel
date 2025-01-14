@@ -13,7 +13,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn(string $modelName) => 'Turso\\Driver\\Laravel\\Tests\\Fixtures\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn (string $modelName) => 'Turso\\Driver\\Laravel\\Tests\\Fixtures\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
@@ -61,7 +61,7 @@ class TestCase extends Orchestra
                 'url' => 'http://127.0.0.1:8081',
                 // Replace the token with yours
                 'authToken' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ',
-            ]
+            ],
         ]);
         config()->set('database.default', 'libsql');
         config()->set('queue.default', 'sync');

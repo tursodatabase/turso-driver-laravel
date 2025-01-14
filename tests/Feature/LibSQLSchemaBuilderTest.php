@@ -41,32 +41,32 @@ test('it can retrieve all of the column information in the table', function () {
         ->and($result->has('migration'))->toBeTrue()
         ->and($result->has('batch'))->toBeTrue()
         ->and($result->get('id'))->toBe([
-                'name' => 'id',
-                'type' => 'INTEGER',
-                'notnull' => 1,
-                'dflt_value' => null,
-                'hidden' => 0,
-                'pk' => 1,
-                'cid' => 0
-            ])
+            'name' => 'id',
+            'type' => 'INTEGER',
+            'notnull' => 1,
+            'dflt_value' => null,
+            'hidden' => 0,
+            'pk' => 1,
+            'cid' => 0,
+        ])
         ->and($result->get('migration'))->toBe([
-                'name' => 'migration',
-                'type' => 'varchar',
-                'notnull' => 1,
-                'dflt_value' => null,
-                'hidden' => 0,
-                'pk' => 0,
-                'cid' => 1
-            ])
+            'name' => 'migration',
+            'type' => 'varchar',
+            'notnull' => 1,
+            'dflt_value' => null,
+            'hidden' => 0,
+            'pk' => 0,
+            'cid' => 1,
+        ])
         ->and($result->get('batch'))->toBe([
-                'name' => 'batch',
-                'type' => 'INTEGER',
-                'notnull' => 1,
-                'dflt_value' => null,
-                'hidden' => 0,
-                'pk' => 0,
-                'cid' => 2
-            ]);
+            'name' => 'batch',
+            'type' => 'INTEGER',
+            'notnull' => 1,
+            'dflt_value' => null,
+            'hidden' => 0,
+            'pk' => 0,
+            'cid' => 2,
+        ]);
 })->group('LibSQLSchemaBuilderTest', 'FeatureTest');
 
 test('it can create a new table', function () {

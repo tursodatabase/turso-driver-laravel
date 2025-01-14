@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -16,6 +17,7 @@ class LibSQLQueryProcessor extends SQLiteProcessor
     public function processTables($results): array
     {
         $results = $results instanceof \stdClass ? stdClassToArray($results) : $results;
+
         return array_map(function ($result) {
             $result = (object) $result;
 
@@ -33,6 +35,7 @@ class LibSQLQueryProcessor extends SQLiteProcessor
     public function processViews($results)
     {
         $results = $results instanceof \stdClass ? stdClassToArray($results) : $results;
+
         return array_map(function ($result) {
             $result = (object) $result;
 

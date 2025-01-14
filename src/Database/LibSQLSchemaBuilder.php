@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -76,7 +77,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     public function getColumns($table)
     {
-        $table = $this->connection->getTablePrefix() . $table;
+        $table = $this->connection->getTablePrefix().$table;
 
         $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
 
@@ -93,7 +94,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
             }
         }
 
-        $keyOrder = ["name", "type", "notnull", "dflt_value", "hidden", "pk", "cid"];
+        $keyOrder = ['name', 'type', 'notnull', 'dflt_value', 'hidden', 'pk', 'cid'];
         $delctypes = reorderArrayKeys($delctypes, $keyOrder);
 
         return $delctypes;

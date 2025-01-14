@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Schema;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\Deployment;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\Environment;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\Project;

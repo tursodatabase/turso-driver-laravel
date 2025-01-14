@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -14,12 +15,13 @@ class LibSQLQueryBuilder extends Builder
         $results = $this->connection->select(
             $this->grammar->compileExists($this),
             $this->getBindings(),
-            !$this->useWritePdo
+            ! $this->useWritePdo
         );
 
         $results = (array) $results;
         if (isset($results[0])) {
             $results = (array) $results[0];
+
             return (bool) ($results['exists'] ?? false);
         }
 

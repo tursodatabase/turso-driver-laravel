@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel;
@@ -21,8 +22,8 @@ class LibSQLManager
 
     public function __call(string $method, array $arguments = []): mixed
     {
-        if (!method_exists($this->client, $method)) {
-            throw new BadMethodCallException('Call to undefined method ' . static::class . '::' . $method . '()');
+        if (! method_exists($this->client, $method)) {
+            throw new BadMethodCallException('Call to undefined method '.static::class.'::'.$method.'()');
         }
 
         return $this->client->$method(...$arguments);

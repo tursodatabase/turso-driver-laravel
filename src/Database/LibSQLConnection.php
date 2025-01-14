@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
@@ -68,7 +69,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return !empty($res);
+        return ! empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -132,7 +133,7 @@ class LibSQLConnection extends Connection
     {
         $records = $this->select($query, $bindings, $useReadPdo);
 
-        if (!is_array($records)) {
+        if (! is_array($records)) {
             $records = stdClassToArray($records);
         }
 
@@ -191,7 +192,7 @@ class LibSQLConnection extends Connection
 
         $preparedQuery = $this->getRawPdo()->prepare($query);
 
-        if (!$preparedQuery) {
+        if (! $preparedQuery) {
             throw new Exception('Failed to prepare statement.');
         }
 
@@ -344,6 +345,7 @@ class LibSQLConnection extends Connection
     public function escapeBinary(mixed $value): string
     {
         $hex = bin2hex($value);
+
         return "x'{$hex}'";
     }
 
@@ -392,7 +394,7 @@ class LibSQLConnection extends Connection
         }
 
         if (is_string($input)) {
-            return "'" . $this->escapeString($input) . "'";
+            return "'".$this->escapeString($input)."'";
         }
 
         if (is_resource($input)) {
