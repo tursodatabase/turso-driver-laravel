@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Schema;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\Project;
 
 beforeEach(function () {
+    if (shouldSkipTests()) {
+        $this->markTestSkipped('This test skipped by default because it need a running libsql server');
+    }
+
     DB::setDefaultConnection('otherdb');
     Schema::dropAllTables();
     migrateTables('projects');

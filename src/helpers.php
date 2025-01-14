@@ -1,18 +1,26 @@
 <?php
 
-function arrayToStdClass(array $array): \stdClass|array
+function arrayToStdClass(array $array): array
 {
-    if (empty($array)) {
-        return [];
+    $result = [];
+
+    foreach ($array as $item) {
+        $formattedItem = [];
+
+        foreach ($item as $key => $value) {
+            if (is_array($value) && !is_vector($value)) {
+                // Encode only the nested array as a JSON string
+                $formattedItem[$key] = json_encode($value);
+            } else {
+                $formattedItem[$key] = $value;
+            }
+        }
+
+        // Convert the formatted item to a stdClass
+        $result[] = (object) $formattedItem;
     }
 
-    $object = new \stdClass();
-
-    foreach ($array as $key => $value) {
-        $object->{$key} = is_array($value) ? arrayToStdClass($value) : $value;
-    }
-
-    return $object;
+    return $result;
 }
 
 function stdClassToArray(\stdClass|array $object): array
@@ -49,4 +57,19 @@ function reorderArrayKeys(array $data, array $keyOrder): array
         $ordered = array_fill_keys($keyOrder, null);
         return array_merge($ordered, $item);
     }, $data);
+}
+
+function is_vector($value): bool
+{
+    if (!is_array($value)) {
+        return false;
+    }
+
+    foreach ($value as $element) {
+        if (!is_numeric($element)) {
+            return false;
+        }
+    }
+
+    return array_keys($value) === range(0, count($value) - 1);
 }

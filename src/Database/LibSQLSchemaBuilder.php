@@ -83,7 +83,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $columns = $this->connection->selectOne("SELECT sql FROM sqlite_master WHERE type='table' AND name='{$table}'");
 
         $pattern = '/(?:\(|,)\s*[\'"`]?([a-zA-Z_][a-zA-Z0-9_]*)[\'"`]?\s+[a-zA-Z]+/i';
-        preg_match_all($pattern, $columns['sql'], $matches);
+        preg_match_all($pattern, $columns->sql, $matches);
         $columnMatches = $matches[1] ?? [];
 
         $delctypes = stdClassToArray($data);

@@ -153,9 +153,11 @@ class LibSQLConnection extends Connection
             $statement = $this->getRawPdo()->prepare($query);
             $results = $statement->query($bindings);
 
-            return array_map(function ($row) {
+            $data = array_map(function ($row) {
                 return decodeBlobs($row);
             }, $results->rows);
+
+            return $data;
         });
 
         $rows = match ($this->mode) {

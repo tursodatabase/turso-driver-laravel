@@ -14,7 +14,7 @@ afterEach(function () {
 
 test('it can execute SQL command', function () {
     expect($this->pdo->exec('PRAGMA foreign_keys = ON;'))->toBe(0);
-})->group('TursoPDOTest', 'FeatureTest');
+})->group('LibSQLPDOTest', 'FeatureTest');
 
 test('it can begin the database transaction, and rollback the changes.', function () {
     $this->pdo->beginTransaction();
@@ -29,7 +29,7 @@ test('it can begin the database transaction, and rollback the changes.', functio
 
     expect($this->pdo->inTransaction())->toBeFalse()
         ->and($this->pdo->exec('SELECT * FROM "projects";'))->toBe(0);
-})->group('TursoPDOTest', 'FeatureTest');
+})->group('LibSQLPDOTest', 'FeatureTest');
 
 test('it can begin the database transaction, and commit the changes.', function () {
     $this->pdo->beginTransaction();
@@ -44,4 +44,4 @@ test('it can begin the database transaction, and commit the changes.', function 
 
     expect($this->pdo->inTransaction())->toBeFalse()
         ->and($this->pdo->exec('SELECT * FROM "projects";'))->toBe(2);
-})->group('TursoPDOTest', 'FeatureTest');
+})->group('LibSQLPDOTest', 'FeatureTest');

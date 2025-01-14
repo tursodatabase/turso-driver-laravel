@@ -96,6 +96,7 @@ class LibSQLPDOStatement
                 is_bool($value) => 'boolean',
                 $value === null => 'null',
                 $value instanceof Carbon => 'datetime',
+                is_vector($value) => 'vector',
                 default => 'text',
             };
 
@@ -111,6 +112,10 @@ class LibSQLPDOStatement
                 $value = $value->toDateTimeString();
             }
 
+            if ($type === 'vector') {
+                $value = json_encode($value);
+            }
+
             return $value;
         })->toArray();
 
@@ -124,6 +129,10 @@ class LibSQLPDOStatement
                 foreach ($row as $key => &$value) {
                     if (is_string($value) && $this->isValidDateOrTimestamp($value)) {
                         continue;
+                    }
+
+                    if (is_string($value) && $decoded = json_decode($value, true)) {
+                        $value = $decoded;
                     }
 
                     if (is_string($value) && $this->isValidBlob($value)) {

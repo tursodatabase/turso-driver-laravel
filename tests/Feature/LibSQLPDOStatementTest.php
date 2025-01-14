@@ -91,4 +91,4 @@ test('it can perform update statement with binding values', function () {
     $statement->execute(['CreateRolesTable', 1]);
 
     expect($statement->rowCount())->toBe(1);
-})->group('TursoPDOStatementTest', 'FeatureTest');
+})->group('LibSQLPDOStatementTest', 'FeatureTest');

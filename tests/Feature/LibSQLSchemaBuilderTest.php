@@ -119,4 +119,4 @@ test('it can drop all views from the database', function () {
     Schema::dropAllViews();
 
     expect(Schema::getViews())->toBe([]);
-})->group('TursoSchemaBuilderTest', 'FeatureTest');
+})->group('LibSQLSchemaBuilderTest', 'FeatureTest');

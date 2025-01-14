@@ -32,3 +32,8 @@ function clearDirectory(): void
         File::delete($file);
     }
 }
+
+function shouldSkipTests()
+{
+    return true;
+}
