@@ -180,7 +180,6 @@ DB_DATABASE=database.sqlite
   <pre><code>DB_CONNECTION=libsql
 DB_AUTH_TOKEN=&lt;your-database-auth-token-from-turso&gt;
 DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
-DB_REMOTE_ONLY=true
   </code></pre>
 </details>
 
@@ -194,7 +193,6 @@ DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 DB_SYNC_INTERVAL=5
 DB_READ_YOUR_WRITES=true
 DB_ENCRYPTION_KEY=
-DB_REMOTE_ONLY=false
   </code></pre>
   <p>That's it! How easy to make different connection using LibSQL Driver in Laravel, right?!</p>
 </details>
@@ -206,15 +204,13 @@ Add this configuration at `config/database.php` inside the `connections` array:
 ```php
 'libsql' => [
     'driver' => 'libsql',
-    'url' => env('DB_DATABASE', database_path('database.sqlite')),
+    'database' => env('DB_DATABASE', database_path('database.sqlite')),
+    'prefix' => '',
+    'url' => env('DB_SYNC_URL', ''),
     'authToken' => env('DB_AUTH_TOKEN', ''),
-    'syncUrl' => env('DB_SYNC_URL', ''),
     'syncInterval' => env('DB_SYNC_INTERVAL', 5),
     'read_your_writes' => env('DB_READ_YOUR_WRITES', true),
     'encryptionKey' => env('DB_ENCRYPTION_KEY', ''),
-    'remoteOnly' => env('DB_REMOTE_ONLY', false),
-    'database' => null,
-    'prefix' => '',
 ],
 ```
 
