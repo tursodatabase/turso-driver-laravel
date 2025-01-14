@@ -15,6 +15,7 @@ class LibSQLQueryProcessor extends SQLiteProcessor
      */
     public function processTables($results): array
     {
+        $results = $results instanceof \stdClass ? stdClassToArray($results) : $results;
         return array_map(function ($result) {
             $result = (object) $result;
 
@@ -25,6 +26,20 @@ class LibSQLQueryProcessor extends SQLiteProcessor
                 'comment' => $result->comment ?? null, // MySQL and PostgreSQL
                 'collation' => $result->collation ?? null, // MySQL only
                 'engine' => $result->engine ?? null, // MySQL only
+            ];
+        }, $results);
+    }
+
+    public function processViews($results)
+    {
+        $results = $results instanceof \stdClass ? stdClassToArray($results) : $results;
+        return array_map(function ($result) {
+            $result = (object) $result;
+
+            return [
+                'name' => $result->name,
+                'schema' => $result->schema ?? null, // PostgreSQL and SQL Server
+                'definition' => $result->definition,
             ];
         }, $results);
     }

@@ -128,6 +128,17 @@ class LibSQLConnection extends Connection
         );
     }
 
+    public function selectOne($query, $bindings = [], $useReadPdo = true)
+    {
+        $records = $this->select($query, $bindings, $useReadPdo);
+
+        if (!is_array($records)) {
+            $records = stdClassToArray($records);
+        }
+
+        return array_shift($records);
+    }
+
     public function select($query, $bindings = [], $useReadPdo = true)
     {
         $bindings = array_map(function ($binding) {
@@ -143,41 +154,18 @@ class LibSQLConnection extends Connection
             $results = $statement->query($bindings);
 
             return array_map(function ($row) {
-                return $this->decodeBlobs($row);
+                return decodeBlobs($row);
             }, $results->rows);
         });
 
         $rows = match ($this->mode) {
             \PDO::FETCH_ASSOC => collect($data),
-            \PDO::FETCH_OBJ => $this->arrayToStdClass($data),
+            \PDO::FETCH_OBJ => arrayToStdClass($data),
             \PDO::FETCH_NUM => array_values($data),
             default => $data
         };
 
         return $rows;
-    }
-
-    private function arrayToStdClass(array $array): \stdClass
-    {
-        $object = new \stdClass();
-
-        foreach ($array as $key => $value) {
-            // Recursively convert nested arrays to stdClass
-            if (is_array($value)) {
-                $object->{$key} = $this->arrayToStdClass($value);
-            } else {
-                $object->{$key} = $value;
-            }
-        }
-
-        return $object;
-    }
-
-    private function decodeBlobs(array $row): array
-    {
-        return array_map(function ($value) {
-            return is_resource($value) ? stream_get_contents($value) : $value;
-        }, $row);
     }
 
     public function selectResultSets($query, $bindings = [], $useReadPdo = true)
@@ -326,7 +314,7 @@ class LibSQLConnection extends Connection
     }
 
     #[\ReturnTypeWillChange]
-    protected function getDefaultSchemaGrammar(): LibSQLSchemaGrammar
+    public function getDefaultSchemaGrammar(): LibSQLSchemaGrammar
     {
         ($grammar = new LibSQLSchemaGrammar)->setConnection($this);
         $this->withTablePrefix($grammar);
@@ -357,7 +345,7 @@ class LibSQLConnection extends Connection
         return "x'{$hex}'";
     }
 
-    protected function getDefaultPostProcessor(): LibSQLQueryProcessor
+    public function getDefaultPostProcessor(): LibSQLQueryProcessor
     {
         return new LibSQLQueryProcessor;
     }
@@ -381,7 +369,7 @@ class LibSQLConnection extends Connection
         return new LibSQLSchemaState($this, $files, $processFactory);
     }
 
-    protected function isUniqueConstraintError(Exception $exception): bool
+    public function isUniqueConstraintError(Exception $exception): bool
     {
         return (bool) preg_match('#(column(s)? .* (is|are) not unique|UNIQUE constraint failed: .*)#i', $exception->getMessage());
     }

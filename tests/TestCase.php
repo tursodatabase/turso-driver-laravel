@@ -27,6 +27,7 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.connections', [
+            // In-Memory Connection
             'libsql' => [
                 'driver' => 'libsql',
                 'syncInterval' => 5,
@@ -37,6 +38,7 @@ class TestCase extends Orchestra
                 'url' => '',
                 'authToken' => '',
             ],
+            // Remote Connection
             'otherdb' => [
                 'driver' => 'libsql',
                 'syncInterval' => 5,
@@ -47,6 +49,7 @@ class TestCase extends Orchestra
                 'url' => 'http://127.0.0.1:8081',
                 'authToken' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ',
             ],
+            // Embedded Replica
             'otherdb2' => [
                 'driver' => 'libsql',
                 'syncInterval' => 5,

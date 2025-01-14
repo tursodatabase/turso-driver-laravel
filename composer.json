@@ -41,6 +41,9 @@
     "psr-4": {
       "Turso\\Driver\\Laravel\\": "src/"
     },
+    "files": [
+      "src/helpers.php"
+    ],
     "exclude-from-classmap": [
       "src/libsql_php_extension.stubs.php"
     ]

@@ -172,13 +172,20 @@ class LibSQLPDOStatement
         try {
             // Determine if parameters are named or positional
             if ($this->hasNamedParameters($parameters)) {
+                $this->bindings = $parameters;
                 $this->statement->bindNamed($parameters);
             } else {
                 $parameters = $this->parameterCasting($parameters);
+                $this->bindings = $parameters;
                 $this->statement->bindPositional(array_values($parameters));
             }
 
-            $this->affectedRows = $this->statement->execute($parameters);
+            if (str_starts_with(strtolower($this->query), 'select')) {
+                $queryRows = $this->statement->query($parameters)->fetchArray(LibSQL::LIBSQL_ASSOC);
+                $this->affectedRows = count($queryRows);
+            } else {
+                $this->affectedRows = $this->statement->execute($parameters);
+            }
 
             return true;
         } catch (\Exception $e) {
@@ -204,7 +211,27 @@ class LibSQLPDOStatement
         $rows = $result->fetchArray(LibSQL::LIBSQL_ASSOC);
 
         if (!$rows) {
-            return false;
+            $anotherStatement = $this->statement->query($parameters);
+            $rows = $anotherStatement->fetchArray(LibSQL::LIBSQL_ASSOC);
+
+            if (!$rows) {
+                return false;
+            }
+
+            $row = $rows[$cursorOffset];
+            $mode = PDO::FETCH_ASSOC;
+
+            $data = match ($mode) {
+                PDO::FETCH_ASSOC => $row,
+                PDO::FETCH_OBJ => (object) $row,
+                PDO::FETCH_NUM => array_values($row),
+                default => $row
+            };
+
+            $this->bindings = [];
+            $parameters = [];
+
+            return $data;
         }
 
         $row = $rows[$cursorOffset];
@@ -230,7 +257,17 @@ class LibSQLPDOStatement
             $mode = $this->mode;
         }
 
-        $allRows = $this->response->rows;
+        $parameters = $this->bindings;
+        if ($this->hasNamedParameters($parameters)) {
+            $this->statement->bindNamed($parameters);
+        } else {
+            $parameters = $this->parameterCasting($parameters);
+            $this->statement->bindPositional(array_values($parameters));
+        }
+        $result = $this->statement->query($parameters);
+        $response = $result->fetchArray(LibSQL::LIBSQL_ALL);
+
+        $allRows = $response['rows'];
         $decodedRows = $this->parameterCasting($allRows);
         $rowValues = \array_map('array_values', $decodedRows);
 
