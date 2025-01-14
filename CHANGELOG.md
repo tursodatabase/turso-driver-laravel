@@ -1,3 +1,22 @@
+## [1.2.0] - 2025-01-14
+
+- release: minor version 1.2.0 [Imam Ali Mustofa]
+- fix(feature): also add vectory data type tests [Imam Ali Mustofa]
+- chore: commit save point [Imam Ali Mustofa]
+- docs: update database configuration [Imam Ali Mustofa]
+- chore: commit save point [Imam Ali Mustofa]
+- chore(tests): complete all tests [Imam Ali Mustofa]
+- chore: commit save point [Imam Ali Mustofa]
+- docs: update the docs and add community sdk annotation [Imam Ali Mustofa]
+- docs: include laravel sail setup guide [Imam Ali Mustofa]
+- Fix styling [darkterminal]
+- docs: include new turso-php artisan command [Imam Ali Mustofa]
+- Fix styling [darkterminal]
+- chore: update CHANGELOG.md for patch version 1.1.1 [Imam Ali Mustofa]
+- release: patch version 1.1.1 [Imam Ali Mustofa]
+- feat(vector): add vector data type support [Imam Ali Mustofa]
+- Fix styling [darkterminal]
+
 ## [1.1.1] - 2025-01-10
 
 - release: patch version 1.1.1 [Imam Ali Mustofa]
