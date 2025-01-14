@@ -1,3 +1,11 @@
+## [1.2.1] - 2025-01-15
+
+- release: patch version 1.2.1 [Imam Ali Mustofa]
+- fix(schema): expected column types schema [Imam Ali Mustofa]
+- docs: add tests badge [Imam Ali Mustofa]
+- Fix styling [darkterminal]
+- chore: update CHANGELOG.md for minor version 1.2.0 [Imam Ali Mustofa]
+
 ## [1.2.0] - 2025-01-14
 
 - release: minor version 1.2.0 [Imam Ali Mustofa]
