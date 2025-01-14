@@ -41,6 +41,11 @@
       <img src="https://img.shields.io/github/v/tag/tursodatabase/turso-driver-laravel?label=version&color=F05340" alt="Version Tag" />
     </picture>
   </a>
+  <a href="https://github.com/tursodatabase/turso-driver-laravel/actions/workflows/tests.yml">
+    <picture>
+      <img src="https://github.com/tursodatabase/turso-driver-laravel/actions/workflows/tests.yml/badge.svg" alt="Testing" />
+    </picture>
+  </a>
 </p>
 
 <p align="center">
