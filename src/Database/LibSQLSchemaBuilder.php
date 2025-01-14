@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\SQLiteBuilder;
+use Illuminate\Support\Str;
 use Turso\Driver\Laravel\Exceptions\FeatureNotSupportedException;
 
 class LibSQLSchemaBuilder extends SQLiteBuilder
@@ -77,7 +79,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     public function getColumns($table)
     {
-        $table = $this->connection->getTablePrefix().$table;
+        $table = $this->connection->getTablePrefix() . $table;
 
         $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
 
@@ -92,9 +94,30 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
             if (isset($delctypes[$key]['name'])) {
                 $delctypes[$key]['name'] = $columnMatches[$key];
             }
+
+            if (isset($delctypes[$key]['type'])) {
+                $delctypes[$key]['type_name'] = $delctypes[$key]['type'];
+            }
+
+            if (isset($delctypes[$key]['notnull'])) {
+                $delctypes[$key]['nullable'] = $delctypes[$key]['notnull'] == 1 ? true : false;
+            }
+
+            if (isset($delctypes[$key]['dflt_value'])) {
+                $delctypes[$key]['default'] = $delctypes[$key]['dflt_value'] == 'NULL' ? null : new Expression(Str::wrap($delctypes[$key]['dflt_value'], '(', ')'));
+            }
+
+            if (isset($delctypes[$key]['pk'])) {
+                $delctypes[$key]['auto_increment'] = $delctypes[$key]['pk'] == 1 ? true : false;
+            }
+
+            $delctypes[$key]['collation'] = null;
+            $delctypes[$key]['comment'] = null;
+            $delctypes[$key]['generation']['type'] = null;
+            $delctypes[$key]['generation']['expression'] = null;
         }
 
-        $keyOrder = ['name', 'type', 'notnull', 'dflt_value', 'hidden', 'pk', 'cid'];
+        $keyOrder = ['name', 'type', 'type_name', 'notnull', 'nullable', 'dflt_value', 'default', 'hidden', 'pk', 'cid', 'auto_increment', 'collation', 'comment', 'generation'];
         $delctypes = reorderArrayKeys($delctypes, $keyOrder);
 
         return $delctypes;
