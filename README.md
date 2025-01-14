@@ -104,14 +104,9 @@ DB_SYNC_URL=<your-database-url-from-turso>
 DB_SYNC_INTERVAL=5
 DB_READ_YOUR_WRITES=true
 DB_ENCRYPTION_KEY=
-DB_REMOTE_ONLY=false
 ```
 
 Create a new Turso Database [here](https://docs.turso.tech/quickstart)
-
-Here’s the information in a nicely formatted markdown section for a README:
-
----
 
 ### Environment Variables for Turso Driver
 
@@ -147,11 +142,6 @@ Below is a list of environment variables used to configure the Turso driver. Eac
     Specifies the encryption key used for database encryption. This key is critical for securing data at rest, ensuring only authorized individuals can decrypt the database content.  
     **Default:** Empty  
     **Use case:** Protects sensitive data stored on disk.
-
--   **`DB_REMOTE_ONLY`**  
-    Determines if only the remote database should be used for read and write operations.  
-    **Default:** `false`  
-    **Use case:** Set to `true` to strictly use a remote connection without local synchronization.
 
 ## Choose Your Connection Needs
 
