@@ -79,7 +79,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     public function getColumns($table)
     {
-        $table = $this->connection->getTablePrefix().$table;
+        $table = $this->connection->getTablePrefix() . $table;
 
         $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
 
@@ -91,16 +91,19 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
         $delctypes = stdClassToArray($data);
         foreach ($delctypes as $key => $value) {
+
             if (isset($delctypes[$key]['name'])) {
                 $delctypes[$key]['name'] = $columnMatches[$key];
             }
 
             if (isset($delctypes[$key]['type'])) {
-                $delctypes[$key]['type_name'] = $delctypes[$key]['type'];
+                $type = strtolower($delctypes[$key]['type']);
+                $delctypes[$key]['type'] = $type;
+                $delctypes[$key]['type_name'] = $type;
             }
 
             if (isset($delctypes[$key]['notnull'])) {
-                $delctypes[$key]['nullable'] = $delctypes[$key]['notnull'] == 1 ? true : false;
+                $delctypes[$key]['nullable'] = $delctypes[$key]['notnull'] == 1 ? false : true;
             }
 
             if (isset($delctypes[$key]['dflt_value'])) {
@@ -113,11 +116,10 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
             $delctypes[$key]['collation'] = null;
             $delctypes[$key]['comment'] = null;
-            $delctypes[$key]['generation']['type'] = null;
-            $delctypes[$key]['generation']['expression'] = null;
+            $delctypes[$key]['generation'] = null;
         }
 
-        $keyOrder = ['name', 'type', 'type_name', 'notnull', 'nullable', 'dflt_value', 'default', 'hidden', 'pk', 'cid', 'auto_increment', 'collation', 'comment', 'generation'];
+        $keyOrder = ['name', 'type_name', 'type', 'collation', 'nullable', 'default', 'auto_increment', 'comment', 'generation', 'pk', 'notnull', 'dflt_value', 'cid', 'hidden'];
         $delctypes = reorderArrayKeys($delctypes, $keyOrder);
 
         return $delctypes;
