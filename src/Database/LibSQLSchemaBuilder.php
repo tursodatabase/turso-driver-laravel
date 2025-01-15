@@ -79,7 +79,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     public function getColumns($table)
     {
-        $table = $this->connection->getTablePrefix() . $table;
+        $table = $this->connection->getTablePrefix().$table;
 
         $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
 
