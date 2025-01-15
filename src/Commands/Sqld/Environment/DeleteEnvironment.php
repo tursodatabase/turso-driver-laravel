@@ -6,11 +6,11 @@ namespace Turso\Driver\Laravel\Commands\Sqld\Environment;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use Turso\Driver\Laravel\Traits\CommandTrait;
+use Turso\Driver\Laravel\Concerns\HandlesTursoInstallerCommands;
 
 class DeleteEnvironment extends Command
 {
-    use CommandTrait;
+    use HandlesTursoInstallerCommands;
 
     protected $signature = 'turso-php:env-delete {name-or-id}';
 
