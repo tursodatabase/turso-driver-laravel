@@ -1,3 +1,13 @@
+## [1.2.2] - 2025-01-17
+
+- release: patch version 1.2.2 [Imam Ali Mustofa]
+- feat(refactor): complete turso-php artisan command and refactoring [Imam Ali Mustofa]
+- Fix styling [darkterminal]
+- fix(tests): fix schema builder test [Imam Ali Mustofa]
+- chore(build): add emoji and composer update hook [Imam Ali Mustofa]
+- Fix styling [darkterminal]
+- chore: update CHANGELOG.md for patch version 1.2.1 [Imam Ali Mustofa]
+
 ## [1.2.1] - 2025-01-15
 
 - release: patch version 1.2.1 [Imam Ali Mustofa]
