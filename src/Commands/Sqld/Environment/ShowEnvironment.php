@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class ShowEnvironment extends Command
+final class ShowEnvironment extends Command
 {
     use CommandTrait;
 
@@ -25,8 +25,8 @@ class ShowEnvironment extends Command
 
         $process = Process::run($this->callTursoCommand(
             command: 'sqld:env-show',
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

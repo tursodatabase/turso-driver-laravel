@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class EditEnvironment extends Command
+final class EditEnvironment extends Command
 {
     use CommandTrait;
 
@@ -23,10 +23,10 @@ class EditEnvironment extends Command
             $arguments[] = $nameOrId;
         }
 
-        $process = Process::run($this->callTursoCommand(
+        $process = Process::forever()->tty()->run($this->callTursoCommand(
             command: 'sqld:env-edit',
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

@@ -57,7 +57,7 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
                     $config['driver'] = 'libsql';
                 }
 
-                $connector = new LibSQLConnector;
+                $connector = new LibSQLConnector();
                 $db = $connector->connect($config);
 
                 $connection = new LibSQLConnection($db, $config['database'] ?? ':memory:', $config['prefix'], $config);

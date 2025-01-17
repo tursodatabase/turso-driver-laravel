@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Exception;
 use LibSQL;
 use LibSQLTransaction;
+use PDO;
+use PDOException;
+use SQLite3;
 
 class LibSQLDatabase
 {
@@ -13,7 +17,7 @@ class LibSQLDatabase
 
     protected array $config;
 
-    protected int $mode = \PDO::FETCH_OBJ;
+    protected int $mode = PDO::FETCH_OBJ;
 
     protected string $connection_mode;
 
@@ -114,7 +118,7 @@ class LibSQLDatabase
     public function beginTransaction(): bool
     {
         if ($this->inTransaction()) {
-            throw new \PDOException('Already in a transaction');
+            throw new PDOException('Already in a transaction');
         }
 
         $this->in_transaction = true;
@@ -126,7 +130,7 @@ class LibSQLDatabase
     public function commit(): bool
     {
         if (! $this->inTransaction()) {
-            throw new \PDOException('No active transaction');
+            throw new PDOException('No active transaction');
         }
 
         $this->tx->commit();
@@ -138,7 +142,7 @@ class LibSQLDatabase
     public function rollBack(): bool
     {
         if (! $this->inTransaction()) {
-            throw new \PDOException('No active transaction');
+            throw new PDOException('No active transaction');
         }
 
         $this->tx->rollback();
@@ -176,9 +180,9 @@ class LibSQLDatabase
         }, $result);
 
         return match ($this->mode) {
-            \PDO::FETCH_ASSOC => collect($rows),
-            \PDO::FETCH_OBJ => (object) $rows,
-            \PDO::FETCH_NUM => array_values($rows),
+            PDO::FETCH_ASSOC => collect($rows),
+            PDO::FETCH_OBJ => (object) $rows,
+            PDO::FETCH_NUM => array_values($rows),
             default => collect($rows)
         };
     }
@@ -212,7 +216,7 @@ class LibSQLDatabase
     public function sync(): void
     {
         if ($this->connection_mode !== 'remote_replica') {
-            throw new \Exception("[LibSQL:{$this->connection_mode}] Sync is only available for Remote Replica Connection.", 1);
+            throw new Exception("[LibSQL:{$this->connection_mode}] Sync is only available for Remote Replica Connection.", 1);
         }
         $this->db->sync();
     }
@@ -233,7 +237,7 @@ class LibSQLDatabase
             return 'NULL';
         }
 
-        return \SQLite3::escapeString($input);
+        return SQLite3::escapeString($input);
     }
 
     public function quote($input)
@@ -242,7 +246,7 @@ class LibSQLDatabase
             return 'NULL';
         }
 
-        return "'".$this->escapeString($input)."'";
+        return "'" . $this->escapeString($input) . "'";
     }
 
     public function __destruct()

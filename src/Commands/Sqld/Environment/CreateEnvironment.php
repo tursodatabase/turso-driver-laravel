@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class CreateEnvironment extends Command
+final class CreateEnvironment extends Command
 {
     use CommandTrait;
 
@@ -35,11 +35,11 @@ class CreateEnvironment extends Command
             $options[] = '--force';
         }
 
-        $process = Process::run($this->callTursoCommand(
+        $process = Process::forever()->tty()->run($this->callTursoCommand(
             command: 'sqld:env-new',
             options: $options,
             arguments: $arguments,
-        ), function ($type, $line) {
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

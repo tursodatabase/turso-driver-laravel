@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function arrayToStdClass(array $array): array
 {
     $result = [];

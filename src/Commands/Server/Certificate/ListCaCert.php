@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class ListCaCert extends Command
+final class ListCaCert extends Command
 {
     use CommandTrait;
 
@@ -18,7 +18,7 @@ class ListCaCert extends Command
 
     public function handle(): void
     {
-        $process = Process::run($this->callTursoCommand(command: 'server:ca-cert-list'), function ($type, $line) {
+        $process = Process::run($this->callTursoCommand(command: 'server:ca-cert-list'), function ($type, $line): void {
             $this->output->write($line);
         });
 

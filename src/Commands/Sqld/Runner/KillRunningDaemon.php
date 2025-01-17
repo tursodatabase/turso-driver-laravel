@@ -2,36 +2,36 @@
 
 declare(strict_types=1);
 
-namespace Turso\Driver\Laravel\Commands\Server\Store;
+namespace Turso\Driver\Laravel\Commands\Sqld\Runner;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-final class SetCertificateStore extends Command
+final class KillRunningDaemon extends Command
 {
     use CommandTrait;
 
-    protected $signature = 'turso-php:cert-store-set {path?}';
+    protected $signature = 'turso-php:daemon-kill {daemon-pid}';
 
-    protected $description = 'Set/overwrite global certificate store, to use by the server later. Default is same as {installation_dir}/certs';
+    protected $description = 'Kill a running daemon';
 
     public function handle(): void
     {
         $arguments = [];
-        if ($path = $this->argument('path')) {
-            $arguments[] = $path;
+        if ($daemonPid = $this->argument('daemon-pid')) {
+            $arguments[] = $daemonPid;
         }
 
         $process = Process::run($this->callTursoCommand(
-            command: 'server:cert-store-get',
+            command: 'sqld:daemon-kill',
             arguments: $arguments,
         ), function ($type, $line): void {
             $this->output->write($line);
         });
 
         if ($process->failed()) {
-            $this->error('Failed to set certificate store.');
+            $this->error('Failed to list running daemons.');
 
             return;
         }

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class CheckRequirementServer extends Command
+final class CheckRequirementServer extends Command
 {
     use CommandTrait;
 
@@ -18,7 +18,7 @@ class CheckRequirementServer extends Command
 
     public function handle(): void
     {
-        $process = Process::run($this->callTursoCommand('server:check'), function ($type, $line) {
+        $process = Process::run($this->callTursoCommand('server:check'), function ($type, $line): void {
             $this->output->write($line);
         });
 

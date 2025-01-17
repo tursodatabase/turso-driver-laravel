@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class DeleteToken extends Command
+final class DeleteToken extends Command
 {
     use CommandTrait;
 
@@ -38,8 +38,8 @@ class DeleteToken extends Command
         $process = Process::run($this->callTursoCommand(
             command: 'token:delete',
             options: $options,
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class ShowToken extends Command
+final class ShowToken extends Command
 {
     use CommandTrait;
 
@@ -45,8 +45,8 @@ class ShowToken extends Command
         $process = Process::run($this->callTursoCommand(
             command: 'token:show',
             options: $options,
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

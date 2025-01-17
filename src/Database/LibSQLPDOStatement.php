@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use DateTime;
+use Exception;
 use Illuminate\Support\Carbon;
+use InvalidArgumentException;
 use LibSQL;
+use LibSQLStatement;
 use PDO;
+use PDOException;
+use ReturnTypeWillChange;
 
 class LibSQLPDOStatement
 {
@@ -21,9 +27,10 @@ class LibSQLPDOStatement
     protected array $lastInsertIds = [];
 
     public function __construct(
-        private \LibSQLStatement $statement,
+        private LibSQLStatement $statement,
         protected string $query
-    ) {}
+    ) {
+    }
 
     public function setFetchMode(int $mode, mixed ...$args): bool
     {
@@ -39,7 +46,7 @@ class LibSQLPDOStatement
         } elseif (is_string($parameter)) {
             $this->bindings[$parameter] = $value;
         } else {
-            throw new \InvalidArgumentException('Parameter must be an integer or string.');
+            throw new InvalidArgumentException('Parameter must be an integer or string.');
         }
 
         return $this;
@@ -163,7 +170,7 @@ class LibSQLPDOStatement
         $formats = $format ? [$format] : ['Y-m-d H:i:s', 'Y-m-d'];
 
         foreach ($formats as $fmt) {
-            $dateTime = \DateTime::createFromFormat($fmt, $string);
+            $dateTime = DateTime::createFromFormat($fmt, $string);
             if ($dateTime && $dateTime->format($fmt) === $string) {
                 return true;
             }
@@ -197,12 +204,12 @@ class LibSQLPDOStatement
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): array|false
     {
         if ($mode === PDO::FETCH_DEFAULT) {
@@ -259,7 +266,7 @@ class LibSQLPDOStatement
         };
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, ...$args): array
     {
         if ($mode === PDO::FETCH_DEFAULT) {
@@ -285,7 +292,7 @@ class LibSQLPDOStatement
             PDO::FETCH_ASSOC, PDO::FETCH_NAMED => $allRows,
             PDO::FETCH_NUM => $rowValues,
             PDO::FETCH_OBJ => $allRows,
-            default => throw new \PDOException('Unsupported fetch mode.'),
+            default => throw new PDOException('Unsupported fetch mode.'),
         };
 
         return $response;

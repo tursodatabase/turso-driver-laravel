@@ -23,7 +23,7 @@ class LibSQLManager
     public function __call(string $method, array $arguments = []): mixed
     {
         if (! method_exists($this->client, $method)) {
-            throw new BadMethodCallException('Call to undefined method '.static::class.'::'.$method.'()');
+            throw new BadMethodCallException('Call to undefined method ' . static::class . '::' . $method . '()');
         }
 
         return $this->client->$method(...$arguments);

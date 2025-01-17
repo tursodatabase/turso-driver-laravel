@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Closure;
 use Exception;
+use Generator;
 use Illuminate\Database\Connection;
 use Illuminate\Filesystem\Filesystem;
 use LibSQL;
 use LibSQLTransaction;
+use PDO;
+use ReturnTypeWillChange;
+use SQLite3;
 
 class LibSQLConnection extends Connection
 {
@@ -19,7 +24,7 @@ class LibSQLConnection extends Connection
     /**
      * The active PDO connection used for reads.
      *
-     * @var LibSQLDatabase|\Closure
+     * @var LibSQLDatabase|Closure
      */
     protected $readPdo;
 
@@ -27,7 +32,7 @@ class LibSQLConnection extends Connection
 
     protected array $bindings = [];
 
-    protected int $mode = \PDO::FETCH_OBJ;
+    protected int $mode = PDO::FETCH_OBJ;
 
     protected bool $in_transaction = false;
 
@@ -96,7 +101,7 @@ class LibSQLConnection extends Connection
     /**
      * Set the LibSQL connection.
      *
-     * @param  LibSQL|\Closure|null  $pdo
+     * @param  LibSQL|Closure|null  $pdo
      * @return $this
      */
     public function setPdo($pdo)
@@ -111,7 +116,7 @@ class LibSQLConnection extends Connection
     /**
      * Set the LibSQL connection used for reading.
      *
-     * @param  LibSQL|\Closure|null  $pdo
+     * @param  LibSQL|Closure|null  $pdo
      * @return $this
      */
     public function setReadPdo($pdo)
@@ -162,9 +167,9 @@ class LibSQLConnection extends Connection
         });
 
         $rows = match ($this->mode) {
-            \PDO::FETCH_ASSOC => collect($data),
-            \PDO::FETCH_OBJ => arrayToStdClass($data),
-            \PDO::FETCH_NUM => array_values($data),
+            PDO::FETCH_ASSOC => collect($data),
+            PDO::FETCH_OBJ => arrayToStdClass($data),
+            PDO::FETCH_NUM => array_values($data),
             default => $data
         };
 
@@ -182,7 +187,7 @@ class LibSQLConnection extends Connection
      * @param  string  $query
      * @param  array  $bindings
      * @param  bool  $useReadPdo
-     * @return \Generator
+     * @return Generator
      */
     public function cursor($query, $bindings = [], $useReadPdo = true)
     {
@@ -253,7 +258,7 @@ class LibSQLConnection extends Connection
             $statement = $this->getPdo()->prepare($query);
 
             foreach ($bindings as $key => $value) {
-                $type = is_resource($value) ? \PDO::PARAM_LOB : \PDO::PARAM_STR;
+                $type = is_resource($value) ? PDO::PARAM_LOB : PDO::PARAM_STR;
                 $statement->bindValue($key, $value, $type);
             }
 
@@ -293,7 +298,7 @@ class LibSQLConnection extends Connection
 
     protected function getDefaultQueryGrammar()
     {
-        ($grammar = new LibSQLQueryGrammar)->setConnection($this);
+        ($grammar = new LibSQLQueryGrammar())->setConnection($this);
         $this->withTablePrefix($grammar);
 
         return $grammar;
@@ -316,10 +321,10 @@ class LibSQLConnection extends Connection
         );
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function getDefaultSchemaGrammar(): LibSQLSchemaGrammar
     {
-        ($grammar = new LibSQLSchemaGrammar)->setConnection($this);
+        ($grammar = new LibSQLSchemaGrammar())->setConnection($this);
         $this->withTablePrefix($grammar);
 
         return $grammar;
@@ -327,7 +332,7 @@ class LibSQLConnection extends Connection
 
     public function useDefaultSchemaGrammar()
     {
-        if (is_null($this->schemaGrammar)) {
+        if (null === $this->schemaGrammar) {
             $this->schemaGrammar = $this->getDefaultSchemaGrammar();
         }
     }
@@ -351,7 +356,7 @@ class LibSQLConnection extends Connection
 
     public function getDefaultPostProcessor(): LibSQLQueryProcessor
     {
-        return new LibSQLQueryProcessor;
+        return new LibSQLQueryProcessor();
     }
 
     public function useDefaultPostProcessor()
@@ -361,7 +366,7 @@ class LibSQLConnection extends Connection
 
     public function getSchemaBuilder(): LibSQLSchemaBuilder
     {
-        if (is_null($this->schemaGrammar)) {
+        if (null === $this->schemaGrammar) {
             $this->useDefaultSchemaGrammar();
         }
 
@@ -384,7 +389,7 @@ class LibSQLConnection extends Connection
             return 'NULL';
         }
 
-        return \SQLite3::escapeString($input);
+        return SQLite3::escapeString($input);
     }
 
     public function quote($input)
@@ -394,7 +399,7 @@ class LibSQLConnection extends Connection
         }
 
         if (is_string($input)) {
-            return "'".$this->escapeString($input)."'";
+            return "'" . $this->escapeString($input) . "'";
         }
 
         if (is_resource($input)) {

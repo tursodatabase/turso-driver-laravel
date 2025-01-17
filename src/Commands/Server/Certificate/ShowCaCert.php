@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class ShowCaCert extends Command
+final class ShowCaCert extends Command
 {
     use CommandTrait;
 
@@ -25,7 +25,7 @@ class ShowCaCert extends Command
             $options[] = '--raw';
         }
 
-        $process = Process::run($this->callTursoCommand(command: 'server:ca-cert-show', options: $options), function ($type, $line) {
+        $process = Process::run($this->callTursoCommand(command: 'server:ca-cert-show', options: $options), function ($type, $line): void {
             $this->output->write($line);
         });
 

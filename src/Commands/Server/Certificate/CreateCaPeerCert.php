@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class CreateCaPeerCert extends Command
+final class CreateCaPeerCert extends Command
 {
     use CommandTrait;
 
@@ -33,8 +33,8 @@ class CreateCaPeerCert extends Command
         $process = Process::run($this->callTursoCommand(
             command: 'server:ca-peer-cert-create',
             options: $options,
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

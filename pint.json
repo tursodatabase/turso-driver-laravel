@@ -1,0 +1,61 @@
+{
+    "preset": "psr12",
+    "rules": {
+        "is_null": true,
+        "declare_strict_types": true,
+        "strict_comparison": true,
+        "no_unused_imports": true,
+        "explicit_string_variable": true,
+        "native_function_casing": true,
+        "native_function_type_declaration_casing": true,
+        "ternary_to_null_coalescing": true,
+        "array_indentation": true,
+        "trim_array_spaces": true,
+        "ordered_imports": {
+            "sort_algorithm": "alpha"
+        },
+        "combine_consecutive_issets": true,
+        "combine_consecutive_unsets": true,
+        "no_multiline_whitespace_around_double_arrow": true,
+        "fully_qualified_strict_types": {
+            "leading_backslash_in_global_namespace": true,
+            "import_symbols": true
+        },
+        "method_chaining_indentation": true,
+        "php_unit_method_casing": {
+            "case": "camel_case"
+        },
+        "php_unit_test_annotation": {
+            "style": "prefix"
+        },
+        "global_namespace_import": {
+            "import_classes": true
+        },
+        "standardize_not_equals": true,
+        "no_empty_phpdoc": true,
+        "constant_case": {
+            "case": "lower"
+        },
+        "array_syntax": {
+            "syntax": "short"
+        },
+        "concat_space": {
+            "spacing": "one"
+        },
+        "list_syntax": {
+            "syntax": "short"
+        }
+    },
+    "exclude": [
+        "vendor",
+        "node_modules",
+        "storage",
+        "bootstrap/cache",
+        "public",
+        "resources",
+        "tests"
+    ],
+    "notPath": [
+        "src/libsql_php_extension.stubs.php"
+    ]
+}

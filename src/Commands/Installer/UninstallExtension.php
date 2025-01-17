@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class UninstallExtension extends Command
+final class UninstallExtension extends Command
 {
     use CommandTrait;
 
@@ -26,7 +26,7 @@ class UninstallExtension extends Command
 
         $this->info('Uninstalling LibSQL Extension for PHP');
 
-        $process = Process::run($this->callTursoCommand('uninstall'), function ($type, $line) {
+        $process = Process::run($this->callTursoCommand('uninstall'), function ($type, $line): void {
             $this->output->write($line);
         });
 

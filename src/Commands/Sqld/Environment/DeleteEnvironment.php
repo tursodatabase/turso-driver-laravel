@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class DeleteEnvironment extends Command
+final class DeleteEnvironment extends Command
 {
     use CommandTrait;
 
@@ -25,8 +25,8 @@ class DeleteEnvironment extends Command
 
         $process = Process::run($this->callTursoCommand(
             command: 'sqld:env-delete',
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

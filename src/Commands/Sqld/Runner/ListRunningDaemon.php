@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Turso\Driver\Laravel\Commands\Sqld\Environment;
+namespace Turso\Driver\Laravel\Commands\Sqld\Runner;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-final class ListEnvironment extends Command
+final class ListRunningDaemon extends Command
 {
     use CommandTrait;
 
-    protected $signature = 'turso-php:env-list';
+    protected $signature = 'turso-php:daemon-list';
 
-    protected $description = 'Display all created environments';
+    protected $description = 'List all running daemon processes';
 
     public function handle(): void
     {
         $process = Process::run($this->callTursoCommand(
-            command: 'sqld:env-list',
+            command: 'sqld:daemon-list',
         ), function ($type, $line): void {
             $this->output->write($line);
         });
 
         if ($process->failed()) {
-            $this->error('Failed to list environments.');
+            $this->error('Failed to list running daemons.');
 
             return;
         }

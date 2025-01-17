@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class InstallExtension extends Command
+final class InstallExtension extends Command
 {
     use CommandTrait;
 
@@ -49,7 +49,7 @@ class InstallExtension extends Command
             $options[] = '--thread-safe';
         }
 
-        $process = Process::run($this->callTursoCommand(command: 'install', options: $options), function ($type, $line) {
+        $process = Process::run($this->callTursoCommand(command: 'install', options: $options), function ($type, $line): void {
             $this->output->write($line);
         });
 

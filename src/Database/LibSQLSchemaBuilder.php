@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\SQLiteBuilder;
 use Illuminate\Support\Str;
@@ -11,7 +12,7 @@ use Turso\Driver\Laravel\Exceptions\FeatureNotSupportedException;
 
 class LibSQLSchemaBuilder extends SQLiteBuilder
 {
-    public function __construct(protected LibSQLDatabase $db, \Illuminate\Database\Connection $connection)
+    public function __construct(protected LibSQLDatabase $db, Connection $connection)
     {
         parent::__construct($connection);
     }
@@ -79,7 +80,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     public function getColumns($table)
     {
-        $table = $this->connection->getTablePrefix().$table;
+        $table = $this->connection->getTablePrefix() . $table;
 
         $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
 
@@ -103,15 +104,15 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
             }
 
             if (isset($delctypes[$key]['notnull'])) {
-                $delctypes[$key]['nullable'] = $delctypes[$key]['notnull'] == 1 ? false : true;
+                $delctypes[$key]['nullable'] = $delctypes[$key]['notnull'] === 1 ? false : true;
             }
 
             if (isset($delctypes[$key]['dflt_value'])) {
-                $delctypes[$key]['default'] = $delctypes[$key]['dflt_value'] == 'NULL' ? null : new Expression(Str::wrap($delctypes[$key]['dflt_value'], '(', ')'));
+                $delctypes[$key]['default'] = $delctypes[$key]['dflt_value'] === 'NULL' ? null : new Expression(Str::wrap($delctypes[$key]['dflt_value'], '(', ')'));
             }
 
             if (isset($delctypes[$key]['pk'])) {
-                $delctypes[$key]['auto_increment'] = $delctypes[$key]['pk'] == 1 ? true : false;
+                $delctypes[$key]['auto_increment'] = $delctypes[$key]['pk'] === 1 ? true : false;
             }
 
             $delctypes[$key]['collation'] = null;
@@ -127,7 +128,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     protected function grammar(): LibSQLSchemaGrammar
     {
-        $grammar = new LibSQLSchemaGrammar;
+        $grammar = new LibSQLSchemaGrammar();
 
         return $grammar;
     }

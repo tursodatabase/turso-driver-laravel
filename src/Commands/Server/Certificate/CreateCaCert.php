@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class CreateCaCert extends Command
+final class CreateCaCert extends Command
 {
     use CommandTrait;
 
@@ -33,8 +33,8 @@ class CreateCaCert extends Command
         $process = Process::run($this->callTursoCommand(
             command: 'server:ca-cert-create',
             options: $options,
-            arguments: $arguments
-        ), function ($type, $line) {
+            arguments: $arguments,
+        ), function ($type, $line): void {
             $this->output->write($line);
         });
 

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Turso\Driver\Laravel\Traits\CommandTrait;
 
-class GetCertificateStore extends Command
+final class GetCertificateStore extends Command
 {
     use CommandTrait;
 
@@ -18,7 +18,7 @@ class GetCertificateStore extends Command
 
     public function handle(): void
     {
-        $process = Process::run($this->callTursoCommand('server:cert-store-get'), function ($type, $line) {
+        $process = Process::run($this->callTursoCommand('server:cert-store-get'), function ($type, $line): void {
             $this->output->write($line);
         });
 

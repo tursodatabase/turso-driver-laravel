@@ -28,9 +28,9 @@ class LibSQLConnectionFactory extends ConnectionFactory
 
     public function createConnector(array $config)
     {
-        $connector = new LibSQLConnector;
+        $connector = new LibSQLConnector();
         $connector->connect(config('database.connections.libsql'));
 
-        return new LibSQLConnector;
+        return new LibSQLConnector();
     }
 }
