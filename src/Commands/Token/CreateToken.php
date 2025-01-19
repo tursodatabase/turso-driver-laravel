@@ -6,11 +6,11 @@ namespace Turso\Driver\Laravel\Commands\Token;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use Turso\Driver\Laravel\Traits\CommandTrait;
+use Turso\Driver\Laravel\Concerns\HandlesTursoInstallerCommands;
 
 final class CreateToken extends Command
 {
-    use CommandTrait;
+    use HandlesTursoInstallerCommands;
 
     protected $signature = 'turso-php:token-create {db-name}
         {--expire=7 : The number of days until the token expires, default is 7 days}

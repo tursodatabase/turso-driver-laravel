@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Turso\Driver\Laravel\Traits;
+namespace Turso\Driver\Laravel\Concerns;
 
 use Illuminate\Support\Facades\Process;
 
-trait CommandTrait
+trait HandlesTursoInstallerCommands
 {
     protected function checkIfLibsqlAlreadyInstalled(): bool
     {
