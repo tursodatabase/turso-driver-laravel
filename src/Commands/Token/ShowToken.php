@@ -6,13 +6,13 @@ namespace Turso\Driver\Laravel\Commands\Token;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use Turso\Driver\Laravel\Traits\CommandTrait;
+use Turso\Driver\Laravel\Concerns\HandlesTursoInstallerCommands;
 
 final class ShowToken extends Command
 {
-    use CommandTrait;
+    use HandlesTursoInstallerCommands;
 
-    protected $signature = 'turso-php:token-show {db-name} 
+    protected $signature = 'turso-php:token-show {db-name}
         {--fat : Display only full access token}
         {--roa : Display only read-only access token}
         {--pkp : Display only public key pem}

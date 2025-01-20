@@ -25,4 +25,4 @@ jobs:
           ./vendor/darkterminal/turso-php-installer/builds/turso-php-installer install -n --php-version=8.3
 
       - name: Tests
-        run: composer run test
+        run: composer run test:parallel

@@ -6,14 +6,14 @@ namespace Turso\Driver\Laravel\Commands\Installer;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use Turso\Driver\Laravel\Traits\CommandTrait;
+use Turso\Driver\Laravel\Concerns\HandlesTursoInstallerCommands;
 
 final class InstallExtension extends Command
 {
-    use CommandTrait;
+    use HandlesTursoInstallerCommands;
 
     protected $signature = 'turso-php:install
-        {--unstable : Install the unstable version from development repository} 
+        {--unstable : Install the unstable version from development repository}
         {--thread-safe : Install the Thread Safe (TS) version}
         {--php-ini= : Specify the php.ini file}
         {--php-version= : Specify the PHP version}

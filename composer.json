@@ -74,6 +74,9 @@
     "test": [
       "@php vendor/bin/pest"
     ],
+    "test:parallel": [
+      "@php vendor/bin/pest --parallel"
+    ],
     "test-feature": [
       "@php vendor/bin/pest --testsuite=Feature"
     ],

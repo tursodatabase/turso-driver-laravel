@@ -6,11 +6,11 @@ namespace Turso\Driver\Laravel\Commands\Server\Certificate;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use Turso\Driver\Laravel\Traits\CommandTrait;
+use Turso\Driver\Laravel\Concerns\HandlesTursoInstallerCommands;
 
 final class CreateCaPeerCert extends Command
 {
-    use CommandTrait;
+    use HandlesTursoInstallerCommands;
 
     protected $signature = 'turso-php:ca-peer-cert-create {name=ca}
         {--expiry=30 : Expiry in days, default is 30 days}
