@@ -1,3 +1,20 @@
+## [1.2.3] - 2025-01-21
+
+- release: patch version 1.2.3 [Imam Ali Mustofa]
+- refactor: missing strict types [Imam Ali Mustofa]
+- fix: indexes, view, foreignkey, tables in database command related [Imam Ali Mustofa]
+- fix: preg_match can be null [Imam Ali Mustofa]
+- refactor(feat): add line in artisan db:show command [Imam Ali Mustofa]
+- fix(provider): ensure libSQL is only used when set as the default connection [Imam Ali Mustofa]
+- build(deps-dev): update phpstan/phpstan-phpunit requirement [dependabot[bot]]
+- build(deps): bump actions/checkout from 3 to 4 [dependabot[bot]]
+- chore(traits): using new traits [Imam Ali Mustofa]
+- Merge pull request #24 from eznix86/chore/rename-concern [Imam Ali Mustofa]
+- build(refactor): using parallel tests [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 1.2.2 [Imam Ali Mustofa]
+- chore: add parallel testing [Bruno Bernard]
+- refactor: rename trait to concern [Bruno Bernard]
+
 ## [1.2.2] - 2025-01-17
 
 - release: patch version 1.2.2 [Imam Ali Mustofa]
