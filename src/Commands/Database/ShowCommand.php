@@ -57,6 +57,7 @@ class ShowCommand extends DatabaseInspectionCommand
         if (strtolower($connection->getDriverTitle()) === 'libsql') {
             $data['platform']['author'] = 'Imam Ali Mustofa - darkterminal@duck.com';
             $data['platform']['support'] = 'https://github.com/sponsors/darkterminal';
+            $data['platform']['repository'] = 'https://github.com/tursodatabase/turso-driver-laravel';
         }
 
         if ($this->option('views')) {
@@ -170,6 +171,7 @@ class ShowCommand extends DatabaseInspectionCommand
         $this->components->twoColumnDetail('<fg=green;options=bold>' . $platform['name'] . '</>', $platform['version']);
         if (strtolower($platform['name']) === 'libsql') {
             $this->components->twoColumnDetail('Community SDK Version', $platform['author']);
+            $this->components->twoColumnDetail('GitHub Repository', $platform['repository']);
             $this->components->twoColumnDetail('Donate / Support', $platform['support']);
         }
         $this->components->twoColumnDetail('Connection', $platform['connection']);
