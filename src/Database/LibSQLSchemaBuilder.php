@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\QueryException;
@@ -154,7 +155,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
         $exists = $this->connection->selectOne("SELECT name FROM sqlite_master WHERE type='table' AND name='{$table}'");
         if (!$exists) {
-            throw new \Exception("Table '{$table}' does not exist in the database.");
+            throw new Exception("Table '{$table}' does not exist in the database.");
         }
 
         $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
@@ -171,7 +172,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         $delctypes = stdClassToArray($data);
         foreach ($delctypes as $key => $value) {
             // Check if the column name exists in the matches
-            if (isset($delctypes[$key]['name']) && isset($columnMatches[$key])) {
+            if (isset($delctypes[$key]['name'], $columnMatches[$key])) {
                 $delctypes[$key]['name'] = $columnMatches[$key];
             }
 

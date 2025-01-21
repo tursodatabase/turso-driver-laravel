@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
+use Closure;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Connectors\ConnectionFactory;
@@ -17,6 +18,8 @@ use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\SQLiteConnection;
 use Illuminate\Database\SqlServerConnection;
+use InvalidArgumentException;
+use PDO;
 
 class LibSQLConnectionFactory extends ConnectionFactory
 {
@@ -29,13 +32,13 @@ class LibSQLConnectionFactory extends ConnectionFactory
      * Create a new connection instance.
      *
      * @param  string  $driver
-     * @param  \PDO|\Closure|LibSQLDatabase  $connection
+     * @param  PDO|Closure|LibSQLDatabase  $connection
      * @param  string  $database
      * @param  string  $prefix
      * @param  array  $config
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function createConnection($driver, $connection, $database, $prefix = '', array $config = [])
     {
@@ -57,14 +60,14 @@ class LibSQLConnectionFactory extends ConnectionFactory
             'sqlite' => new SQLiteConnection($connection, $database, $prefix, $config),
             'sqlsrv' => new SqlServerConnection($connection, $database, $prefix, $config),
             'libsql' => new LibSQLConnection($connection, $database, $prefix, $config),
-            default => throw new \InvalidArgumentException("Unsupported driver [{$driver}]."),
+            default => throw new InvalidArgumentException("Unsupported driver [{$driver}]."),
         };
     }
 
     public function createConnector(array $config)
     {
         if (!isset($config['driver'])) {
-            throw new \InvalidArgumentException('A driver must be specified.');
+            throw new InvalidArgumentException('A driver must be specified.');
         }
 
         if ($this->container->bound($key = "db.connector.{$config['driver']}")) {
@@ -72,13 +75,13 @@ class LibSQLConnectionFactory extends ConnectionFactory
         }
 
         return match ($config['driver']) {
-            'mysql' => new MySqlConnector,
-            'mariadb' => new MariaDbConnector,
-            'pgsql' => new PostgresConnector,
-            'sqlite' => new SQLiteConnector,
-            'sqlsrv' => new SqlServerConnector,
-            'libsql' => new LibSQLConnector,
-            default => throw new \InvalidArgumentException("Unsupported driver [{$config['driver']}]."),
+            'mysql' => new MySqlConnector(),
+            'mariadb' => new MariaDbConnector(),
+            'pgsql' => new PostgresConnector(),
+            'sqlite' => new SQLiteConnector(),
+            'sqlsrv' => new SqlServerConnector(),
+            'libsql' => new LibSQLConnector(),
+            default => throw new InvalidArgumentException("Unsupported driver [{$config['driver']}]."),
         };
     }
 }
