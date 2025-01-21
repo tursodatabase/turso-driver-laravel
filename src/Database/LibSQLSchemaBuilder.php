@@ -82,9 +82,17 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
     {
         $table = $this->connection->getTablePrefix() . $table;
 
-        $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
+        $exists = $this->connection->selectOne("SELECT name FROM sqlite_master WHERE type='table' AND name='{$table}'");
+        if (!$exists) {
+            throw new \Exception("Table '{$table}' does not exist in the database.");
+        }
 
+        $data = $this->connection->select("PRAGMA table_xinfo('{$table}')");
         $columns = $this->connection->selectOne("SELECT sql FROM sqlite_master WHERE type='table' AND name='{$table}'");
+
+        if (!$columns) {
+            return [];
+        }
 
         $pattern = '/(?:\(|,)\s*[\'"`]?([a-zA-Z_][a-zA-Z0-9_]*)[\'"`]?\s+[a-zA-Z]+/i';
         preg_match_all($pattern, $columns->sql, $matches);
