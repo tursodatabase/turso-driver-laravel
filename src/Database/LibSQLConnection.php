@@ -48,6 +48,11 @@ class LibSQLConnection extends Connection
         $this->in_transaction = false;
     }
 
+    public function getDriverName(): string
+    {
+        return 'LibSQL';
+    }
+
     public function inTransaction(): bool
     {
         return $this->in_transaction;
@@ -74,7 +79,7 @@ class LibSQLConnection extends Connection
     {
         $res = $this->select($query, $bindings);
 
-        return ! empty($res);
+        return !empty($res);
     }
 
     public function getPdo(): LibSQLDatabase
@@ -138,7 +143,7 @@ class LibSQLConnection extends Connection
     {
         $records = $this->select($query, $bindings, $useReadPdo);
 
-        if (! is_array($records)) {
+        if (!is_array($records)) {
             $records = stdClassToArray($records);
         }
 
@@ -197,7 +202,7 @@ class LibSQLConnection extends Connection
 
         $preparedQuery = $this->getRawPdo()->prepare($query);
 
-        if (! $preparedQuery) {
+        if (!$preparedQuery) {
             throw new Exception('Failed to prepare statement.');
         }
 

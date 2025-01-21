@@ -88,15 +88,15 @@ class LibSQLDatabase
             $mode = 'memory';
         }
 
-        if (empty($database) && ! empty($url) && ! empty($authToken)) {
+        if (empty($database) && !empty($url) && !empty($authToken)) {
             $mode = 'remote';
         }
 
-        if (! empty($database) && $database !== ':memory:' && empty($url) && empty($authToken) && empty($url)) {
+        if (!empty($database) && $database !== ':memory:' && empty($url) && empty($authToken) && empty($url)) {
             $mode = 'local';
         }
 
-        if (! empty($database) && $database !== ':memory:' && ! empty($authToken) && ! empty($url)) {
+        if (!empty($database) && $database !== ':memory:' && !empty($authToken) && !empty($url)) {
             $mode = 'remote_replica';
         }
 
@@ -129,7 +129,7 @@ class LibSQLDatabase
 
     public function commit(): bool
     {
-        if (! $this->inTransaction()) {
+        if (!$this->inTransaction()) {
             throw new PDOException('No active transaction');
         }
 
@@ -141,7 +141,7 @@ class LibSQLDatabase
 
     public function rollBack(): bool
     {
-        if (! $this->inTransaction()) {
+        if (!$this->inTransaction()) {
             throw new PDOException('No active transaction');
         }
 
