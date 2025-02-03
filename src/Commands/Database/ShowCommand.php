@@ -36,7 +36,7 @@ class ShowCommand extends DatabaseInspectionCommand
     /**
      * Execute the console command.
      *
-     * @param  \Illuminate\Database\ConnectionResolverInterface  $connections
+     * @param  ConnectionResolverInterface  $connections
      * @return int
      */
     public function handle(ConnectionResolverInterface $connections)
@@ -78,13 +78,13 @@ class ShowCommand extends DatabaseInspectionCommand
     /**
      * Get information regarding the tables within the database.
      *
-     * @param  \Illuminate\Database\ConnectionInterface  $connection
-     * @param  \Illuminate\Database\Schema\Builder  $schema
-     * @return \Illuminate\Support\Collection
+     * @param  ConnectionInterface  $connection
+     * @param  Builder  $schema
+     * @return Collection
      */
     protected function tables(ConnectionInterface $connection, Builder $schema)
     {
-        return (new Collection($schema->getTables()))->map(fn($table) => [
+        return (new Collection($schema->getTables()))->map(fn ($table) => [
             'table' => $table['name'],
             'schema' => $table['schema'],
             'size' => $table['size'],
@@ -100,15 +100,15 @@ class ShowCommand extends DatabaseInspectionCommand
     /**
      * Get information regarding the views within the database.
      *
-     * @param  \Illuminate\Database\ConnectionInterface  $connection
-     * @param  \Illuminate\Database\Schema\Builder  $schema
-     * @return \Illuminate\Support\Collection
+     * @param  ConnectionInterface  $connection
+     * @param  Builder  $schema
+     * @return Collection
      */
     protected function views(ConnectionInterface $connection, Builder $schema)
     {
         return (new Collection($schema->getViews()))
-            ->reject(fn($view) => (new Stringable($view['name']))->startsWith(['pg_catalog', 'information_schema', 'spt_']))
-            ->map(fn($view) => [
+            ->reject(fn ($view) => (new Stringable($view['name']))->startsWith(['pg_catalog', 'information_schema', 'spt_']))
+            ->map(fn ($view) => [
                 'view' => $view['name'],
                 'schema' => $view['schema'],
                 'rows' => $connection->table($view['schema'] ? $view['schema'] . '.' . $view['name'] : $view['name'])->count(),
@@ -118,14 +118,14 @@ class ShowCommand extends DatabaseInspectionCommand
     /**
      * Get information regarding the user-defined types within the database.
      *
-     * @param  \Illuminate\Database\ConnectionInterface  $connection
-     * @param  \Illuminate\Database\Schema\Builder  $schema
-     * @return \Illuminate\Support\Collection
+     * @param  ConnectionInterface  $connection
+     * @param  Builder  $schema
+     * @return Collection
      */
     protected function types(ConnectionInterface $connection, Builder $schema)
     {
         return (new Collection($schema->getTypes()))
-            ->map(fn($type) => [
+            ->map(fn ($type) => [
                 'name' => $type['name'],
                 'schema' => $type['schema'],
                 'type' => $type['type'],
@@ -192,7 +192,7 @@ class ShowCommand extends DatabaseInspectionCommand
         $this->newLine();
 
         if ($tables->isNotEmpty()) {
-            $hasSchema = !is_null($tables->first()['schema']);
+            $hasSchema = null !== $tables->first()['schema'];
 
             $this->components->twoColumnDetail(
                 ($hasSchema ? '<fg=green;options=bold>Schema</> <fg=gray;options=bold>/</> ' : '') . '<fg=green;options=bold>Table</>',
@@ -200,7 +200,7 @@ class ShowCommand extends DatabaseInspectionCommand
             );
 
             $tables->each(function ($table) {
-                $tableSize = is_null($table['size']) ? null : Number::fileSize($table['size'], 2);
+                $tableSize = null === $table['size'] ? null : Number::fileSize($table['size'], 2);
 
                 $this->components->twoColumnDetail(
                     ($table['schema'] ? $table['schema'] . ' <fg=gray;options=bold>/</> ' : '') . $table['table'] . ($this->output->isVerbose() ? ' <fg=gray>' . $table['engine'] . '</>' : null),
@@ -220,14 +220,14 @@ class ShowCommand extends DatabaseInspectionCommand
         }
 
         if ($views && $views->isNotEmpty()) {
-            $hasSchema = !is_null($views->first()['schema']);
+            $hasSchema = null !== $views->first()['schema'];
 
             $this->components->twoColumnDetail(
                 ($hasSchema ? '<fg=green;options=bold>Schema</> <fg=gray;options=bold>/</> ' : '') . '<fg=green;options=bold>View</>',
                 '<fg=green;options=bold>Rows</>'
             );
 
-            $views->each(fn($view) => $this->components->twoColumnDetail(
+            $views->each(fn ($view) => $this->components->twoColumnDetail(
                 ($view['schema'] ? $view['schema'] . ' <fg=gray;options=bold>/</> ' : '') . $view['view'],
                 Number::format($view['rows'])
             ));
@@ -236,14 +236,14 @@ class ShowCommand extends DatabaseInspectionCommand
         }
 
         if ($types && $types->isNotEmpty()) {
-            $hasSchema = !is_null($types->first()['schema']);
+            $hasSchema = null !== $types->first()['schema'];
 
             $this->components->twoColumnDetail(
                 ($hasSchema ? '<fg=green;options=bold>Schema</> <fg=gray;options=bold>/</> ' : '') . '<fg=green;options=bold>Type</>',
                 '<fg=green;options=bold>Type</> <fg=gray;options=bold>/</> <fg=green;options=bold>Category</>'
             );
 
-            $types->each(fn($type) => $this->components->twoColumnDetail(
+            $types->each(fn ($type) => $this->components->twoColumnDetail(
                 ($type['schema'] ? $type['schema'] . ' <fg=gray;options=bold>/</> ' : '') . $type['name'],
                 $type['type'] . ' <fg=gray;options=bold>/</> ' . $type['category']
             ));
