@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "63491417b36e726af6786ca59367d3ac",
+    "content-hash": "29c7e6fd06de6e00566bc83c8c40c4db",
     "packages": [
         {
             "name": "brick/math",
@@ -137,21 +137,21 @@
         },
         {
             "name": "darkterminal/turso-php-installer",
-            "version": "2.0.15",
+            "version": "2.0.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/darkterminal/turso-php-installer.git",
-                "reference": "907be1a6d4cf3609db75ef4dd82e49107a23909f"
+                "reference": "2d53a6d948fa63cd559e106a426cd69902f195c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/darkterminal/turso-php-installer/zipball/907be1a6d4cf3609db75ef4dd82e49107a23909f",
-                "reference": "907be1a6d4cf3609db75ef4dd82e49107a23909f",
+                "url": "https://api.github.com/repos/darkterminal/turso-php-installer/zipball/2d53a6d948fa63cd559e106a426cd69902f195c1",
+                "reference": "2d53a6d948fa63cd559e106a426cd69902f195c1",
                 "shasum": ""
             },
             "require": {
                 "fakerphp/faker": "^1.24",
-                "illuminate/http": "^11.44",
+                "guzzlehttp/guzzle": "^7.9",
                 "laravel/prompts": "^0.3.5",
                 "lcobucci/jwt": "^5.5",
                 "paragonie/sodium_compat": "^2.1",
@@ -199,7 +199,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-26T22:09:03+00:00"
+            "time": "2025-02-26T23:28:23+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -7331,16 +7331,16 @@
         },
         {
             "name": "pestphp/pest",
-            "version": "3.x-dev",
+            "version": "v3.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pestphp/pest.git",
-                "reference": "66ceb64faa70c32664a395375abd663e1d9c82c5"
+                "reference": "4a987d3d5c4e3ba36c76fecbf56113baac2d1b2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest/zipball/66ceb64faa70c32664a395375abd663e1d9c82c5",
-                "reference": "66ceb64faa70c32664a395375abd663e1d9c82c5",
+                "url": "https://api.github.com/repos/pestphp/pest/zipball/4a987d3d5c4e3ba36c76fecbf56113baac2d1b2b",
+                "reference": "4a987d3d5c4e3ba36c76fecbf56113baac2d1b2b",
                 "shasum": ""
             },
             "require": {
@@ -7351,11 +7351,11 @@
                 "pestphp/pest-plugin-arch": "^3.0.0",
                 "pestphp/pest-plugin-mutate": "^3.0.5",
                 "php": "^8.2.0",
-                "phpunit/phpunit": "^11.5.6"
+                "phpunit/phpunit": "^11.5.3"
             },
             "conflict": {
                 "filp/whoops": "<2.16.0",
-                "phpunit/phpunit": ">11.5.6",
+                "phpunit/phpunit": ">11.5.3",
                 "sebastian/exporter": "<6.0.0",
                 "webmozart/assert": "<1.11.0"
             },
@@ -7364,7 +7364,6 @@
                 "pestphp/pest-plugin-type-coverage": "^3.2.3",
                 "symfony/process": "^7.2.0"
             },
-            "default-branch": true,
             "bin": [
                 "bin/pest"
             ],
@@ -7428,7 +7427,7 @@
             ],
             "support": {
                 "issues": "https://github.com/pestphp/pest/issues",
-                "source": "https://github.com/pestphp/pest/tree/3.x"
+                "source": "https://github.com/pestphp/pest/tree/v3.7.4"
             },
             "funding": [
                 {
@@ -7440,7 +7439,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-03T13:36:47+00:00"
+            "time": "2025-01-23T14:03:29+00:00"
         },
         {
             "name": "pestphp/pest-plugin",
@@ -8556,16 +8555,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "11.5.6",
+            "version": "11.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "3c3ae14c90f244cdda95028c3e469028e8d1c02c"
+                "reference": "30e319e578a7b5da3543073e30002bf82042f701"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/3c3ae14c90f244cdda95028c3e469028e8d1c02c",
-                "reference": "3c3ae14c90f244cdda95028c3e469028e8d1c02c",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/30e319e578a7b5da3543073e30002bf82042f701",
+                "reference": "30e319e578a7b5da3543073e30002bf82042f701",
                 "shasum": ""
             },
             "require": {
@@ -8637,7 +8636,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.6"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.3"
             },
             "funding": [
                 {
@@ -8653,7 +8652,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-01-31T07:03:30+00:00"
+            "time": "2025-01-13T09:36:00+00:00"
         },
         {
             "name": "psy/psysh",

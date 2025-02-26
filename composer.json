@@ -1,7 +1,7 @@
 {
   "name": "tursodatabase/turso-driver-laravel",
   "description": "A Turso Driver for Laravel",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "keywords": [
     "turso",
     "tursodatabase",
@@ -22,16 +22,15 @@
   "require": {
     "php": "^8.2",
     "darkterminal/turso-php-installer": "^2.0",
-    "illuminate/contracts": "^11.44||^12.0",
     "spatie/laravel-package-tools": "^1.16"
   },
   "require-dev": {
     "laravel/pint": "^1.14",
     "nunomaduro/collision": "^8.1.1||^7.10.0",
-    "orchestra/testbench": "^9.1",
-    "phpunit/phpunit": "^11",
-    "phpstan/phpstan-phpunit": "^2.0",
+    "orchestra/testbench": "^9.11",
     "pestphp/pest": "^3.7",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "phpunit/phpunit": "^11",
     "spatie/laravel-ray": "^1.35"
   },
   "autoload": {
