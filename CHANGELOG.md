@@ -1,3 +1,14 @@
+## [1.2.4] - 2025-02-27
+
+- release: patch version 1.2.4 [Imam Ali Mustofa]
+- Merge pull request #30 from tursodatabase/dependabot/github_actions/aglipanci/laravel-pint-action-2.5 [github-actions[bot]]
+- build(deps): bump aglipanci/laravel-pint-action from 2.4 to 2.5 [dependabot[bot]]
+- tests: use different database connection driver [Imam Ali Mustofa]
+- Merge pull request #28 from tursodatabase/dependabot/github_actions/dependabot/fetch-metadata-2.3.0 [github-actions[bot]]
+- build(deps): bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 [dependabot[bot]]
+- Fix styling [darkterminal]
+- chore: update CHANGELOG.md for patch version 1.2.3 [Imam Ali Mustofa]
+
 ## [1.2.3] - 2025-01-21
 
 - release: patch version 1.2.3 [Imam Ali Mustofa]
