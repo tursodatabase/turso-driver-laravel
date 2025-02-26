@@ -2,7 +2,6 @@
 .phpunit.cache
 .vscode/
 build
-composer.lock
 coverage
 docs
 phpunit.xml
