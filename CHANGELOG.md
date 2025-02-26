@@ -1,3 +1,8 @@
+## [1.2.7] - 2025-02-27
+
+- release: patch version 1.2.7 [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 1.2.6 [Imam Ali Mustofa]
+
 ## [1.2.6] - 2025-02-27
 
 - release: patch version 1.2.6 [Imam Ali Mustofa]
