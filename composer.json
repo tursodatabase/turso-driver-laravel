@@ -1,7 +1,7 @@
 {
   "name": "tursodatabase/turso-driver-laravel",
   "description": "A Turso Driver for Laravel",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "keywords": [
     "turso",
     "tursodatabase",
