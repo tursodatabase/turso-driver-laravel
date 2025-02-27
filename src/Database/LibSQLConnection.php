@@ -8,6 +8,7 @@ use Closure;
 use Exception;
 use Generator;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Grammar;
 use Illuminate\Filesystem\Filesystem;
 use LibSQL;
 use LibSQLTransaction;
@@ -303,7 +304,7 @@ class LibSQLConnection extends Connection
 
     protected function getDefaultQueryGrammar()
     {
-        ($grammar = new LibSQLQueryGrammar())->setConnection($this);
+        $grammar = new LibSQLQueryGrammar($this);
         $this->withTablePrefix($grammar);
 
         return $grammar;
@@ -326,10 +327,25 @@ class LibSQLConnection extends Connection
         );
     }
 
+    /**
+     * Set the table prefix and return the grammar.
+     *
+     * @template TGrammar of \Illuminate\Database\Grammar
+     *
+     * @param  TGrammar  $grammar
+     * @return TGrammar
+     */
+    public function withTablePrefix(Grammar $grammar)
+    {
+        $grammar->setTablePrefix($this->tablePrefix);
+
+        return $grammar;
+    }
+
     #[ReturnTypeWillChange]
     public function getDefaultSchemaGrammar(): LibSQLSchemaGrammar
     {
-        ($grammar = new LibSQLSchemaGrammar())->setConnection($this);
+        $grammar = new LibSQLSchemaGrammar($this);
         $this->withTablePrefix($grammar);
 
         return $grammar;

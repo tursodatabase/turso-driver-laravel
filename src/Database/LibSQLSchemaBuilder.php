@@ -140,11 +140,11 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
      *
      * @return array
      */
-    public function getViews()
+    public function getViews($schema = null)
     {
         return $this->connection->getPostProcessor()->processViews(
             $this->connection->getRawPdo()->prepare(
-                $this->grammar->compileViews('libsql')
+                $this->grammar->compileViews($schema ?? 'libsql')
             )->fetchAll()
         );
     }
@@ -209,7 +209,7 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
 
     protected function grammar(): LibSQLSchemaGrammar
     {
-        $grammar = new LibSQLSchemaGrammar();
+        $grammar = new LibSQLSchemaGrammar($this->connection);
 
         return $grammar;
     }
