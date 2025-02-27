@@ -1,3 +1,9 @@
+## [1.2.8] - 2025-02-27
+
+- release: patch version 1.2.8 [Imam Ali Mustofa]
+- fix: make it compatible with laravel 12 [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 1.2.7 [Imam Ali Mustofa]
+
 ## [1.2.7] - 2025-02-27
 
 - release: patch version 1.2.7 [Imam Ali Mustofa]
