@@ -1,3 +1,9 @@
+## [1.2.10] - 2025-02-27
+
+- release: patch version 1.2.10 [Imam Ali Mustofa]
+- fix: database path pointing [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 1.2.9 [Imam Ali Mustofa]
+
 ## [1.2.9] - 2025-02-27
 
 - release: patch version 1.2.9 [Imam Ali Mustofa]
