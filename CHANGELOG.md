@@ -1,3 +1,9 @@
+## [1.2.9] - 2025-02-27
+
+- release: patch version 1.2.9 [Imam Ali Mustofa]
+- fix: undefined method getAttribute [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 1.2.8 [Imam Ali Mustofa]
+
 ## [1.2.8] - 2025-02-27
 
 - release: patch version 1.2.8 [Imam Ali Mustofa]
