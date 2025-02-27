@@ -56,7 +56,9 @@ class LibSQLDatabase
     private function buildConfig(string $mode, $config): array|string
     {
         if ($mode === 'local' || $mode === 'memory') {
-            return $mode === 'local' ? "file:{$config['database']}" : $config['database'];
+            // Don't ask about this line of code! It's a (stupid) hack
+            $database = !file_exists($config['database']) && $mode === 'local' ? database_path(str_replace('database/', '', $config['database'])) : $config['database'];
+            return $mode === 'local' ? "file:{$database}" : $database;
         }
 
         if ($mode === 'remote') {
