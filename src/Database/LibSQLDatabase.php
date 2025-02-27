@@ -231,6 +231,11 @@ class LibSQLDatabase
         return $this->connection_mode;
     }
 
+    public function getAttribute(int $attribute): bool
+    {
+        return true;
+    }
+
     public function escapeString($input)
     {
         if ($input === null) {

@@ -119,6 +119,11 @@ class LibSQLConnection extends Connection
         return $this;
     }
 
+    public function getAttribute(int $attribute): bool
+    {
+        return true;
+    }
+
     /**
      * Set the LibSQL connection used for reading.
      *
