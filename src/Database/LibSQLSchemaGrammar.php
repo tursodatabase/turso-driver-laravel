@@ -26,11 +26,6 @@ class LibSQLSchemaGrammar extends SQLiteGrammar
         return "SELECT 'DROP TRIGGER IF EXISTS \"' || name || '\";' FROM sqlite_schema WHERE type = 'trigger' AND name NOT LIKE 'sqlite_%'";
     }
 
-    public function compileDropAllViews($schema = null): string
-    {
-        return "SELECT 'DROP VIEW IF EXISTS \"' || name || '\";' FROM sqlite_schema WHERE type = 'view'";
-    }
-
     #[Override]
     public function wrap($value, $prefixAlias = false): string
     {

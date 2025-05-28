@@ -7,8 +7,8 @@ namespace Turso\Driver\Laravel\Database;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Expression;
-use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\SQLiteBuilder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Turso\Driver\Laravel\Exceptions\FeatureNotSupportedException;
 
@@ -69,70 +69,17 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
         });
     }
 
-    public function dropAllViews(): void
+    public function dropAllViews()
     {
-        $statement = $this->db->prepare($this->grammar()->compileDropAllViews());
-        $results = $statement->query();
+        foreach ($this->getCurrentSchemaListing() as $schema) {
+            $this->pragma('writable_schema', 1);
 
-        collect($results->rows)->each(function (array $query) {
-            $query = array_values($query)[0];
-            $this->db->query($query);
-        });
-    }
+            $this->connection->statement($this->grammar()->compileDropAllViews($schema));
 
-    /**
-     * Get the tables for the database.
-     *
-     * @param  bool  $withSize
-     * @return array
-     */
-    public function getTables($withSize = true)
-    {
-        if ($withSize) {
-            try {
-                $withSize = $this->connection->scalar($this->grammar->compileDbstatExists());
-            } catch (QueryException $e) {
-                $withSize = false;
-            }
+            $this->pragma('writable_schema', 0);
+
+            $this->connection->statement($this->grammar->compileRebuild($schema));
         }
-
-        return $this->connection->getPostProcessor()->processTables(
-            $this->connection->getRawPdo()->prepare($this->grammar->compileTables($withSize))->fetchAll()
-        );
-    }
-
-    /**
-     * Get the foreign keys for a given table.
-     *
-     * @param  string  $table
-     * @return array
-     */
-    public function getForeignKeys($table)
-    {
-        $table = $this->connection->getTablePrefix() . $table;
-
-        return $this->connection->getPostProcessor()->processForeignKeys(
-            $this->connection->getRawPdo()->prepare(
-                $this->grammar->compileForeignKeys('libsql', $table)
-            )->fetchAll()
-        );
-    }
-
-    /**
-     * Get the indexes for a given table.
-     *
-     * @param  string  $table
-     * @return array
-     */
-    public function getIndexes($table)
-    {
-        $table = $this->connection->getTablePrefix() . $table;
-
-        return $this->connection->getPostProcessor()->processIndexes(
-            $this->connection->getRawPdo()->prepare(
-                $this->grammar->compileIndexes('libsql', $table)
-            )->fetchAll()
-        );
     }
 
     /**
@@ -142,11 +89,17 @@ class LibSQLSchemaBuilder extends SQLiteBuilder
      */
     public function getViews($schema = null)
     {
-        return $this->connection->getPostProcessor()->processViews(
-            $this->connection->getRawPdo()->prepare(
-                $this->grammar->compileViews($schema ?? 'libsql')
-            )->fetchAll()
-        );
+        $schema ??= array_column($this->getSchemas(), 'name');
+
+        $views = [];
+
+        foreach (Arr::wrap($schema) as $name) {
+            $views = array_merge($views, $this->connection->selectFromWriteConnection(
+                $this->grammar->compileViews($name)
+            ));
+        }
+
+        return $this->connection->getPostProcessor()->processViews($views);
     }
 
     public function getColumns($table)

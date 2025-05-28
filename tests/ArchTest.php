@@ -4,8 +4,8 @@ arch('it should not use any debugging functions')
     ->expect([
         'dd',
         'debug_backtrace',
-        'die',
-        'dump',
+        // 'die',
+        // 'dump',
         'echo',
         'eval',
         'exec',

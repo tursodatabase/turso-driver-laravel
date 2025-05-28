@@ -33,7 +33,7 @@ it('uses the libsql connection factory for libsql driver', function () {
     config([
         'database.connections.libsql' => [
             'driver' => 'libsql',
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'database' => './database/database.sqlite',
             'prefix' => '',
             'url' => env('DB_SYNC_URL', ''),
             'authToken' => env('DB_AUTH_TOKEN', ''),

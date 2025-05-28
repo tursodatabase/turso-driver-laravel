@@ -22,10 +22,10 @@ test('it can drops all tables from the database.', function () {
 test('it can retrieve all of the table information in the database', function () {
     DB::select('CREATE TABLE "migrations" ("id" integer primary key autoincrement not null, "migration" varchar not null, "batch" integer not null)');
 
-    $result = Schema::getTables()[0];
+    $result = collect(Schema::getTables())->first();
 
     expect($result['name'])->toBe('migrations')
-        ->and($result['schema'])->toBeNull()
+        ->and($result['schema'])->toBe('main')
         ->and($result['comment'])->toBeNull()
         ->and($result['collation'])->toBeNull()
         ->and($result['engine'])->toBeNull();
@@ -41,53 +41,53 @@ test('it can retrieve all of the column information in the table', function () {
         ->and($result->has('migration'))->toBeTrue()
         ->and($result->has('batch'))->toBeTrue()
         ->and($result->get('id'))->toBe([
-            'name' => 'id',
-            'type_name' => 'integer',
-            'type' => 'integer',
-            'collation' => null,
-            'nullable' => false,
-            'default' => null,
-            'auto_increment' => true,
-            'comment' => null,
-            'generation' => null,
-            'pk' => 1,
-            'notnull' => 1,
-            'dflt_value' => null,
-            'cid' => 0,
-            'hidden' => 0,
-        ])
+                'name' => 'id',
+                'type_name' => 'integer',
+                'type' => 'integer',
+                'collation' => null,
+                'nullable' => false,
+                'default' => null,
+                'auto_increment' => true,
+                'comment' => null,
+                'generation' => null,
+                'pk' => 1,
+                'notnull' => 1,
+                'dflt_value' => null,
+                'cid' => 0,
+                'hidden' => 0,
+            ])
         ->and($result->get('migration'))->toBe([
-            'name' => 'migration',
-            'type_name' => 'varchar',
-            'type' => 'varchar',
-            'collation' => null,
-            'nullable' => false,
-            'default' => null,
-            'auto_increment' => false,
-            'comment' => null,
-            'generation' => null,
-            'pk' => 0,
-            'notnull' => 1,
-            'dflt_value' => null,
-            'cid' => 1,
-            'hidden' => 0,
-        ])
+                'name' => 'migration',
+                'type_name' => 'varchar',
+                'type' => 'varchar',
+                'collation' => null,
+                'nullable' => false,
+                'default' => null,
+                'auto_increment' => false,
+                'comment' => null,
+                'generation' => null,
+                'pk' => 0,
+                'notnull' => 1,
+                'dflt_value' => null,
+                'cid' => 1,
+                'hidden' => 0,
+            ])
         ->and($result->get('batch'))->toBe([
-            'name' => 'batch',
-            'type_name' => 'integer',
-            'type' => 'integer',
-            'collation' => null,
-            'nullable' => false,
-            'default' => null,
-            'auto_increment' => false,
-            'comment' => null,
-            'generation' => null,
-            'pk' => 0,
-            'notnull' => 1,
-            'dflt_value' => null,
-            'cid' => 2,
-            'hidden' => 0,
-        ]);
+                'name' => 'batch',
+                'type_name' => 'integer',
+                'type' => 'integer',
+                'collation' => null,
+                'nullable' => false,
+                'default' => null,
+                'auto_increment' => false,
+                'comment' => null,
+                'generation' => null,
+                'pk' => 0,
+                'notnull' => 1,
+                'dflt_value' => null,
+                'cid' => 2,
+                'hidden' => 0,
+            ]);
 })->group('LibSQLSchemaBuilderTest', 'FeatureTest');
 
 test('it can create a new table', function () {
@@ -97,10 +97,10 @@ test('it can create a new table', function () {
         $table->string('name');
     });
 
-    $result = Schema::getTables()[0];
+    $result = collect(Schema::getTables())->first();
 
     expect($result['name'])->toBe('users')
-        ->and($result['schema'])->toBeNull()
+        ->and($result['schema'])->toBe('main')
         ->and($result['comment'])->toBeNull()
         ->and($result['collation'])->toBeNull()
         ->and($result['engine'])->toBeNull();
@@ -134,10 +134,12 @@ test('it can drop all views from the database', function () {
     $view = collect(Schema::getViews())->first();
 
     expect($view['name'])->toBe('foo')
-        ->and($view['schema'])->toBeNull()
+        ->and($view['schema'])->toBe('main')
         ->and($view['definition'])->toBe($createSql);
 
     Schema::dropAllViews();
 
-    expect(Schema::getViews())->toBe([]);
+    $view = collect(Schema::getViews())->first();
+
+    expect($view)->toBeNull();
 })->group('LibSQLSchemaBuilderTest', 'FeatureTest');
