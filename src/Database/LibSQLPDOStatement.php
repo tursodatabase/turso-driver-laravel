@@ -97,7 +97,7 @@ class LibSQLPDOStatement
     {
         $parameters = collect(array_values($parameters))->map(function ($value) {
             $type = match (true) {
-                is_string($value) && (! ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) => 'blob',
+                $this->is_blob($value) => 'blob',
                 is_float($value) || is_float($value) => 'float',
                 is_int($value) => 'integer',
                 is_bool($value) => 'boolean',
@@ -129,6 +129,41 @@ class LibSQLPDOStatement
         return $parameters;
     }
 
+    private function is_base64_encoded($str)
+    {
+        // Check if the string has valid Base64 characters
+        if (!is_string($str)) {
+            return false;
+        }
+
+        // Check if the string has valid Base64 characters and proper padding
+        if (
+            !preg_match('/^(?:[A-Za-z0-9+\/]{4})*' .
+                '(?:[A-Za-z0-9+\/]{2}==|' .
+                '[A-Za-z0-9+\/]{3}=)?$/', $str)
+        ) {
+            return false;
+        }
+
+        // Decode the string in strict mode
+        $decoded = base64_decode($str, true);
+        if ($decoded === false) {
+            return false;
+        }
+
+        // Re-encode the decoded string and compare with the original
+        if (base64_encode($decoded) !== $str) {
+            return false;
+        }
+
+        // Optional: Check if the decoded data is printable
+        if (!ctype_print($decoded)) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function decodeDoubleBase64(array $result): array
     {
         if (isset($result['rows']) && is_array($result['rows'])) {
@@ -142,7 +177,7 @@ class LibSQLPDOStatement
                         $value = $decoded;
                     }
 
-                    if (is_string($value) && $this->isValidBlob($value)) {
+                    if (is_string($value) && $this->is_base64_encoded($value)) {
                         $value = base64_decode(base64_decode($value));
                     }
                 }
@@ -152,9 +187,14 @@ class LibSQLPDOStatement
         return $result;
     }
 
-    private function isValidBlob(mixed $value): bool
+    private function is_blob($value): bool
     {
-        return (bool) preg_match('/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/', $value);
+        return is_string($value) && !$this->isValidBlob($value) && !mb_check_encoding($value, 'UTF-8');
+    }
+
+    private function isValidBlob($data)
+    {
+        return (bool) is_string($data) && preg_match('/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/', $data);
     }
 
     private function isValidDateOrTimestamp($string, $format = null): bool
@@ -226,11 +266,11 @@ class LibSQLPDOStatement
         $result = $this->statement->query();
         $rows = $result->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-        if (! $rows) {
+        if (!$rows) {
             $anotherStatement = $this->statement->query($parameters);
             $rows = $anotherStatement->fetchArray(LibSQL::LIBSQL_ASSOC);
 
-            if (! $rows) {
+            if (!$rows) {
                 return false;
             }
 
