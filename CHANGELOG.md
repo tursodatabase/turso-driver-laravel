@@ -1,3 +1,9 @@
+## [1.3.1] - 2025-05-28
+
+- release: patch version 1.3.1 [Imam Ali Mustofa]
+- fix(upgrade): schema builder and grammar [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for minor version 1.3.0 [Imam Ali Mustofa]
+
 ## [1.3.0] - 2025-05-28
 
 - release: minor version 1.3.0 [Imam Ali Mustofa]
