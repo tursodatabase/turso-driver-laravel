@@ -32,7 +32,6 @@ class LibSQLSchemaGrammar extends SQLiteGrammar
         return str_replace('"', '\'', parent::wrap($value));
     }
 
-    #[Override]
     public function typeVector(Fluent $column): string
     {
         if (!empty($column->dimensions)) {
