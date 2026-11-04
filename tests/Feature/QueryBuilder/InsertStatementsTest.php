@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\User;
@@ -64,4 +65,27 @@ test('it can get the auto increment id as the result of insert command', functio
         ->and($result)->toBe(2)
         ->and($newUser->name)->toBe($expectation->name)
         ->and($newUser->email)->toBe($expectation->email);
+})->group('InsertStatementsTest', 'QueryBuilder', 'FeatureTest');
+
+test('it throws when an insert violates a unique constraint', function () {
+    DB::table('users')->insert([
+        'name' => 'John Doe',
+        'email' => 'john.doe@gmail.com',
+    ]);
+
+    expect(fn () => DB::table('users')->insert([
+        'name' => 'Jane Doe',
+        'email' => 'john.doe@gmail.com',
+    ]))->toThrow(QueryException::class, 'UNIQUE constraint failed');
+
+    expect(DB::table('users')->count())->toBe(1);
+})->group('InsertStatementsTest', 'QueryBuilder', 'FeatureTest');
+
+test('it throws when an insert violates a not null constraint', function () {
+    expect(fn () => DB::table('users')->insert([
+        'name' => null,
+        'email' => 'john.doe@gmail.com',
+    ]))->toThrow(QueryException::class, 'NOT NULL constraint failed');
+
+    expect(DB::table('users')->count())->toBe(0);
 })->group('InsertStatementsTest', 'QueryBuilder', 'FeatureTest');

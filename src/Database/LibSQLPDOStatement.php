@@ -245,7 +245,11 @@ class LibSQLPDOStatement
 
             return true;
         } catch (Exception $e) {
-            return false;
+            // Rethrow as PDOException so Laravel reports the failure instead of ignoring it
+            $exception = new PDOException($e->getMessage(), 0, $e);
+            $exception->errorInfo = ['HY000', $e->getCode(), $e->getMessage()];
+
+            throw $exception;
         }
     }
 
