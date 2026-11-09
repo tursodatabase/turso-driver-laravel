@@ -21,7 +21,7 @@
   ],
   "require": {
     "php": "^8.2",
-    "darkterminal/turso-php-installer": "^2.0",
+    "darkterminal/turso-php-installer": "^2.2",
     "spatie/laravel-package-tools": "^1.16"
   },
   "require-dev": {
