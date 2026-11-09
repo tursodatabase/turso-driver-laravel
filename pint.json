@@ -56,6 +56,6 @@
         "tests"
     ],
     "notPath": [
-        "src/libsql_php_extension.stubs.php"
+        "src/libsql_php.stubs.php"
     ]
 }

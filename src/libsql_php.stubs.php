@@ -12,8 +12,8 @@ namespace {
         /**
          * Creates a new LibSQLStatement instance.
          *
-         * @param  string  $conn_id  The connection ID.
-         * @param  string  $sql  The SQL statement.
+         * @param string $conn_id The connection ID.
+         * @param string $sql The SQL statement.
          */
         public function __construct(string $conn_id, string $sql) {}
 
@@ -27,7 +27,8 @@ namespace {
         /**
          * Binds a value to a named parameter in the prepared statement.
          *
-         * @param  array<string, mixed>  $parameters  The parameters to bind.
+         * @param array<string, mixed> $parameters The parameters to bind.
+         * 
          * @return void
          */
         public function bindNamed(array $parameters) {}
@@ -35,7 +36,8 @@ namespace {
         /**
          * Binds a value to a positionalparameter in the prepared statement.
          *
-         * @param  array<mixed>  $parameters  The value to bind.
+         * @param array<mixed> $parameters The value to bind.
+         * 
          * @return void
          */
         public function bindPositional(array $parameters) {}
@@ -43,7 +45,8 @@ namespace {
         /**
          * Executes the prepared statement with given parameters.
          *
-         * @param  array  $parameters  The parameters for the statement.
+         * @param array $parameters The parameters for the statement.
+         * 
          * @return int The number of affected rows.
          */
         public function execute(array $parameters = []) {}
@@ -51,7 +54,8 @@ namespace {
         /**
          * Executes the prepared statement and retrieves the result set.
          *
-         * @param  array  $parameters  The parameters for the statement.
+         * @param array $parameters The parameters for the statement.
+         * 
          * @return LibSQLResult The result set.
          */
         public function query(array $parameters = []) {}
@@ -73,7 +77,8 @@ namespace {
         /**
          * Gets the name of a parameter by index.
          *
-         * @param  int  $idx  The index of the parameter.
+         * @param int $idx The index of the parameter.
+         * 
          * @return string The name of the parameter.
          */
         public function parameterName(int $idx) {}
@@ -94,8 +99,8 @@ namespace {
         /**
          * Creates a new LibSQLTransaction instance.
          *
-         * @param  string  $conn_id  The connection ID.
-         * @param  string  $trx_mode  The transaction mode.
+         * @param string $conn_id The connection ID.
+         * @param string $trx_mode The transaction mode.
          */
         public function __construct(string $conn_id, string $trx_mode) {}
 
@@ -116,17 +121,28 @@ namespace {
         /**
          * Executes an SQL statement within the transaction.
          *
-         * @param  string  $stmt  The SQL statement to execute.
-         * @param  array  $parameters  The parameters for the statement (optional).
+         * @param string $stmt The SQL statement to execute.
+         * @param array $parameters The parameters for the statement (optional).
+         *
          * @return int The number of affected rows.
          */
         public function execute(string $stmt, array $parameters = []) {}
 
         /**
+         * Prepares an SQL statement for execution within the transaction.
+         *
+         * @param string $sql The SQL statement to prepare.
+         *
+         * @return LibSQLStatement The prepared statement object.
+         */
+        public function prepare(string $sql) {}
+
+        /**
          * Executes a query within the transaction and returns the result set.
          *
-         * @param  string  $stmt  The SQL statement to execute.
-         * @param  array  $parameters  The parameters for the statement (optional).
+         * @param string $stmt The SQL statement to execute.
+         * @param array $parameters The parameters for the statement (optional).
+         *
          * @return array The result set.
          */
         public function query(string $stmt, array $parameters = []) {}
@@ -154,19 +170,29 @@ namespace {
         /**
          * Creates a new LibSQLResult instance.
          *
-         * @param  string  $config  The configuration string for the database connection.
-         * @param  string  $sql  The SQL query that produced this result.
-         * @param  array  $parameters  The parameters for the SQL query (optional).
+         * @param string $config The configuration string for the database connection.
+         * @param string $sql The SQL query that produced this result.
+         * @param array $parameters The parameters for the SQL query (optional).
          */
         public function __construct(string $config, string $sql, array $parameters = []) {}
 
         /**
          * Fetches the result set as an array.
          *
-         * @param  int  $mode  The fetching mode (optional, default is 3).
+         * @param int $mode The fetching mode (optional, default is 3).
+         *
          * @return array|LibSQLIterator The fetched result set.
          */
         public function fetchArray(int $mode = 3) {}
+
+        /**
+         * Fetche single result set as an array.
+         *
+         * @param int $mode The fetching mode (optional, default is 3).
+         *
+         * @return array|LibSQLIterator The fetched result set.
+         */
+        public function fetchSingle(int $mode = 3) {}
 
         /**
          * Finalizes the result set and frees the associated resources.
@@ -185,7 +211,8 @@ namespace {
         /**
          * Retrieves the name of a column by its index.
          *
-         * @param  int  $column  The index of the column.
+         * @param int $column The index of the column.
+         *
          * @return string The name of the column.
          */
         public function columnName(int $column) {}
@@ -193,7 +220,8 @@ namespace {
         /**
          * Retrieves the type of a column by its index.
          *
-         * @param  int  $column  The index of the column.
+         * @param int $column The index of the column.
+         *
          * @return string The type of the column.
          */
         public function columnType(int $column) {}
@@ -205,6 +233,7 @@ namespace {
          */
         public function numColumns() {}
     }
+
 
     /**
      * Represents a connection to a LibSQL database.
@@ -245,7 +274,7 @@ namespace {
          * Return a result sets
          */
         const LIBSQL_ALL = 4;
-
+        
         /**
          * Return a result Generator
          */
@@ -253,53 +282,60 @@ namespace {
 
         /**
          * The mode of the connection.
-         *
          * @var string
          */
         public $mode;
 
+        public $cdc_url;
+
         /**
          * Creates a new LibSQL instance.
-         *
+         * 
          * ## Example Usage
          * 1. **Local Connection:**
-         *
+         * 
          *    Establishing a connection to a local database is straightforward with LibSQL. You have three options:
-         *
+         * 
          *    a. **Standard DSN Connection:** If you're using a DSN string, use the following format:
+         * 
          *       ```
          *       $db = new LibSQL("libsql:dbname=database.db", LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, "");
          *       ```
-         *
+         *       
          *    b. **Standard SQLite Connection:** For direct SQLite connections, simply provide the database file name:
+         * 
          *       ```
          *       $db = new LibSQL("database.db", LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, "");
          *       ```
-         *
+         *       
          *    c. **Standard LibSQL Connection:** Alternatively, you can specify the file protocol explicitly:
+         * 
          *       ```
          *       $db = new LibSQL("file:database.db", LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, "");
          *       ```
-         *
+         * 
          * 2. **Remote Connection:**
-         *
+         * 
          *    Connecting to a remote database is equally effortless. Choose between two options:
-         *
+         * 
          *    a. **Standard DSN Connection with 'libsql://':**
+         * 
          *       ```
          *       $db = new LibSQL("libsql:dbname=libsql://database-org.turso.io;authToken=random-token");
          *       ```
-         *
+         *       
          *    b. **Standard DSN Connection with 'https://':**
+         * 
          *       ```
          *       $db = new LibSQL("libsql:dbname=https://database-org.turso.io;authToken=random-token");
          *       ```
-         *
+         * 
          * 3. **Remote Replica Connection:**
-         *
+         * 
          *    To set up a replica connection for distributed systems, follow these steps:
-         *
+         * 
          *    a. Define the configuration array with the required parameters:
+         * 
          *       ```
          *       $config = [
          *          "url" => "file:database.db",
@@ -307,28 +343,72 @@ namespace {
          *          "syncUrl" => "libsql://database-org.turso.io",
          *          "syncInterval" => 5,
          *          "read_your_writes" => true,
-         *          "encryptionKey" => "",
+         *          "encryptionKey" => ""
          *       ];
+         * 
+         *       $db = new LibSQL(
+         *          config: $config,
+         *          sqld_offline_mode: false,
+         *          flags: LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE,
+         *          encryption_key: "",
+         *          offline_writes: false
+         *       );
          *       ```
+         *       
+         *    b. To establish a replica connection with offline writes, set the offline_writes parameter to true:
+         * 
+         *       ```
+         *       $db = new LibSQL(
+         *          config: $config,
+         *          sqld_offline_mode: false,
+         *          flags: LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE,
+         *          encryption_key: "",
+         *          offline_writes: true
+         *       );
+         *       ```
+         *       
+         *       Note: The offline_writes parameter is currently in beta and may have some limitations. It's only for Turso Cloud database not Libsql Server (sqld) instance.
+         *       
+         *    c. To establish a replica connection with offline writes for sqld instance, set the offline_writes parameter to true and sqld_offline_mode to true:
+         * 
+         *       ```
+         *       $db = new LibSQL(
+         *          config: $config,
+         *          sqld_offline_mode: true,
+         *          flags: LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE,
+         *          encryption_key: "",
+         *          offline_writes: true
+         *       );
+         *       ```
+         *       
+         *       Note: The offline_writes parameter is currently in beta and may have some limitations. It's only for Libsql Server (sqld) instance.
+         * 
+         *    d. Instantiate a new LibSQL object with the configuration array:
+         * 
+         *       ```
+         *       $db = new LibSQL($config, LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, "", false);
+         *       $db = new LibSQL($config, LibSQL::OPEN_READWRITE | LibSQL::OPEN_CREATE, "", true); // Offline Write BETA
+         *       ```
+         * 
+         * With this Quick Start guide, you're ready to seamlessly integrate LibSQL PHP Extension into your projects, whether for local, remote, or distributed database connections. 
          *
-         *    b. Instantiate a new LibSQL object with the configuration array:
-         *       ```
-         *       $db = new LibSQL($config);
-         *       ```
-         *
-         * With this Quick Start guide, you're ready to seamlessly integrate LibSQL PHP Extension into your projects, whether for local, remote, or distributed database connections.
+         * @param string|array $config
+         * @param bool|false $sqld_offline_mode
+         * @param integer|null $flags
+         * @param string|null $encryption_key
+         * @param bool|false $offline_writes
          */
-        public function __construct(string|array $config, ?int $flags = 6, ?string $encryption_key = '') {}
+        public function __construct(string|array $config, ?bool $sqld_offline_mode = false, ?int $flags = 6, ?string $encryption_key = "", ?bool $offline_writes = false) {}
 
         /**
-         * Retrieves the version of the LibSQL library.
-         *
+         * Retrieves the version of the LibSQL extension.
+         * 
          * ## Example Usage
          * ```
          * // Retrieve the version of the LibSQL
          * $version = LibSQL::version();
          * echo $version;
-         *
+         * 
          * // Output
          * // LibSQL Core Version : 3.44.0-3044000 - LibSQL PHP Extension Version: 1.0.0
          * ```
@@ -341,34 +421,33 @@ namespace {
          * Retrieves the number of rows changed by the last SQL statement.
          *
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * $stmt = "UPDATE users SET age = 28 WHERE id = 1";
          * $db->execute($stmt);
-         *
+         * 
          * // Retrieve the number of rows changed
          * $changes = $db->changes();
          * echo "Number of Rows Changed: " . $changes;
-         *
+         * 
          * $db->close();
          * ```
-         *
          * @return int The number of rows changed.
          */
         public function changes() {}
 
         /**
          * Checks if autocommit mode is enabled for the connection.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * // Check if autocommit mode is enabled
          * if ($db->isAutocommit()) {
          *     echo "Autocommit mode is ENABLED." . PHP_EOL;
@@ -384,62 +463,62 @@ namespace {
 
         /**
          * Retrieves the number of rows changed by the last SQL statement.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * $stmt = "UPDATE users SET age = 28 WHERE id = 1";
          * $db->execute($stmt);
-         *
+         * 
          * // Retrieve the number of rows changed
          * $changes = $db->totalChanges();
          * echo "Number of Rows Changed: " . $changes;
-         *
+         * 
          * $db->close();
          * ```
-         *
+         * 
          * @return int The total number of rows changed.
          */
         public function totalChanges() {}
-
+        
         /**
          * Retrieves the ID of the last inserted row.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * $stmt = "INSERT INTO users (name, age) VALUES ('John Doe', 30)";
          * $db->execute($stmt);
-         *
+         * 
          * // Retrieve the ID of the last inserted row
          * $id = $db->lastInsertedId();
          * echo "Last inserted row ID: " . $id;
-         *
+         * 
          * $db->close();
          * ```
-         *
+         * 
          * @return int The ID of the last inserted row.
          */
         public function lastInsertedId() {}
 
         /**
          * Executes an SQL statement on the database.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * // SQL statement with positional parameters
          * $stmt = "INSERT INTO users (name, age) VALUES (?, ?)";
          * $parameters = ["John Doe", 30];
          * $rowsAffected = $db->execute($stmt, $parameters);
          * echo "Inserted $rowsAffected rows." . PHP_EOL;
-         *
+         * 
          * // SQL statement with named parameters
          * $stmt = "UPDATE users SET name = :name WHERE id = :id";
          * $parameters = [":name" => "Jane Doe", ":id" => 6];
@@ -447,82 +526,86 @@ namespace {
          * echo "Updated $rowsAffected rows." . PHP_EOL;
          * ```
          *
-         * @param  string  $stmt  The SQL statement to execute.
-         * @param  array  $parameters  The parameters for the statement (optional).
+         * @param string $stmt The SQL statement to execute.
+         * @param array $parameters The parameters for the statement (optional).
+         *
          * @return int The number of rows affected by the statement.
          */
         public function execute(string $stmt, array $parameters = []) {}
 
         /**
          * Executes a batch of SQL statements on the database.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * // SQL statements to execute as a batch
          * $stmt = "
          *     INSERT INTO users (name, age) VALUES ('Jane Jenifer', 30);
          *     INSERT INTO users (name, age) VALUES ('Jane Smith', 25);
          *     INSERT INTO users (name, age) VALUES ('Michael Johnson', 40);
          * ";
-         *
+         * 
          * // Execute the batch of SQL statements
          * if ($db->executeBatch($stmt)) {
          *     echo "Batch execution successful.";
          * } else {
          *     echo "Batch execution failed.";
          * }
-         *
+         * 
          * $db->close();
          * ```
          *
-         * @param  string  $stmt  The SQL statements to execute as a batch.
+         * @param string $stmt The SQL statements to execute as a batch.
+         *
          * @return bool True if the batch execution was successful, otherwise false.
          */
         public function executeBatch(string $stmt) {}
 
         /**
          * Executes an SQL query on the database.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * $results = $db->query("SELECT * FROM users");
-         *
+         * 
          * foreach ($results['rows'] as $row) {
          *     echo "ID: " . $row['id'] . ", Name: " . $row['name'] . ", Age: " . $row['age'] . "\n";
          * }
-         *
+         * 
          * $db->close();
          * ```
          *
-         * @param  string  $stmt  The SQL query to execute.
-         * @param  array  $parameters  The parameters for the query (optional).
+         * @param string $stmt The SQL query to execute.
+         * @param array $parameters The parameters for the query (optional).
+         * @param bool $force_remote Force read from remote (only for sqld offline mode)
+         *
          * @return LibSQLResult The result of the query.
          */
-        public function query(string $stmt, array $parameters = []) {}
+        public function query(string $stmt, array $parameters = [], bool $force_remote = false) {}
 
         /**
          * Initiates a new database transaction.
-         *
+         * 
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * // Start a new transaction with default behavior
          * $transaction = $db->transaction();
-         *
+         * 
          * $transaction->execute("UPDATE users SET name = 'Glauber Costa' WHERE id = 6");
-         *
+         * 
          * $another_transaction = true;
-         *
+         * 
          * if ($another_transaction) {
          *     $transaction->commit();
          *     echo "Transaction commited!" . PHP_EOL;
@@ -530,28 +613,29 @@ namespace {
          *     $transaction->rollback();
          *     echo "Transaction rollback!" . PHP_EOL;
          * }
-         *
+         * 
          * $db->close();
          * ```
          *
-         * @param  string  $behavior  The behavior of the transaction (optional).
+         * @param string $behavior The behavior of the transaction (optional).
+         *
          * @return \LibSQLTransaction The transaction object.
          */
-        public function transaction(string $behavior = 'DEFERRED') {}
+        public function transaction(string $behavior = "DEFERRED") {}
 
         /**
          * Prepares an SQL statement for execution.
          *
          * ## Example Usage
-         *
+         * 
          * ```
          * // Create a new LibSQL instance
          * $db = new LibSQL("libsql:dbname=database.db");
-         *
+         * 
          * // Prepare an SQL statement for execution
          * $sql = "SELECT * FROM users WHERE id = ?";
          * $statement = $db->prepare($sql);
-         *
+         * 
          * if ($statement) {
          *     // Execute the prepared statement with parameters
          *     $result = $statement->query([1]);
@@ -560,20 +644,21 @@ namespace {
          *     // Handle error
          *     echo "Failed to prepare statement.";
          * }
-         *
+         * 
          * $db->close();
          * ```
+         * 
+         * @param string $sql The SQL statement to prepare.
          *
-         * @param  string  $sql  The SQL statement to prepare.
          * @return \LibSQLStatement The prepared statement object.
          */
         public function prepare(string $sql) {}
 
         /**
          * Closes the database connection.
-         *
+         * 
          * # Example Usage
-         *
+         * 
          * ```
          * $db->close();
          * ```
@@ -584,42 +669,80 @@ namespace {
 
         /**
          * Sync the database.
-         *
+         * 
          * # Example Usage
-         *
+         * 
          * ```
          * $db->sync();
          * ```
+         * 
+         * @param bool|false $log_info Whether to log information about the sync operation.
          *
          * @return void The result of the sync operation.
          */
-        public function sync() {}
+        public function sync(?bool $log_info = false) {}
+
+        /**
+         * Checks the connectivity of the database server
+         * 
+         * @return bool
+         */
+        public function checkConnectivity() {}
+
+        /**
+         * Returns the number of pending operations.
+         * 
+         * @return int
+         */
+        public function getPendingOperationsCount() {}
+        
+        /**
+         * Checks if the database connection is online.
+         * 
+         * @return bool
+         */
+        public function isOnline() {}
 
         /**
          * Enable or disable the loading of extensions.
-         *
+         * 
          * # Example Usage
          * ```
          * $db->enableLoadExtension(true);
          * ```
-         *
-         * @param  bool  $onoff  Enable or disable the loading of extensions.
+         * 
+         * @param bool $onoff Enable or disable the loading of extensions.
          * @return void
          */
         public function enableLoadExtension(?bool $onoff) {}
 
         /**
          * Load extensions.
-         *
+         * 
          * # Example Usage
          * ```
          * $db->loadExtensions(["extension1", "extension2"]);
          * ```
-         *
-         * @param  array|string  $extension_paths  The paths to the extensions to load.
+         * 
+         * @param array|string $extension_paths The paths to the extensions to load.
          * @return void
          */
         public function loadExtensions(array|string $extension_paths) {}
+
+        /**
+         * Captures an event.
+         * 
+         * # Example Usage
+         * ```
+         * $db->captureIt("event_type", "query", "message");
+         * ```
+         * 
+         * @param string $event_type The type of the event.
+         * @param string|null $query The query associated with the event.
+         * @param string|null $message The message associated with the event.
+         * @return bool
+         */
+        public function captureIt(string $event_type, ?string $query, ?string $message) {}
     }
 
     /**
@@ -634,9 +757,9 @@ namespace {
         /**
          * Constructor for LibSQLIterator.
          *
-         * @param  mixed  $data  The data to be iterated over. This can be any type of data,
-         *                       but it is typically expected to be a PHP array or an object
-         *                       that can be iterated over.
+         * @param mixed $data The data to be iterated over. This can be any type of data,
+         *                    but it is typically expected to be a PHP array or an object
+         *                    that can be iterated over.
          */
         public function __construct(mixed $data) {}
 

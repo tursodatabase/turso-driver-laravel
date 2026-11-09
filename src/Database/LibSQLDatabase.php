@@ -9,6 +9,7 @@ use LibSQL;
 use LibSQLTransaction;
 use PDO;
 use PDOException;
+use ReflectionClass;
 use SQLite3;
 
 class LibSQLDatabase
@@ -33,9 +34,14 @@ class LibSQLDatabase
 
         $this->setConnectionMode($config);
 
-        $config = $this->buildConfig($this->connection_mode, $config);
+        $dbConfig = $this->buildConfig($this->connection_mode, $config);
 
-        $this->db = new LibSQL($config);
+        $this->db = $this->connectLibSQL(
+            config: $dbConfig,
+            sqldOfflineMode: (bool) ($config['sqldOfflineMode'] ?? false),
+            offlineWrites: (bool) ($config['offlineWrites'] ?? false),
+            encryptionKey: $config['encryptionKey'] !== null ? (string) $config['encryptionKey'] : '',
+        );
 
         $this->in_transaction = false;
 
@@ -50,6 +56,8 @@ class LibSQLDatabase
             'encryptionKey' => $config['encryptionKey'] ?? null,
             'syncInterval' => $config['syncInterval'] ?? 5,
             'read_your_writes' => $config['read_your_writes'] ?? true,
+            'sqldOfflineMode' => $config['sqldOfflineMode'] ?? false,
+            'offlineWrites' => $config['offlineWrites'] ?? false,
         ];
     }
 
@@ -68,14 +76,47 @@ class LibSQLDatabase
             ];
         }
 
+        // The encryption key, the offline-write flags and the connection flags
+        // are handed over positionally in connectLibSQL() — since extension
+        // 1.7.0 the config array is only read for url/authToken/syncUrl/
+        // syncInterval/read_your_writes.
         return [
             'url' => "file:{$config['database']}",
             'authToken' => $config['authToken'],
             'syncUrl' => $config['url'],
             'syncInterval' => $config['syncInterval'],
             'read_your_writes' => $config['read_your_writes'],
-            'encryptionKey' => $config['encryptionKey'],
         ];
+    }
+
+    private static ?int $libsqlConstructorParamCount = null;
+
+    /**
+     * `libsql_php_extension/v1.6.x` constructs as
+     * (config, flags?, encryption_key?, offline_writes?) — 4 params.
+     * `tursodatabase/turso-client-php v1.7.0` added `sqld_offline_mode` as
+     * the second positional argument and moved nothing else — 5 params.
+     * Feature-detect so both extension generations keep working.
+     */
+    private function connectLibSQL(string|array $config, bool $sqldOfflineMode, bool $offlineWrites, string $encryptionKey): LibSQL
+    {
+        $paramCount = self::$libsqlConstructorParamCount;
+
+        if ($paramCount === null) {
+            $paramCount = self::$libsqlConstructorParamCount = (new ReflectionClass(LibSQL::class))
+                ->getMethod('__construct')
+                ->getNumberOfParameters();
+        }
+
+        if ($paramCount >= 5) {
+            return new LibSQL($config, $sqldOfflineMode, 6, $encryptionKey, $offlineWrites);
+        }
+
+        if ($paramCount === 4) {
+            return new LibSQL($config, 6, $encryptionKey, $offlineWrites);
+        }
+
+        return new LibSQL($config);
     }
 
     private function setConnectionMode(array $config): void

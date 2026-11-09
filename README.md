@@ -108,8 +108,14 @@ DB_AUTH_TOKEN=<your-database-auth-token-from-turso>
 DB_SYNC_URL=<your-database-url-from-turso>
 DB_SYNC_INTERVAL=5
 DB_READ_YOUR_WRITES=true
-DB_ENCRYPTION_KEY=
+DB_ENCRYPTION_KEY=<your-encryption-key>
+DB_SQLD_OFFLINE_MODE=false
+DB_OFFLINE_WRITES=false
 ```
+
+-   `DB_ENCRYPTION_KEY` encrypts the database at rest. It is passed straight into the libSQL extension (`v1.7.0` positional `encryption_key` argument) and is only effective at database creation time.
+-   `DB_SQLD_OFFLINE_MODE` enables `sqld_offline_mode` for sqld (self-hosted libsql server) offline-write replicas (`extension >= 1.7.0`).
+-   `DB_OFFLINE_WRITES` enables offline writes for Turso Cloud databases (`extension >= 1.7.0`, Turso Cloud only — not plain libsql-server).
 
 Create a new Turso Database [here](https://docs.turso.tech/quickstart)
 
@@ -180,15 +186,18 @@ DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 
 <details>
   <summary><strong>🌱 &mdash; Remote Replica Connection (Embedded Replica)</strong></summary>
-  <p>To configure remote replica connection (embedded replica), you can simply use the following <code>.env</code>:</p>
+  <p>To configure remote replica connection (embedded replica), you can simply use the following <code>.env</code> variables:</p>
   <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=database.sqlite
 DB_AUTH_TOKEN=&lt;your-database-auth-token-from-turso&gt;
 DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 DB_SYNC_INTERVAL=5
 DB_READ_YOUR_WRITES=true
-DB_ENCRYPTION_KEY=
+DB_ENCRYPTION_KEY=<your-encryption-key>
+DB_SQLD_OFFLINE_MODE=false
+DB_OFFLINE_WRITES=false
   </code></pre>
+  <p>Enable `DB_OFFLINE_WRITES=true` (Turso Cloud) or `DB_SQLD_OFFLINE_MODE=true` (sqld server) when you need offline-write capability; both require the libSQL extension `>= 1.7.0`.</p>
   <p>That's it! How easy to make different connection using LibSQL Driver in Laravel, right?!</p>
 </details>
 
@@ -206,6 +215,8 @@ Add this configuration at `config/database.php` inside the `connections` array:
     'syncInterval' => env('DB_SYNC_INTERVAL', 5),
     'read_your_writes' => env('DB_READ_YOUR_WRITES', true),
     'encryptionKey' => env('DB_ENCRYPTION_KEY', ''),
+    'sqldOfflineMode' => env('DB_SQLD_OFFLINE_MODE', false),
+    'offlineWrites' => env('DB_OFFLINE_WRITES', false),
 ],
 ```
 
