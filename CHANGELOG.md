@@ -1,8 +1,12 @@
 ## [1.4.0] - 2026-11-10
 
-- release: minor version 1.4.0 [Imam Ali Mustofa]
-- docs(changelog): curate the 1.3.2 section (headline #113/#66 fixes, fold bot churn) [Imam Ali Mustofa]
-- chore: update CHANGELOG.md for patch version 1.3.2 [Imam Ali Mustofa]
+- fix(encryption): `DB_ENCRYPTION_KEY` actually reaches the libSQL extension — it was always a dead positional argument before extension v1.7.0 positional args are now passed positionally (config `encryptionKey`) so database encryption works from creation
+- feat(config): new `sqldOfflineMode` / `offlineWrites` config keys (env `DB_SQLD_OFFLINE_MODE`, `DB_OFFLINE_WRITES`) — sqld offline-write mode and Turso Cloud offline writes, feature-detected across extension generations (1.6.x vs 1.7.0+ constructors)
+- fix(ide): vendored IDE stubs refreshed from extension `v1.7.0` (51 methods, new `prepare()`/`fetchSingle()`/CDC/`sync()`/`isOnline()` surface, renamed `src/libsql_php.stubs.php`)
+- chore(deps): `darkterminal/turso-php-installer` ^2.2 — metadata-based install detection (fixes false "already installed" reruns), PHP 8.1–8.5 assets, renamed turso-client-php release channel serving extension 1.7.0
+- fix(statement): rethrow failed writes as `PDOException` → Laravel `QueryException` (fixes #113, PR #114) [William Isted]
+- security(vectors): validate identifiers, vector components and limit in `VectorMacro` (PR #107) [jonathanagustin]
+- ci: actions bumps folded (checkout 7, dependabot/fetch-metadata 3.1.0, git-auto-commit-action 7) [dependabot[bot]]
 
 ## [1.3.2] - 2026-11-10
 
