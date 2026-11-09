@@ -1,3 +1,9 @@
+## [1.4.0] - 2026-11-10
+
+- release: minor version 1.4.0 [Imam Ali Mustofa]
+- docs(changelog): curate the 1.3.2 section (headline #113/#66 fixes, fold bot churn) [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 1.3.2 [Imam Ali Mustofa]
+
 ## [1.3.2] - 2026-11-10
 
 - fix(statement): rethrow failed writes (constraints, binding errors) as `PDOException` — Laravel surfaces a `QueryException`, silent drops are over (fixes #113, PR #114) [William Isted]
