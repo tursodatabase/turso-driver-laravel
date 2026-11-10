@@ -31,6 +31,20 @@ jobs:
         run: |
           ./vendor/darkterminal/turso-php-installer/builds/turso-php-installer install -n --php-version=8.3
 
+      - name: Seed sqld (initialize WAL so embedded replicas can sync)
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf -m 2 -X POST http://127.0.0.1:8081/v2/pipeline \
+              -H 'Content-Type: application/json' \
+              -d '{"requests":[{"type":"execute","stmt":{"sql":"CREATE TABLE IF NOT EXISTS _boot (id INTEGER PRIMARY KEY)"}},{"type":"close"}]}' > /dev/null 2>&1; then
+              echo "sqld ready and seeded"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "sqld did not become ready"
+          exit 1
+
       - name: Tests
         env:
           TURSO_SQLD_AVAILABLE: true
