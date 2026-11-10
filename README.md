@@ -1,9 +1,11 @@
 > [!IMPORTANT]
-> Offline writes are currently in **beta**. They are supported in this driver
-> via the libSQL PHP extension v1.7.0 or newer (see *Offline-Write Modes*
-> below). A new Laravel adapter that requires no PHP extension is also in
-> development — follow along and share feedback on the
-> [Turso Discord](https://discord.gg/9eAaMnJtfY).
+> Offline writes are currently in **beta** and come in **two flavors**: the
+> journaled flavor for **Turso Cloud** (`DB_OFFLINE_WRITES=true` alone) and the
+> sqld flavor for **self-hosted libsql-server** (`DB_SQLD_OFFLINE_MODE=true`
+> **and** `DB_OFFLINE_WRITES=true`). Both are supported via the libSQL PHP
+> extension v1.7.0+ (see *Offline-Write Modes* below). A new Laravel adapter
+> that requires no PHP extension is also in development — follow along and
+> share feedback on the [Turso Discord](https://discord.gg/9eAaMnJtfY).
 
 <p align="center">
   <a href="https://discord.gg/9eAaMnJtfY">
@@ -226,10 +228,18 @@ DB_OFFLINE_WRITES=false
 Both modes are **opt-in** and default to `false`. They require libSQL PHP
 extension **1.7.0+** — older extension versions ignore these keys silently.
 
-| Env variable | Value | Target | Behavior |
+| Env variable | Value | Flavor target | Behavior |
 |---|---|---|---|
-| `DB_OFFLINE_WRITES` | `true` | **Turso Cloud** only | Writes queue locally and replay to the cloud when connectivity returns. |
-| `DB_SQLD_OFFLINE_MODE` | `true` | **sqld** (self-hosted libsql-server) | Enables offline-write mode for self-managed libsql instances. |
+| `DB_OFFLINE_WRITES` | `true` | **Turso Cloud** (beta flavor) | `remote_replica` mode — a local replica writes against Turso Cloud; `DB::sync()` pushes journaled frames. |
+| `DB_SQLD_OFFLINE_MODE` | `true` | **sqld** (self-hosted libsql-server) | `offline_write` mode — the write journal applies locally; `DB::sync()` replays it to sqld. |
+| `DB_SQLD_OFFLINE_MODE` + `DB_OFFLINE_WRITES` | both `true` | **sqld** (self-hosted libsql-server) | Activates the sqld journaled flavor; required together. |
+
+> [!IMPORTANT]
+> **The Turso Cloud flavor bootstraps from the cloud first.** With a fresh
+> local replica file, call `DB::sync()` **before** any write to pull the
+> remote state — writes made before the first sync then push with the correct
+> frame generation. The sqld flavor journals locally first and syncs later,
+> so this bootstrap is not required there.
 
 > [!NOTE]
 > These modes are **not** for plain `libsql-server` without the offline-write
@@ -237,6 +247,13 @@ extension **1.7.0+** — older extension versions ignore these keys silently.
 > `DB_SQLD_OFFLINE_MODE` targets self-hosted sqld replicas. Both need the
 > driver's `sqldOfflineMode` / `offlineWrites` connection keys to be enabled
 > (see the `config/database.php` snippet below).
+
+**Verified live.** The Turso Cloud flavor has been exercised against a real
+Turso Cloud database by this repository: bootstrap sync, journaled local
+writes, `DB::sync()` push, plain remote read-back, and a pushed drop — all
+green via `php artisan proof:offline-cloud` and the env-gated
+`TursoCloudOfflineWriteTest` (skips without `TURSO_CLOUD_DB_URL` /
+`TURSO_CLOUD_DB_TOKEN`). See `docker/proof/offline-cloud.sh`.
 
 ### Database File Configuration
 

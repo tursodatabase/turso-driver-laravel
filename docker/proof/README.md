@@ -59,6 +59,7 @@ PROOF: {"ok":N,"fail":0,"all_ok":true}
 PROOF-HTTP: {"ok":M,"fail":0,"all_ok":true}
 PROOF-OFFLINE-WRITE: {"ok":P,"fail":0,"all_ok":true}
 PROOF-OFFLINE-SYNC: {"ok":Q,"fail":0,"all_ok":true}
+PROOF-OFFLINE-CLOUD: {"ok":R,"fail":0,"all_ok":true}   # only with TURSO_CLOUD_DB_URL/TOKEN set
 ```
 
 Finish with a clean slate (containers **and** volumes removed):
@@ -95,6 +96,39 @@ web tier — a separate process from the CLI asserts):
 `proof_notes` table in the local file) and runs right after it in `proof.sh`.
 Re-running the harness always wipes and rebuilds from scratch, so ordering is
 deterministic.
+
+### Turso Cloud offline-writes flavor (`php artisan proof:offline-cloud`, opt-in)
+
+Separate from the sqld phases above, this one exercises the driver's **Turso
+Cloud** offline-writes flavor — the extension's `new_synced_database` over
+HTTPS, in `remote_replica` mode. It needs a **real Turso Cloud database** — it
+cannot be emulated — and a **manual first sync** (bootstrap) before any write
+against a non-empty cloud database, otherwise the push fails with a frame
+conflict. The driver itself needs nothing extra beyond `offlineWrites=true`
+without `sqldOfflineMode=true`.
+
+It asserts: bootstrap pull from remote → local journaled writes →
+`sync()` push → plain remote read-back → pushed drop, all against your own
+Turso Cloud database (12 asserts). The table it creates is dropped and the
+drop is pushed, so the cloud database is left untouched.
+
+| Phase | What it proves |
+|-------|----------------|
+| `cloud_bootstrap` | Connection is the Turso Cloud offline-writes flavor (`remote_replica` mode) and `sync()` pulls the remote state down |
+| `cloud_journal` | `CREATE TABLE` + 2 inserts journal to the local replica |
+| `cloud_push` | `sync()` pushes the journaled frames to Turso Cloud |
+| `cloud_remote_read` | A plain `remote` (non-replica) connection reads the 2 rows |
+| `cloud_cleanup` | The drop is journaled and pushed; cloud is left untouched |
+
+```bash
+TURSO_CLOUD_DB_URL=libsql://<db>.turso.io TURSO_CLOUD_DB_TOKEN=<token> \
+    docker/proof/offline-cloud.sh
+```
+
+The phase is **opt-in**: without those two environment variables the script
+prints a skip notice and exits 0 (the harness stays green). It is deliberately
+not wired into `proof.sh` — it talks to a live cloud database, so it never
+runs in CI.
 
 ### Offline-write phases (`php artisan proof:offline-write` / `proof:offline-sync`)
 
@@ -168,11 +202,11 @@ DRIVER_SOURCE=packagist DRIVER_VERSION=^1.4 docker/proof/proof.sh --teardown
 
 ## What this does NOT prove
 
-- **Turso Cloud offline writes** (`DB_OFFLINE_WRITES=true` without
-  `DB_SQLD_OFFLINE_MODE=true`). That flavor targets Turso Cloud; this harness
-  proves the **sqld (self-hosted) offline-write** combination —
-  `sqldOfflineMode=true` + `offlineWrites=true` — against the official
-  `ghcr.io/tursodatabase/libsql-server` image.
+- **Turso Cloud credentials are never fabricated or borrowed.** The
+  `offline-cloud` phase runs only against your own database with your own
+  token. As a baseline, `proof.sh` verifies the **sqld (self-hosted)
+  offline-write** combination; the Cloud combination is verified separately
+  by `offline-cloud.sh` (and by `TursoCloudOfflineWriteTest`, env-gated).
 - **Your application.** The proof uses a vanilla Laravel 12 skeleton served by
   fpm. Your app's middleware, opcache setup and connection pooling may differ.
 - **Debug error pages are environment-specific.** `throw_over_http` asserts
@@ -197,12 +231,14 @@ DRIVER_SOURCE=packagist DRIVER_VERSION=^1.4 docker/proof/proof.sh --teardown
 | `Dockerfile.dockerignore` | Per-Dockerfile ignore: keeps the context small, app payload included |
 | `compose.yaml` | `sqld` + `app` (php-fpm) + `web` (nginx) services, split across `web-net` / `server-net`; project name `turso-driver-proof` |
 | `proof.sh` | Orchestrator: wipe → build → server readiness → install → migrate → CLI assert → web tier → HTTP assert → **offline window (disconnect/reconnect)** → reports |
+| `offline-cloud.sh` | Opt-in Turso Cloud offline-writes proof (probes `php artisan proof:offline-cloud`) — needs your own cloud DB; never in CI |
 | `default.conf` | nginx tier: front controller to php-fpm (`fastcgi_pass app:9000`) |
 | `host-hrana-check.php` | Host-side raw Hrana probe for the server-side asserts (outside the outage) |
 | `app/ProofRun.php` | Console assert phases (`php artisan proof:run`) |
 | `app/ProofHttp.php` | HTTP/fpm assert phases (`php artisan proof:http`) |
 | `app/ProofOfflineWrite.php` | Offline-write assertions, run during the outage (`proof:offline-write`) |
 | `app/ProofOfflineSync.php` | Journal drain + server round-trip (`proof:offline-sync`) |
+| `app/ProofOfflineCloud.php` | Turso Cloud offline-writes assertions (`proof:offline-cloud`) — 12 asserts against your DB |
 | `app/web-routes.php` | Routes served over HTTP: `/proof/health`, `/proof/remote`, `/proof/throw` |
 | `app/create_proof_notes_table.php` | Migration created by `php artisan migrate --force` through the driver |
 | `proof-report/` | Generated reports (gitignored) |
