@@ -1,3 +1,22 @@
+## [1.6.0] - 2026-11-10
+
+- release: minor version 1.6.0 [Imam Ali Mustofa]
+- docs(README): remove unverifiable promises; state only repo-proven facts [Imam Ali Mustofa]
+- docs(README): drop Laravel 10/11 from the supported matrix [Imam Ali Mustofa]
+- docs: reword "What this does NOT prove" first bullet [Imam Ali Mustofa]
+- ci: add Laravel 13 legs to the test matrix [Imam Ali Mustofa]
+- docs: document Turso Cloud offline-writes flavor + verified cloud proof [Imam Ali Mustofa]
+- feat(docker): Turso Cloud offline-writes proof + feature test [Imam Ali Mustofa]
+- docs: add SECURITY.md (supported versions, private reporting, coordinated disclosure) [Imam Ali Mustofa]
+- ci: run two seeded sqld services and pin composer platform to php 8.2 [Imam Ali Mustofa]
+- test(replica): isolate the embedded-replica tests and survive stale WAL opens [Imam Ali Mustofa]
+- ci: expand tests to PHP 8.2/8.3/8.4/8.5 matrix [Imam Ali Mustofa]
+- ci: seed sqld service with a bootstrap table before tests [Imam Ali Mustofa]
+- feat(driver): multi-connection libsql facade extensions + server-dependent tests in CI [Imam Ali Mustofa]
+- test(fixtures): make factory-generated names collision-proof [Imam Ali Mustofa]
+- docs(changelog): curate the 1.5.0 section (headline native offline-write support, proof harness, security fixes; fold release meta) [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for minor version 1.5.0 [Imam Ali Mustofa]
+
 ## [1.5.0] - 2026-11-10
 
 - feat(offline): offline writes now work through the driver — when `sqldOfflineMode` and `offlineWrites` are set (env `DB_SQLD_OFFLINE_MODE`, `DB_OFFLINE_WRITES`, extension ≥ 1.7.0), statements bind parameters and route through the extension's offline-safe `execute()`/`query()`; DDL (e.g. `CREATE TABLE`) and DML journal locally while the app is offline, and `sync()`/re-open replicates them to the server. The extension refuses `prepare()` in offline-write mode, which previously made every statement fail
