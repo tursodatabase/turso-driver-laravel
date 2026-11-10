@@ -1,3 +1,11 @@
+## [1.7.0] - 2026-11-10
+
+- release: minor version 1.7.0 [Imam Ali Mustofa]
+- fix(driver): cursor() streaming, unambiguous blob transport, base64 heuristic [Imam Ali Mustofa]
+- docs(README): trim duplicated docs, link to Wiki as canonical user manual [Imam Ali Mustofa]
+- docs(changelog): curate 1.6.0 section (headline multi-connection fix, L13 matrix, cloud proof; fold release meta) [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for minor version 1.6.0 [Imam Ali Mustofa]
+
 ## [1.6.0] - 2026-11-10
 
 - feat(driver, multi-connection): `db.factory` extension registered **by connection name** — every statically configured `driver: libsql` connection is now extended individually, each with its own raw config. Previously the facade extension was registered only for the connection named `libsql` and forced the default `libsql` config onto every connection — any second libsql connection silently shared the default's memory configuration, making remote/replica modes unusable in multi-connection apps. The 6 server-dependent tests (previously always skipped) now run and pass in CI against seeded sqld services
