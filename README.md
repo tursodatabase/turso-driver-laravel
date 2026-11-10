@@ -72,7 +72,7 @@
 | Component | Requirement |
 |---|---|
 | PHP | ^8.2 (extension assets available for PHP 8.2 – 8.5) |
-| Laravel | 10, 11, 12, or 13 |
+| Laravel | 12 or 13 (13 requires PHP 8.3+) |
 | libSQL PHP extension | Installed automatically via Artisan (see below) |
 | Turso PHP installer | 2.2+ (bundled with this package) |
 
