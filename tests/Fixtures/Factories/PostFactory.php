@@ -19,7 +19,7 @@ class PostFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'title' => fake()->text(rand(10, 30)),
+            'title' => fake()->unique()->regexify('[a-z]{8}'),
             'content' => fake()->paragraph(),
         ];
     }

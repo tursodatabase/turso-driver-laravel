@@ -17,7 +17,7 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->text(rand(5, 10)),
+            'name' => fake()->unique()->regexify('[a-z]{8}'),
         ];
     }
 

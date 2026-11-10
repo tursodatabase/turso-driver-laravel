@@ -19,7 +19,7 @@ class EnvironmentFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
-            'name' => fake()->text(rand(5, 10)),
+            'name' => fake()->unique()->regexify('[a-z]{8}'),
         ];
     }
 
