@@ -1,10 +1,16 @@
 # Turso Driver for Laravel — isolated proof of usage.
 #
-#   docker compose -f docker/proof/compose.yaml up -d --build sqld app
-#   docker/proof/proof.sh        (orchestrates build, readiness, phases, report)
+# Topology: proof.sh orchestrates everything; this file only declares the
+# services:
 #
-# The `proof` orchestration lives in proof.sh (exec into the app container);
-# this file only declares the two services.
+#   curl (from inside the app container)
+#        │
+#        ▼
+#   nginx :80 ──► app (php-fpm :9000) ──► sqld (libSQL server :8080)
+#
+# The app container shares a named volume with nginx so the web tier can
+# serve /app/public. The volume is initialized from the image on first use
+# and wiped by `proof.sh --teardown` (docker compose down -v).
 
 name: turso-driver-proof
 
@@ -23,10 +29,21 @@ services:
       args:
         DRIVER_SOURCE: ${DRIVER_SOURCE:-path}
         DRIVER_VERSION: ${DRIVER_VERSION:-*}
-    # Keeps the container alive so proof.sh can exec artisan commands.
-    command: ["tail", "-f", "/dev/null"]
-    # The app reaches the server over the compose network, so no driver
-    # config needs to be written by hand.
+    volumes:
+      - app-data:/app
+    # php-fpm serves :9000 (see Dockerfile CMD). The CLI SAPI in the same
+    # image is what proof.sh execs into for the console proof phases.
+
+  web:
+    image: nginx:alpine
+    depends_on:
+      - app
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      - app-data:/app:ro
+    ports:
+      - "${HTTP_PORT:-8080}:80"
 
 volumes:
   sqld-data:
+  app-data:

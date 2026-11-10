@@ -11,10 +11,12 @@
 #                  latest stable (packagist).
 #
 # The image builds a fresh Laravel 12 application, installs the driver the
-# same way a user would (composer → Artisan → turso-php:install), and keeps
-# the container alive so `docker compose exec` can drive proof phases.
+# same way a user would (composer → Artisan → turso-php:install), and runs
+# php-fpm as the app tier behind nginx (the web proof). The CLI SAPI is part
+# of the same image, so `docker compose exec app php artisan ...` (the CLI
+# proof) keeps working unchanged.
 
-FROM php:8.3-cli-bookworm
+FROM php:8.3-fpm-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive \
     COMPOSER_ALLOW_SUPERUSER=1 \
@@ -75,18 +77,24 @@ RUN printf '%s\n' \
     && rm /tmp/libsql-connection.php \
     && php -l /app/config/database.php
 
-# 6) Bake the proof into the application: migration + console command,
-#    with the Commands directory registered in bootstrap/app.php.
+# 6) Bake the proof into the application: migration + console commands +
+#    web routes, with the Commands directory registered in bootstrap/app.php.
 COPY docker/proof/app/create_proof_notes_table.php /app/database/migrations/2026_01_01_000000_create_proof_notes_table.php
 COPY docker/proof/app/ProofRun.php /app/app/Console/Commands/ProofRun.php
+COPY docker/proof/app/ProofHttp.php /app/app/Console/Commands/ProofHttp.php
+COPY docker/proof/app/web-routes.php /app/routes/web.php
 RUN sed -i "s#->create();#->withCommands([__DIR__.'/../app/Console/Commands'])\n    ->create();#" /app/bootstrap/app.php \
-    && php /app/artisan list --raw 2>&1 | grep -q 'proof:run'
+    && php /app/artisan list --raw 2>&1 | grep -q 'proof:run' \
+    && php /app/artisan list --raw 2>&1 | grep -q 'proof:http'
 
 # 7) Install the libSQL PHP extension inside the container (the real user flow).
 RUN php /app/artisan turso-php:install -n
 
 # 8) Final step: switch the default connection to the driver's local file —
-#    after this point no artisan call happens during the build.
+#    after this point no artisan call happens during the build. Note the
+#    empty DB_AUTH_TOKEN: database + token + empty url matches no connection
+#    mode rule (the driver reports "unknown"); a bare local file must have
+#    no token. The remote/replica phases set their own credentials at runtime.
 RUN printf '%s\n' \
         'APP_NAME="Turso Driver Proof"' \
         'APP_ENV=local' \
@@ -94,11 +102,15 @@ RUN printf '%s\n' \
         'LOG_CHANNEL=stack' \
         'DB_CONNECTION=libsql' \
         'DB_DATABASE=/app/proof.sqlite' \
-        'DB_AUTH_TOKEN=proof-token' \
+        'DB_AUTH_TOKEN=' \
         'DB_SYNC_URL=' \
         "$(grep '^APP_KEY=' /app/.env)" > /app/.env.tmp \
     && mv /app/.env.tmp /app/.env \
     && touch /app/proof.sqlite
 
-# 9) Keep the container alive for `docker compose exec`.
-CMD ["tail", "-f", "/dev/null"]
+# 9) Hand the application tree to the fpm worker user — php-fpm (www-data)
+#    cannot write storage/ or bootstrap/cache otherwise (requests 500).
+RUN chown -R www-data:www-data /app
+
+# 10) Run php-fpm in the foreground as the app tier (nginx fronts it).
+CMD ["php-fpm", "-F"]

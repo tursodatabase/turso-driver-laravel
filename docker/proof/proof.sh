@@ -6,12 +6,14 @@
 #   docker/proof/proof.sh --teardown full proof, then wipes the environment
 #
 # What it does:
-#   1. wipes volumes and builds a fresh image (Laravel 12 + driver)
+#   1. wipes volumes and builds a fresh image (Laravel 12 + driver, fpm SAPI)
 #   2. boots the libSQL server (official ghcr image)
 #   3. installs the extension inside the app container, runs `php artisan
 #      migrate --force` through the driver (real artisan flow)
 #   4. executes `php artisan proof:run` and prints the PROOF: {json} line
-#   5. copies the JSON report into docker/proof/proof-report/
+#   5. brings up the web tier (nginx → php-fpm) and executes
+#      `php artisan proof:http` — HTTP assertions driven through the driver
+#   6. copies both JSON reports into docker/proof/proof-report/
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -26,6 +28,7 @@ for arg in "$@"; do
 done
 
 export SQLD_PORT="${SQLD_PORT:-8081}"
+export HTTP_PORT="${HTTP_PORT:-8080}"
 
 echo "==> Resetting environment (wiped volumes)"
 docker compose down -v --remove-orphans >/dev/null 2>&1 || true
@@ -64,10 +67,31 @@ docker compose exec -T app php artisan migrate --force
 echo "==> Running proof assertions"
 docker compose exec -T app php artisan proof:run
 
+echo "==> Starting web tier (nginx → php-fpm)"
+docker compose up -d web
+
+echo "==> Waiting for the web tier to serve /proof/health"
+READY=0
+for i in $(seq 1 60); do
+    if curl -sf -m 2 "http://127.0.0.1:${HTTP_PORT}/proof/health" >/dev/null 2>&1; then
+        READY=1
+        break
+    fi
+    sleep 1
+done
+if [ "$READY" != "1" ]; then
+    echo "error: web tier did not become ready within 60s" >&2
+    exit 1
+fi
+
+echo "==> Running HTTP/fpm assertions"
+docker compose exec -T app php artisan proof:http
+
 mkdir -p proof-report
-REPORT_NAME="proof-$(date +%Y%m%d-%H%M%S).json"
-docker compose cp app:/app/storage/app/proof-report.json "proof-report/${REPORT_NAME}" >/dev/null
-echo "==> Report written to docker/proof/proof-report/${REPORT_NAME}"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+docker compose cp app:/app/storage/app/proof-report.json "proof-report/proof-${STAMP}.json" >/dev/null
+docker compose cp app:/app/storage/app/proof-http-report.json "proof-report/proof-http-${STAMP}.json" >/dev/null
+echo "==> Reports written to docker/proof/proof-report/proof-${STAMP}.json and proof-http-${STAMP}.json"
 
 if [ "$TEARDOWN" = "1" ]; then
     echo "==> Tearing down (removes containers and volumes)"
