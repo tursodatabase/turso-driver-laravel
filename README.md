@@ -1,8 +1,12 @@
-> [!CAUTION]
-> There is a new adapter coming soon for Laravel that doesn't require using an extension. This extension doesn't support offline writes beta. Join us on Discord to talk more - https://discord.gg/turso
+> [!IMPORTANT]
+> Offline writes are currently in **beta**. They are supported in this driver
+> via the libSQL PHP extension v1.7.0 or newer (see *Offline-Write Modes*
+> below). A new Laravel adapter that requires no PHP extension is also in
+> development — follow along and share feedback on the
+> [Turso Discord](https://discord.gg/9eAaMnJtfY).
 
 <p align="center">
-  <a href="https://discord.gg/turso">
+  <a href="https://discord.gg/9eAaMnJtfY">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
       <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
@@ -49,59 +53,90 @@
 </p>
 
 <p align="center">
-  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and <a href="https://github.com/tursodatabase/turso-client-php/">libSQL Extension</a> for PHP.
+  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and the <a href="https://github.com/tursodatabase/turso-client-php/">libSQL PHP extension</a>.
 </p>
 
 <p align="center">
-  LibSQL is a fork of SQLite and this package is <b>#1 LibSQL Driver</b> that run natively using LibSQL Native Extension/Driver/Whatever and support Laravel Ecosystem.
+  libSQL is an open-contribution fork of SQLite. This package provides a
+  first-party Laravel database driver built on the native libSQL PHP extension,
+  with full support for Eloquent, the Query Builder, migrations, and
+  transactions.
 </p>
 
 ---
 
+## Requirements
+
+| Component | Requirement |
+|---|---|
+| PHP | ^8.2 (extension assets available for PHP 8.2 – 8.5) |
+| Laravel | 10, 11, 12, or 13 |
+| libSQL PHP extension | Installed automatically via Artisan (see below) |
+| Turso PHP installer | 2.2+ (bundled with this package) |
+
 ## Installation
 
-You can install the package via composer:
+Install the package with Composer:
 
 ```bash
 composer require tursodatabase/turso-driver-laravel
 ```
 
-Then register the service provider at `bootstrap/providers.php` array:
+Register the service provider in `bootstrap/providers.php`:
 
 ```php
 return [
     App\Providers\AppServiceProvider::class,
-    Turso\Driver\Laravel\LibSQLDriverServiceProvider::class, // Here
+    Turso\Driver\Laravel\LibSQLDriverServiceProvider::class, // add this line
 ];
 ```
 
-The package now include the `turso-php-installer`, so you can install the LibSQL Extension via artisan command:
+The package ships with `darkterminal/turso-php-installer`. Install the libSQL
+PHP extension with Artisan:
 
-```
+```bash
 php artisan turso-php:install
 ```
 
-And you can read the all command using `php artisan | grep turso-php` or read the [manual](https://darkstation.mintlify.app/dark-extensions/tools/installer/reference)
+Manage the extension lifecycle with the bundled commands:
 
-## Laravel Sail
+| Command | Description |
+|---|---|
+| `turso-php:install` | Install the libSQL PHP extension |
+| `turso-php:update` | Update the installed extension |
+| `turso-php:uninstall` | Remove the installed extension |
 
-Don't worry, we also provide Laravel Sail step by step guide for you read: [Sailing with LibSQL](https://darkstation.mintlify.app/dark-extensions/tools/installer/platforms/laravel-sail)
+The installer also bundles environment, token, certificate, and `sqld`-server
+management commands (`turso-php:env-*`, `turso-php:token-*`,
+`turso-php:cert-*`, `turso-php:server-*`). Run
+`php artisan | grep turso-php` for the full list, or read the
+[command reference](https://darkstation.mintlify.app/dark-extensions/tools/installer/reference).
 
-## Environment Variable Overview
+### Laravel Sail
 
-You need to know the additional configuration in `.env` file, which come from Laravel and which come from LibSQL Driver. And here is the overview of `.env`:
+Using [Laravel Sail](https://laravel.com/docs/sail)? Follow the step-by-step
+guide: [Sailing with LibSQL](https://darkstation.mintlify.app/dark-extensions/tools/installer/platforms/laravel-sail).
 
-**Laravel**
+## Configuration
+
+The driver reads its configuration from your `.env` file. Laravel provides the
+connection selection; the driver contributes the variables listed below.
+
+### Environment Variables
+
+**Laravel core**
 
 ```env
 DB_CONNECTION=libsql
 DB_DATABASE=database.sqlite
 ```
 
--   `DB_CONNECTION` key is represent default database connection like `libsql`, `sqlite`, `mysql`, `mariadb`, `pgsql`, and `sqlsrv`.
--   `DB_DATABASE` key is represent the location of database name or in this case is database filename.
+-   **`DB_CONNECTION`** — selects the database connection (`libsql`, `sqlite`,
+    `mysql`, `mariadb`, `pgsql`, `sqlsrv`).
+-   **`DB_DATABASE`** — path to the database file, or `:memory:` for an
+    in-memory database.
 
-**LibSQL Driver**
+**LibSQL driver**
 
 ```env
 DB_AUTH_TOKEN=<your-database-auth-token-from-turso>
@@ -113,71 +148,54 @@ DB_SQLD_OFFLINE_MODE=false
 DB_OFFLINE_WRITES=false
 ```
 
--   `DB_ENCRYPTION_KEY` encrypts the database at rest. It is passed straight into the libSQL extension (`v1.7.0` positional `encryption_key` argument) and is only effective at database creation time.
--   `DB_SQLD_OFFLINE_MODE` enables `sqld_offline_mode` for sqld (self-hosted libsql server) offline-write replicas (`extension >= 1.7.0`).
--   `DB_OFFLINE_WRITES` enables offline writes for Turso Cloud databases (`extension >= 1.7.0`, Turso Cloud only — not plain libsql-server).
+-   **`DB_AUTH_TOKEN`** — authentication token for the database. Generate one
+    with `turso db tokens create <database-name>`, or from the
+    [Turso Dashboard](https://dashboard.turso.io) by selecting your database
+    and creating a token.
+-   **`DB_SYNC_URL`** — database URL, assigned by Turso at creation time.
+    Retrieve it with `turso db show --url <database-name>`.
+-   **`DB_SYNC_INTERVAL`** — interval in seconds at which an embedded replica
+    synchronizes with the primary database. **Default:** `5`.
+-   **`DB_READ_YOUR_WRITES`** — makes writes from a connection immediately
+    visible to subsequent reads on the same connection, preserving consistency
+    in distributed systems. **Default:** `true`.
+-   **`DB_ENCRYPTION_KEY`** — key for encrypting the database at rest. Passed
+    directly to the libSQL extension (the v1.7.0 positional
+    `encryption_key` argument) and effective at database-creation time.
+    **Default:** empty.
+-   **`DB_SQLD_OFFLINE_MODE`** — enables `sqld_offline_mode` for self-hosted
+    `sqld` offline-write replicas (extension ≥ 1.7.0). **Default:** `false`.
+-   **`DB_OFFLINE_WRITES`** — enables offline writes for Turso Cloud databases
+    (extension ≥ 1.7.0). **Default:** `false`.
 
-Create a new Turso Database [here](https://docs.turso.tech/quickstart)
+New to Turso? Create a database via the
+[Turso quickstart](https://docs.turso.tech/quickstart).
 
-### Environment Variables for Turso Driver
+### Connection Types
 
-Below is a list of environment variables used to configure the Turso driver. Each variable plays a role in defining database connection and behavior:
-
--   **`DB_AUTH_TOKEN`**  
-    You can generate this token using the following command:
-
-    ```bash
-    turso db tokens create <database-name>
-    ```
-
-    Alternatively, visit your [Turso Dashboard](https://dashboard.turso.io), select the desired database, and generate the token from there.
-
--   **`DB_SYNC_URL`**  
-    This URL is automatically generated by Turso when you create a new database. Retrieve the database URL using the command:
-
-    ```bash
-    turso db show --url <database-name>
-    ```
-
--   **`DB_SYNC_INTERVAL`**  
-    This variable defines the interval (in seconds) at which an embedded replica synchronizes with the primary database. It ensures automatic synchronization of the database in the background.  
-    **Default:** `5 seconds`  
-    **Use case:** Keeps replicas up-to-date with minimal manual intervention.
-
--   **`DB_READ_YOUR_WRITES`**  
-    Ensures that writes made by a connection are immediately visible to subsequent reads from the same connection. This is vital for maintaining consistency in distributed systems.  
-    **Default:** `true`  
-    **Use case:** Guarantees clients always see their latest writes.
-
--   **`DB_ENCRYPTION_KEY`**  
-    Specifies the encryption key used for database encryption. This key is critical for securing data at rest, ensuring only authorized individuals can decrypt the database content.  
-    **Default:** Empty  
-    **Use case:** Protects sensitive data stored on disk.
-
-## Choose Your Connection Needs
-
-**LibSQL** has **4 types of connections** to interact with the database: _In-Memory Connection_, _Local Connection_, _Remote Connection_, and _Remote Replica Connection (Embedded Replica)_
+libSQL supports **four connection types**: *in-memory*, *local*, *remote*, and
+*remote replica* (embedded replica).
 
 <details>
-  <summary><strong>💾 &mdash; In-Memory Connection</strong></summary>
-  <p>To be able to use LibSQL in-memory as if you were using SQLite, simply change the following <code>.env</code>:</p>
+  <summary><strong>In-Memory Connection</strong></summary>
+  <p>To run libSQL fully in memory, set the following <code>.env</code> values:</p>
   <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=:memory:
   </code></pre>
 </details>
 
 <details>
-  <summary><strong>🖥 &mdash; Local Connection</strong></summary>
-  <p>To be able to use LibSQL locally as if you were using SQLite, simply change the following <code>.env</code>:</p>
+  <summary><strong>Local Connection</strong></summary>
+  <p>To use libSQL against a local database file, set the following <code>.env</code> values:</p>
   <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=database.sqlite
   </code></pre>
-  <p>Ignore other LibSQL <code>.env</code> variables.</p>
+  <p>All other LibSQL driver variables can be omitted.</p>
 </details>
 
 <details>
-  <summary><strong>🌏 &mdash; Remote Connection</strong></summary>
-  <p>To use LibSQL Remote Connection only, you can define the following <code>.env</code> variables:</p>
+  <summary><strong>Remote Connection</strong></summary>
+  <p>To use a remote-only connection, define the following <code>.env</code> variables:</p>
   <pre><code>DB_CONNECTION=libsql
 DB_AUTH_TOKEN=&lt;your-database-auth-token-from-turso&gt;
 DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
@@ -185,25 +203,28 @@ DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 </details>
 
 <details>
-  <summary><strong>🌱 &mdash; Remote Replica Connection (Embedded Replica)</strong></summary>
-  <p>To configure remote replica connection (embedded replica), you can simply use the following <code>.env</code> variables:</p>
+  <summary><strong>Remote Replica Connection (Embedded Replica)</strong></summary>
+  <p>To configure an embedded replica, define the following <code>.env</code> variables:</p>
   <pre><code>DB_CONNECTION=libsql
 DB_DATABASE=database.sqlite
 DB_AUTH_TOKEN=&lt;your-database-auth-token-from-turso&gt;
 DB_SYNC_URL=&lt;your-database-url-from-turso&gt;
 DB_SYNC_INTERVAL=5
 DB_READ_YOUR_WRITES=true
-DB_ENCRYPTION_KEY=<your-encryption-key>
+DB_ENCRYPTION_KEY=
 DB_SQLD_OFFLINE_MODE=false
 DB_OFFLINE_WRITES=false
   </code></pre>
-  <p>Enable `DB_OFFLINE_WRITES=true` (Turso Cloud) or `DB_SQLD_OFFLINE_MODE=true` (sqld server) when you need offline-write capability; both require the libSQL extension `>= 1.7.0`.</p>
-  <p>That's it! How easy to make different connection using LibSQL Driver in Laravel, right?!</p>
+  <p>Set `DB_OFFLINE_WRITES=true` (Turso Cloud) or
+  `DB_SQLD_OFFLINE_MODE=true` (self-hosted sqld) when you need offline-write
+  capability — both require libSQL PHP extension 1.7.0 or newer. See
+  <strong>Offline-Write Modes</strong> below.</p>
 </details>
 
-## 🌙 Offline-Write Modes (libSQL Extension ≥ 1.7.0)
+### Offline-Write Modes (libSQL Extension ≥ 1.7.0)
 
-Both modes are **opt-in** and default to `false`. They require libSQL Extension **1.7.0+** — older extension versions ignore these keys silently.
+Both modes are **opt-in** and default to `false`. They require libSQL PHP
+extension **1.7.0+** — older extension versions ignore these keys silently.
 
 | Env variable | Value | Target | Behavior |
 |---|---|---|---|
@@ -217,9 +238,9 @@ Both modes are **opt-in** and default to `false`. They require libSQL Extension 
 > driver's `sqldOfflineMode` / `offlineWrites` connection keys to be enabled
 > (see the `config/database.php` snippet below).
 
-## Database Configuration
+### Database File Configuration
 
-Add this configuration at `config/database.php` inside the `connections` array:
+Add this block to `config/database.php` inside the `connections` array:
 
 ```php
 'libsql' => [
@@ -236,11 +257,14 @@ Add this configuration at `config/database.php` inside the `connections` array:
 ],
 ```
 
-> Copy and Paste and do not change it! Or try to change it and will broke your app or give you malfunction.
+> Copy this block as-is. Arbitrary edits to the interpolation values can break
+> the connection or cause unexpected behavior.
 
 ## Usage
 
-For database operation usage, everything have same interface like usual when you using `Illuminate\Support\Facades\DB` in your database model. But remember, this is LibSQL they have `sync` method that can be used when you connect with Remote Replica Connection (Embedded Replica).
+Database operations use the standard `Illuminate\Support\Facades\DB`
+interface. When connected via Remote Replica (embedded replica), the driver
+adds a `DB::sync()` method for triggering a manual replica synchronization.
 
 > [!IMPORTANT]
 > **Write failures throw since v1.4.0** — failed `insert()`, `update()`,
@@ -301,13 +325,26 @@ try {
     echo "An error occurred: " . $e->getMessage();
 }
 
-// Sync
+// Sync (Remote Replica / embedded replica only)
 DB::sync();
 ```
 
+## Testing
+
+Install development dependencies and run the test suite:
+
+```bash
+composer install
+./vendor/bin/pest
+```
+
+Tests that require a running libsql server are skipped automatically when no
+server is available.
+
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed
+recently.
 
 ## Contributing
 
@@ -315,7 +352,8 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+Please review [our security policy](https://github.com/tursodatabase/turso-driver-laravel/security/policy)
+on how to report security vulnerabilities.
 
 ## Contributors
 
@@ -323,6 +361,6 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+Licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.
 
 <!-- GitAds-Verify: QMVSQYBI166XXYYWVHF4E5PWL9UJFRL8 -->
