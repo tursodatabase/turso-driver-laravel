@@ -1,10 +1,11 @@
 ## [1.7.0] - 2026-11-10
 
-- release: minor version 1.7.0 [Imam Ali Mustofa]
-- fix(driver): cursor() streaming, unambiguous blob transport, base64 heuristic [Imam Ali Mustofa]
-- docs(README): trim duplicated docs, link to Wiki as canonical user manual [Imam Ali Mustofa]
-- docs(changelog): curate 1.6.0 section (headline multi-connection fix, L13 matrix, cloud proof; fold release meta) [Imam Ali Mustofa]
-- chore: update CHANGELOG.md for minor version 1.6.0 [Imam Ali Mustofa]
+- fix(driver): `cursor()` streaming — the streaming path iterated the raw extension envelope (`columns`, `rows`, `rows_affected`, `last_insert_rowid`) instead of yielding rows, so `DB::table(...)->cursor()` never returned a correct row and skipped all cell decoding. It now normalizes the envelope (online stdClass / offline row list), decodes cells exactly like `select()` (double-base64, JSON vectors, resource blobs) and yields `stdClass` rows per Laravel's cursor contract
+- fix(driver, data corruption): blob round-trip transport now writes an unambiguous `libsqlblob:` marker; previously, any text cell that happened to be canonical, printable base64 — e.g. the Faker word `bzwobkku` — was silently double-decoded into garbage bytes. This is what made CI leg `8.3, 12` fail deterministically under fixed random-order seeds (`-'bzwobkku' +'¢r'`). The legacy double-base64 heuristic stays for unmarked data but no longer fires on plain alphabetic words
+- fix(statement): `fetch()` delegates to the shared decoder instead of its own inline single-base64 pass (which corrupted base64-looking text); `fetchAll()` no longer re-encodes output rows through the input binder `parameterCasting()`
+- test: regression test for `cursor()` in `DatabaseQueriesTest`; suite green with the exact CI seed `1794325993` plus a 4-seed sweep; `pint --test` passes; `docker/proof/proof.sh` green with this code (PROOF 42/42, HTTP 8/8, OFFLINE-WRITE 9/9, OFFLINE-SYNC 5/5, `all_ok` everywhere, outage/blind-window and post-sync server reads verified by an independent host-side Hrana client)
+- docs: README trimmed to Wiki links (single source of truth for the full manual; no content removed, only duplicated detail moved)
+- compat: data written by 1.7.0 uses the `libsqlblob:` marker and needs 1.7.0+ to read; unmarked data written by earlier releases is still decoded via the legacy heuristic
 
 ## [1.6.0] - 2026-11-10
 
