@@ -202,11 +202,12 @@ DRIVER_SOURCE=packagist DRIVER_VERSION=^1.4 docker/proof/proof.sh --teardown
 
 ## What this does NOT prove
 
-- **Turso Cloud credentials are never fabricated or borrowed.** The
-  `offline-cloud` phase runs only against your own database with your own
-  token. As a baseline, `proof.sh` verifies the **sqld (self-hosted)
-  offline-write** combination; the Cloud combination is verified separately
-  by `offline-cloud.sh` (and by `TursoCloudOfflineWriteTest`, env-gated).
+- **The default harness does NOT prove the Turso Cloud offline-write flavor.**
+  `proof.sh` covers only the **sqld (self-hosted) offline-write** combination;
+  the Turso Cloud combination is exercised separately, and only by
+  `offline-cloud.sh` / `TursoCloudOfflineWriteTest`, because it requires a real
+  Turso Cloud database (it cannot be emulated or run in CI). Your own
+  credentials are never substituted, simulated, or fabricated by this harness.
 - **Your application.** The proof uses a vanilla Laravel 12 skeleton served by
   fpm. Your app's middleware, opcache setup and connection pooling may differ.
 - **Debug error pages are environment-specific.** `throw_over_http` asserts
