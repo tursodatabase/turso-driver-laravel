@@ -1,3 +1,17 @@
+## [1.5.0] - 2026-11-10
+
+- release: minor version 1.5.0 [Imam Ali Mustofa]
+- feat(docker): offline-write outage window + driver offline-write support [Imam Ali Mustofa]
+- feat(docker): HTTP/fpm proof tier — nginx + php-fpm, asserted via real HTTP [Imam Ali Mustofa]
+- feat(docker): isolated proof-of-usage harness (composer + artisan flow, asserts, docs) [Imam Ali Mustofa]
+- test: skip server-dependent tests without touching the database [Imam Ali Mustofa]
+- fix(deps): pin symfony 7.4 for PHP 8.3 CI compatibility [Imam Ali Mustofa]
+- chore(deps): update dev dependencies to fix security advisories [Imam Ali Mustofa]
+- docs(README): professional restructure, corrected status note, no emoji [Imam Ali Mustofa]
+- docs(README): document throw-behavior for failed writes + offline-write flavors [Imam Ali Mustofa]
+- docs(changelog): curate the 1.4.0 section (headline encryption + offline-writes features, fold release meta) [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for minor version 1.4.0 [Imam Ali Mustofa]
+
 ## [1.4.0] - 2026-11-10
 
 - fix(encryption): `DB_ENCRYPTION_KEY` actually reaches the libSQL extension — it was always a dead positional argument before extension v1.7.0 positional args are now passed positionally (config `encryptionKey`) so database encryption works from creation
