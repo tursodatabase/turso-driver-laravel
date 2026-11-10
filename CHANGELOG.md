@@ -1,16 +1,12 @@
 ## [1.5.0] - 2026-11-10
 
-- release: minor version 1.5.0 [Imam Ali Mustofa]
-- feat(docker): offline-write outage window + driver offline-write support [Imam Ali Mustofa]
-- feat(docker): HTTP/fpm proof tier — nginx + php-fpm, asserted via real HTTP [Imam Ali Mustofa]
-- feat(docker): isolated proof-of-usage harness (composer + artisan flow, asserts, docs) [Imam Ali Mustofa]
-- test: skip server-dependent tests without touching the database [Imam Ali Mustofa]
-- fix(deps): pin symfony 7.4 for PHP 8.3 CI compatibility [Imam Ali Mustofa]
-- chore(deps): update dev dependencies to fix security advisories [Imam Ali Mustofa]
-- docs(README): professional restructure, corrected status note, no emoji [Imam Ali Mustofa]
-- docs(README): document throw-behavior for failed writes + offline-write flavors [Imam Ali Mustofa]
-- docs(changelog): curate the 1.4.0 section (headline encryption + offline-writes features, fold release meta) [Imam Ali Mustofa]
-- chore: update CHANGELOG.md for minor version 1.4.0 [Imam Ali Mustofa]
+- feat(offline): offline writes now work through the driver — when `sqldOfflineMode` and `offlineWrites` are set (env `DB_SQLD_OFFLINE_MODE`, `DB_OFFLINE_WRITES`, extension ≥ 1.7.0), statements bind parameters and route through the extension's offline-safe `execute()`/`query()`; DDL (e.g. `CREATE TABLE`) and DML journal locally while the app is offline, and `sync()`/re-open replicates them to the server. The extension refuses `prepare()` in offline-write mode, which previously made every statement fail
+- feat(docker): isolated proof-of-usage harness (`docker/proof/`) — Laravel 12 app built fresh, driver installed via `turso-php:install`, assertions through `php artisan` (42) and through a real nginx → php-fpm tier over HTTP (8), plus a real outage window (`docker network disconnect`) proving journaled writes, blind server and `sync()` drain (9 + 5); user-facing guide in `docker/proof/README.md`
+- security(deps): resolved all 18 open advisories across 8 dev packages (phpunit 11.5.15→11.5.57, psy/psysh, symfony/http-foundation|kernel|mime|routing|yaml (7.4-pinned for PHP 8.3 CI), zbateson/mail-mime-parser 4.0.1→4.0.2) — `composer audit` is clean
+- fix(statement): normalized the extension's two `fetchArray()` shapes (online envelope vs plain row list in offline mode) and the `rows`-key absence on DDL results
+- docs(README): professional restructure (Requirements/Installation/Configuration/Usage/Testing, standard OSS order, corrected stale "offline writes unsupported" status note, no emoji)
+- docs(README): documented throw-behavior for failed writes + offline-write flavors (Turso Cloud vs sqld)
+- fix(tests): skip server-dependent tests without eagerly hitting the DB in hooks (Pest/PHPUnit bump made the old `markTestSkipped()` pattern leak through `beforeEach`/`afterEach`)
 
 ## [1.4.0] - 2026-11-10
 
