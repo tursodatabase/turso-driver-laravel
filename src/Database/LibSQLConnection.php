@@ -206,16 +206,39 @@ class LibSQLConnection extends Connection
             return [];
         }
 
-        $preparedQuery = $this->getRawPdo()->prepare($query);
+        $bindings = array_map(function ($binding) {
+            return is_bool($binding) ? (int) $binding : $binding;
+        }, $bindings);
 
-        if (!$preparedQuery) {
-            throw new Exception('Failed to prepare statement.');
+        $result = $this->run($query, $bindings, function ($query, $bindings) {
+            $preparedQuery = $this->getRawPdo()->prepare($query);
+
+            if (!$preparedQuery) {
+                throw new Exception('Failed to prepare statement.');
+            }
+
+            return $preparedQuery->query($bindings);
+        });
+
+        // The raw extension query() returns an envelope — either a stdClass
+        // object with a `rows` property, or (offline flavor) a plain list of
+        // rows / an array envelope. Normalize to a list of rows first.
+        if (is_object($result)) {
+            $rows = $result->rows ?? [];
+        } elseif (is_array($result)) {
+            $rows = isset($result['rows']) && is_array($result['rows']) ? $result['rows'] : array_values($result);
+        } else {
+            $rows = [];
         }
 
-        $statement = $preparedQuery->query($bindings);
+        $rows = array_map(function ($row) {
+            return is_object($row) ? stdClassToArray($row) : $row;
+        }, $rows);
 
-        foreach ($statement as $record) {
-            yield $record;
+        foreach (decodeDoubleBase64Rows($rows) as $row) {
+            $row = decodeBlobs($row);
+
+            yield arrayToStdClass([$row])[0];
         }
     }
 

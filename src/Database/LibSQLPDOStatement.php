@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Turso\Driver\Laravel\Database;
 
-use DateTime;
 use Exception;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
@@ -167,7 +166,9 @@ class LibSQLPDOStatement
             };
 
             if ($type === 'blob') {
-                $value = base64_encode(base64_encode($value));
+                // Transported blobs carry an explicit marker so reads can
+                // decode them unambiguously (see decodeDoubleBase64Rows()).
+                $value = 'libsqlblob:' . base64_encode(base64_encode($value));
             }
 
             if ($type === 'boolean') {
@@ -188,59 +189,11 @@ class LibSQLPDOStatement
         return $parameters;
     }
 
-    private function is_base64_encoded($str)
-    {
-        // Check if the string has valid Base64 characters
-        if (!is_string($str)) {
-            return false;
-        }
-
-        // Check if the string has valid Base64 characters and proper padding
-        if (
-            !preg_match('/^(?:[A-Za-z0-9+\/]{4})*' .
-                '(?:[A-Za-z0-9+\/]{2}==|' .
-                '[A-Za-z0-9+\/]{3}=)?$/', $str)
-        ) {
-            return false;
-        }
-
-        // Decode the string in strict mode
-        $decoded = base64_decode($str, true);
-        if ($decoded === false) {
-            return false;
-        }
-
-        // Re-encode the decoded string and compare with the original
-        if (base64_encode($decoded) !== $str) {
-            return false;
-        }
-
-        // Optional: Check if the decoded data is printable
-        if (!ctype_print($decoded)) {
-            return false;
-        }
-
-        return true;
-    }
-
     private function decodeDoubleBase64(array $result): array
     {
+        // Shared with the streaming cursor() path — see helpers.php
         if (isset($result['rows']) && is_array($result['rows'])) {
-            foreach ($result['rows'] as &$row) {
-                foreach ($row as $key => &$value) {
-                    if (is_string($value) && $this->isValidDateOrTimestamp($value)) {
-                        continue;
-                    }
-
-                    if (is_string($value) && $decoded = json_decode($value, true)) {
-                        $value = $decoded;
-                    }
-
-                    if (is_string($value) && $this->is_base64_encoded($value)) {
-                        $value = base64_decode(base64_decode($value));
-                    }
-                }
-            }
+            $result['rows'] = decodeDoubleBase64Rows($result['rows']);
         }
 
         return $result;
@@ -254,28 +207,6 @@ class LibSQLPDOStatement
     private function isValidBlob($data)
     {
         return (bool) is_string($data) && preg_match('/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/', $data);
-    }
-
-    private function isValidDateOrTimestamp($string, $format = null): bool
-    {
-        if (is_numeric($string) && (int) $string > 0 && (int) $string <= PHP_INT_MAX) {
-            return true;
-        }
-
-        if (is_numeric($string) && strlen($string) === 4 && (int) $string >= 1000 && (int) $string <= 9999) {
-            return true;
-        }
-
-        $formats = $format ? [$format] : ['Y-m-d H:i:s', 'Y-m-d'];
-
-        foreach ($formats as $fmt) {
-            $dateTime = DateTime::createFromFormat($fmt, $string);
-            if ($dateTime && $dateTime->format($fmt) === $string) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public function execute(array $parameters = []): bool
@@ -353,11 +284,7 @@ class LibSQLPDOStatement
             }
 
             $row = $rows[$cursorOffset];
-            $row = array_map(function ($value) {
-                return is_string($value) && base64_encode(base64_decode($value, true)) === $value
-                    ? base64_decode($value)
-                    : $value;
-            }, $row);
+            $row = decodeDoubleBase64Rows([$row])[0];
 
             return match ($mode) {
                 PDO::FETCH_ASSOC => collect($row),
@@ -402,11 +329,7 @@ class LibSQLPDOStatement
         }
 
         $row = $rows[$cursorOffset];
-        $row = array_map(function ($value) {
-            return is_string($value) && base64_encode(base64_decode($value, true)) === $value
-                ? base64_decode($value)
-                : $value;
-        }, $row);
+        $row = decodeDoubleBase64Rows([$row])[0];
         $mode = $this->mode ?? $mode;
 
         return match ($mode) {
@@ -432,8 +355,7 @@ class LibSQLPDOStatement
             $response = $this->normalizeRows($result->fetchArray(LibSQL::LIBSQL_ALL));
 
             $allRows = $response['rows'];
-            $decodedRows = $this->parameterCasting($allRows);
-            $rowValues = \array_map('array_values', $decodedRows);
+            $rowValues = \array_map('array_values', $allRows);
 
             return match ($mode) {
                 PDO::FETCH_BOTH => [...$allRows, ...$rowValues],
@@ -455,8 +377,7 @@ class LibSQLPDOStatement
         $response = $result->fetchArray(LibSQL::LIBSQL_ALL);
 
         $allRows = $response['rows'];
-        $decodedRows = $this->parameterCasting($allRows);
-        $rowValues = \array_map('array_values', $decodedRows);
+        $rowValues = \array_map('array_values', $allRows);
 
         $response = match ($mode) {
             PDO::FETCH_BOTH => [...$allRows, ...$rowValues],

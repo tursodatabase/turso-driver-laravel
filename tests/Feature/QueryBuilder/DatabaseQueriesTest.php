@@ -80,6 +80,27 @@ test('it can stream the results lazily', function () {
         });
 })->group('DatabaseQueriesTest', 'QueryBuilder', 'FeatureTest');
 
+test('it can stream the results with cursor()', function () {
+    $expectations = [
+        $this->project1,
+        $this->project2,
+        $this->project3,
+    ];
+
+    $rows = [];
+
+    foreach (DB::table('projects')->orderBy('id')->cursor() as $project) {
+        $rows[] = $project;
+    }
+
+    expect($rows)->toHaveCount(3)
+        ->and($rows[0])->toBeObject()
+        ->and($rows[0]->id)->toEqual($expectations[0]->id)
+        ->and($rows[0]->name)->toEqual($expectations[0]->name)
+        ->and($rows[1]->name)->toEqual($expectations[1]->name)
+        ->and($rows[2]->name)->toEqual($expectations[2]->name);
+})->group('DatabaseQueriesTest', 'QueryBuilder', 'FeatureTest');
+
 test('it can count the records count', function () {
     expect(DB::table('projects')->count())->toEqual(3);
 })->group('DatabaseQueriesTest', 'QueryBuilder', 'FeatureTest');

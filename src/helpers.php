@@ -46,6 +46,88 @@ function stdClassToArray(\stdClass|array $object): array
     return $array;
 }
 
+/**
+ * Decode result-row cells exactly the way LibSQLPDOStatement decodes them:
+ * rows stored as double-base64 (blob round-trip through the extension) and
+ * cells holding JSON arrays (vector storage). Extracted so the streaming
+ * cursor() path decodes identically to select().
+ */
+function decodeDoubleBase64Rows(array $rows): array
+{
+    $isBase64 = static function (string $str): bool {
+        if (! preg_match('/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/', $str)) {
+            return false;
+        }
+
+        $decoded = base64_decode($str, true);
+        if ($decoded === false) {
+            return false;
+        }
+
+        if (base64_encode($decoded) !== $str) {
+            return false;
+        }
+
+        if (! ctype_print($decoded)) {
+            return false;
+        }
+
+        return true;
+    };
+
+    $isValidDateOrTimestamp = static function (string $string): bool {
+        if (is_numeric($string) && (int) $string > 0 && (int) $string <= PHP_INT_MAX) {
+            return true;
+        }
+
+        if ((is_numeric($string) && strlen($string) === 4 && (int) $string >= 1000 && (int) $string <= 9999)) {
+            return true;
+        }
+
+        foreach (['Y-m-d H:i:s', 'Y-m-d'] as $format) {
+            $dateTime = \DateTime::createFromFormat($format, $string);
+            if ($dateTime && $dateTime->format($format) === $string) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    foreach ($rows as &$row) {
+        foreach ($row as $key => &$value) {
+            if (is_string($value) && str_starts_with($value, 'libsqlblob:')) {
+                // Marker written by parameterCasting() for transported blobs —
+                // unambiguous, unlike the legacy double-base64 heuristic.
+                $value = base64_decode(base64_decode(substr($value, strlen('libsqlblob:'))));
+
+                continue;
+            }
+
+            if (is_string($value) && preg_match('/^[A-Za-z]{1,24}$/', $value)) {
+                // Plain alphabetic words (e.g. Faker names) are never
+                // transported blobs; the legacy heuristic would corrupt them.
+                continue;
+            }
+
+            if (is_string($value) && $isValidDateOrTimestamp($value)) {
+                continue;
+            }
+
+            if (is_string($value) && $decoded = json_decode($value, true)) {
+                $value = $decoded;
+            }
+
+            if (is_string($value) && $isBase64($value)) {
+                $value = base64_decode(base64_decode($value));
+            }
+        }
+    }
+    unset($row, $value);
+
+    return $rows;
+}
+
 function decodeBlobs(array $row): array
 {
     return array_map(function ($value) {
