@@ -1,21 +1,14 @@
 ## [1.6.0] - 2026-11-10
 
-- release: minor version 1.6.0 [Imam Ali Mustofa]
-- docs(README): remove unverifiable promises; state only repo-proven facts [Imam Ali Mustofa]
-- docs(README): drop Laravel 10/11 from the supported matrix [Imam Ali Mustofa]
-- docs: reword "What this does NOT prove" first bullet [Imam Ali Mustofa]
-- ci: add Laravel 13 legs to the test matrix [Imam Ali Mustofa]
-- docs: document Turso Cloud offline-writes flavor + verified cloud proof [Imam Ali Mustofa]
-- feat(docker): Turso Cloud offline-writes proof + feature test [Imam Ali Mustofa]
-- docs: add SECURITY.md (supported versions, private reporting, coordinated disclosure) [Imam Ali Mustofa]
-- ci: run two seeded sqld services and pin composer platform to php 8.2 [Imam Ali Mustofa]
-- test(replica): isolate the embedded-replica tests and survive stale WAL opens [Imam Ali Mustofa]
-- ci: expand tests to PHP 8.2/8.3/8.4/8.5 matrix [Imam Ali Mustofa]
-- ci: seed sqld service with a bootstrap table before tests [Imam Ali Mustofa]
-- feat(driver): multi-connection libsql facade extensions + server-dependent tests in CI [Imam Ali Mustofa]
-- test(fixtures): make factory-generated names collision-proof [Imam Ali Mustofa]
-- docs(changelog): curate the 1.5.0 section (headline native offline-write support, proof harness, security fixes; fold release meta) [Imam Ali Mustofa]
-- chore: update CHANGELOG.md for minor version 1.5.0 [Imam Ali Mustofa]
+- feat(driver, multi-connection): `db.factory` extension registered **by connection name** — every statically configured `driver: libsql` connection is now extended individually, each with its own raw config. Previously the facade extension was registered only for the connection named `libsql` and forced the default `libsql` config onto every connection — any second libsql connection silently shared the default's memory configuration, making remote/replica modes unusable in multi-connection apps. The 6 server-dependent tests (previously always skipped) now run and pass in CI against seeded sqld services
+- feat(ci): 7-job test matrix — Laravel 12 on PHP 8.2/8.3/8.4/8.5 and Laravel 13 on PHP 8.3/8.4/8.5 (L13 legs rewrite `composer.json` to require `orchestra/testbench ^11`; Laravel 13 needs PHP 8.3+); two seeded sqld service containers (8081/8082) initialize WAL metadata so embedded replicas can sync
+- feat(offline-cloud): Turso Cloud offline-writes flavor now ships a runnable verification — `php artisan proof:offline-cloud` (12 asserts: bootstrap sync → local journaled writes → `sync()` push → plain remote read-back → pushed drop) plus env-gated `TursoCloudOfflineWriteTest` (skips without credentials) and `docker/proof/offline-cloud.sh`
+- compat: `LibSQLConnection::select()`, `selectResultSets()` and `cursor()` accept the optional `array $fetchUsing = []` parameter that Laravel 13 added to the parent signature (optional — Laravel 12 compatibility preserved)
+- test(replica): embedded-replica tests are isolated per test (unique replica file + WAL/SHM sidecar cleanup) and retry on stale-replica opens ("Can not sync a database without a wal_index")
+- fix(fixtures): factory-generated names are now collision-proof (`unique()->regexify`), eliminating the random-order `1 matches expected 2` CI failure
+- docs: README corrected — Laravel 12 or 13 only; all unverifiable promises removed (no adapter-in-development, no Laravel Sail section); Requirements section reflects only physically-proven facts
+- security(docs): added `SECURITY.md` — supported versions, private reporting via GitHub advisories, coordinated disclosure, extension issues cross-linked to `turso-client-php`
+- deps(security): `composer audit` reports **0 advisories** (18 resolved in 1.5.0 cycle are retained); `composer.lock` pinned to PHP 8.2 platform so it installs across the whole matrix
 
 ## [1.5.0] - 2026-11-10
 
