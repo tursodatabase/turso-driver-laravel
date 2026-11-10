@@ -156,7 +156,7 @@ class LibSQLConnection extends Connection
         return array_shift($records);
     }
 
-    public function select($query, $bindings = [], $useReadPdo = true)
+    public function select($query, $bindings = [], $useReadPdo = true, array $fetchUsing = [])
     {
         $bindings = array_map(function ($binding) {
             return is_bool($binding) ? (int) $binding : $binding;
@@ -187,7 +187,7 @@ class LibSQLConnection extends Connection
         return $rows;
     }
 
-    public function selectResultSets($query, $bindings = [], $useReadPdo = true)
+    public function selectResultSets($query, $bindings = [], $useReadPdo = true, array $fetchUsing = [])
     {
         return $this->select($query, $bindings, $useReadPdo);
     }
@@ -200,7 +200,7 @@ class LibSQLConnection extends Connection
      * @param  bool  $useReadPdo
      * @return Generator
      */
-    public function cursor($query, $bindings = [], $useReadPdo = true)
+    public function cursor($query, $bindings = [], $useReadPdo = true, array $fetchUsing = [])
     {
         if ($this->pretending()) {
             return [];
