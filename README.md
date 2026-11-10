@@ -201,6 +201,22 @@ DB_OFFLINE_WRITES=false
   <p>That's it! How easy to make different connection using LibSQL Driver in Laravel, right?!</p>
 </details>
 
+## 🌙 Offline-Write Modes (libSQL Extension ≥ 1.7.0)
+
+Both modes are **opt-in** and default to `false`. They require libSQL Extension **1.7.0+** — older extension versions ignore these keys silently.
+
+| Env variable | Value | Target | Behavior |
+|---|---|---|---|
+| `DB_OFFLINE_WRITES` | `true` | **Turso Cloud** only | Writes queue locally and replay to the cloud when connectivity returns. |
+| `DB_SQLD_OFFLINE_MODE` | `true` | **sqld** (self-hosted libsql-server) | Enables offline-write mode for self-managed libsql instances. |
+
+> [!NOTE]
+> These modes are **not** for plain `libsql-server` without the offline-write
+> provider. `DB_OFFLINE_WRITES` targets Turso Cloud databases exclusively;
+> `DB_SQLD_OFFLINE_MODE` targets self-hosted sqld replicas. Both need the
+> driver's `sqldOfflineMode` / `offlineWrites` connection keys to be enabled
+> (see the `config/database.php` snippet below).
+
 ## Database Configuration
 
 Add this configuration at `config/database.php` inside the `connections` array:
@@ -225,6 +241,24 @@ Add this configuration at `config/database.php` inside the `connections` array:
 ## Usage
 
 For database operation usage, everything have same interface like usual when you using `Illuminate\Support\Facades\DB` in your database model. But remember, this is LibSQL they have `sync` method that can be used when you connect with Remote Replica Connection (Embedded Replica).
+
+> [!IMPORTANT]
+> **Write failures throw since v1.4.0** — failed `insert()`, `update()`,
+> `delete()` calls raise a `PDOException` (Laravel wraps it as
+> `QueryException`) instead of silently returning `false`. Wrap write
+> operations in `try/catch` the same way you would with the SQLite driver.
+
+```php
+try {
+    DB::table('users')->insert([
+        'name' => 'John Doe',
+        'email' => 'john.doe@gmail.com',
+    ]);
+} catch (\Illuminate\Database\QueryException $e) {
+    // Example: "UNIQUE constraint failed: users.email"
+    report($e);
+}
+```
 
 ```php
 use Illuminate\Support\Facades\DB;
