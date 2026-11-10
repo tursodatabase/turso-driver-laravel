@@ -3,9 +3,7 @@
 > journaled flavor for **Turso Cloud** (`DB_OFFLINE_WRITES=true` alone) and the
 > sqld flavor for **self-hosted libsql-server** (`DB_SQLD_OFFLINE_MODE=true`
 > **and** `DB_OFFLINE_WRITES=true`). Both are supported via the libSQL PHP
-> extension v1.7.0+ (see *Offline-Write Modes* below). A new Laravel adapter
-> that requires no PHP extension is also in development — follow along and
-> share feedback on the [Turso Discord](https://discord.gg/9eAaMnJtfY).
+> extension v1.7.0+ (see *Offline-Write Modes* below).
 
 <p align="center">
   <a href="https://discord.gg/9eAaMnJtfY">
@@ -60,9 +58,9 @@
 
 <p align="center">
   libSQL is an open-contribution fork of SQLite. This package provides a
-  first-party Laravel database driver built on the native libSQL PHP extension,
-  with full support for Eloquent, the Query Builder, migrations, and
-  transactions.
+  Laravel database driver built on the native libSQL PHP extension; Eloquent,
+  the Query Builder, migrations and transactions are exercised by the test
+  suite and the `docker/proof/` integration harness.
 </p>
 
 ---
@@ -110,14 +108,8 @@ Manage the extension lifecycle with the bundled commands:
 
 The installer also bundles environment, token, certificate, and `sqld`-server
 management commands (`turso-php:env-*`, `turso-php:token-*`,
-`turso-php:cert-*`, `turso-php:server-*`). Run
-`php artisan | grep turso-php` for the full list, or read the
-[command reference](https://darkstation.mintlify.app/dark-extensions/tools/installer/reference).
-
-### Laravel Sail
-
-Using [Laravel Sail](https://laravel.com/docs/sail)? Follow the step-by-step
-guide: [Sailing with LibSQL](https://darkstation.mintlify.app/dark-extensions/tools/installer/platforms/laravel-sail).
+`turso-php:cert-*`, `turso-php:server-*`). Run `php artisan | grep turso-php`
+for the full list, or see `src/Commands/` for the implementation.
 
 ## Configuration
 
