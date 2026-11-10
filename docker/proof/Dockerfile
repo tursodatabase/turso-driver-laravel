@@ -84,12 +84,14 @@ COPY docker/proof/app/ProofRun.php /app/app/Console/Commands/ProofRun.php
 COPY docker/proof/app/ProofHttp.php /app/app/Console/Commands/ProofHttp.php
 COPY docker/proof/app/ProofOfflineWrite.php /app/app/Console/Commands/ProofOfflineWrite.php
 COPY docker/proof/app/ProofOfflineSync.php /app/app/Console/Commands/ProofOfflineSync.php
+COPY docker/proof/app/ProofOfflineCloud.php /app/app/Console/Commands/ProofOfflineCloud.php
 COPY docker/proof/app/web-routes.php /app/routes/web.php
 RUN sed -i "s#->create();#->withCommands([__DIR__.'/../app/Console/Commands'])\n    ->create();#" /app/bootstrap/app.php \
     && php /app/artisan list --raw 2>&1 | grep -q 'proof:run' \
     && php /app/artisan list --raw 2>&1 | grep -q 'proof:http' \
     && php /app/artisan list --raw 2>&1 | grep -q 'proof:offline-write' \
-    && php /app/artisan list --raw 2>&1 | grep -q 'proof:offline-sync'
+    && php /app/artisan list --raw 2>&1 | grep -q 'proof:offline-sync' \
+    && php /app/artisan list --raw 2>&1 | grep -q 'proof:offline-cloud'
 
 # 7) Install the libSQL PHP extension inside the container (the real user flow).
 RUN php /app/artisan turso-php:install -n

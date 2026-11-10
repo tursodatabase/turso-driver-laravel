@@ -143,6 +143,10 @@ docker compose cp app:/app/storage/app/proof-offline-write-report.json "proof-re
 docker compose cp app:/app/storage/app/proof-offline-sync-report.json "proof-report/proof-offline-sync-${STAMP}.json" >/dev/null
 echo "==> Reports written to docker/proof/proof-report/ (proof/proof-http/proof-offline-write/proof-offline-sync ${STAMP})"
 
+# Optional: Turso Cloud offline-writes flavor (requires real Cloud credentials)
+echo "==> Tip: Turso Cloud offline-writes proof is opt-in — it needs a real Cloud database:"
+echo "    TURSO_CLOUD_DB_URL=libsql://<db>.turso.io TURSO_CLOUD_DB_TOKEN=<token> docker/proof/offline-cloud.sh"
+
 if [ "$TEARDOWN" = "1" ]; then
     echo "==> Tearing down (removes containers and volumes)"
     docker compose down -v --remove-orphans
