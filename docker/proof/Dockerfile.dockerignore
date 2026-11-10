@@ -12,6 +12,10 @@ docs
 docker
 !docker/proof/app
 !docker/proof/app/ProofRun.php
+!docker/proof/app/ProofHttp.php
+!docker/proof/app/ProofOfflineWrite.php
+!docker/proof/app/ProofOfflineSync.php
+!docker/proof/app/web-routes.php
 !docker/proof/app/create_proof_notes_table.php
 builder
 storage/framework/cache

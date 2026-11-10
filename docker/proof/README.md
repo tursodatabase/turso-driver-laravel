@@ -3,9 +3,10 @@
 **Try the driver before you install it.** This harness boots a real Laravel
 application against a live libSQL server — entirely inside Docker — installs
 the driver the same way you would in your own app, and asserts that it works
-end to end, both through the console (`php artisan`) and through a real web
-tier (**nginx → php-fpm → Laravel → the driver**). Nothing is installed on
-your host beyond Docker itself.
+end to end: through the console (`php artisan`), through a real web tier
+(**nginx → php-fpm → Laravel → the driver**), and through an **offline-write
+outage window** (`docker network disconnect`, journaling, drain). Nothing is
+installed on your host beyond Docker itself.
 
 If you are evaluating whether this package fits your stack, this is the
 fastest, most honest way to find out. It is also used by maintainers as a
@@ -42,7 +43,13 @@ The script will:
 5. run `php artisan proof:run` and print a one-line `PROOF: {...}` summary;
 6. bring up the web tier (nginx → php-fpm) on port **8080** (override with
    `HTTP_PORT`) and run `php artisan proof:http`, printing `PROOF-HTTP: {...}`;
-7. write JSON reports to `docker/proof/proof-report/` (gitignored — never
+7. **cut the app ↔ sqld link** (`docker network disconnect` on the server-net
+   only) and run `php artisan proof:offline-write` — writes must journal
+   locally while the server stays blind (the web tier keeps serving);
+8. **reconnect** and run `php artisan proof:offline-sync` — `sync()` must
+   drain the journal; a second Hrana client (from the host) reads the
+   journaled rows back from the server;
+9. write JSON reports to `docker/proof/proof-report/` (gitignored — never
    commit them).
 
 Expected ending (assert counts may vary):
@@ -50,6 +57,8 @@ Expected ending (assert counts may vary):
 ```
 PROOF: {"ok":N,"fail":0,"all_ok":true}
 PROOF-HTTP: {"ok":M,"fail":0,"all_ok":true}
+PROOF-OFFLINE-WRITE: {"ok":P,"fail":0,"all_ok":true}
+PROOF-OFFLINE-SYNC: {"ok":Q,"fail":0,"all_ok":true}
 ```
 
 Finish with a clean slate (containers **and** volumes removed):
@@ -86,6 +95,33 @@ web tier — a separate process from the CLI asserts):
 `proof_notes` table in the local file) and runs right after it in `proof.sh`.
 Re-running the harness always wipes and rebuilds from scratch, so ordering is
 deterministic.
+
+### Offline-write phases (`php artisan proof:offline-write` / `proof:offline-sync`)
+
+Run during a **real outage window** — `proof.sh` disconnects the app from the
+server-net (sqld only; the nginx→fpm path on web-net keeps serving):
+
+| # | Phase | What it proves |
+|---|-------|----------------|
+| 1 | `offline_outage` | The outage is real: `isOnline() === false` inside the app |
+| 2 | `offline_journal` | `CREATE TABLE` + 3 inserts journal locally (`pending` 1 → 4); journaled rows read back offline |
+| 3 | `offline_blind_window` | The app cannot reach sqld at all during the outage (raw Hrana fails) |
+| 4 | host-side check (in `proof.sh`) | From **outside** the outage: `jour` absent/empty on sqld — the journal never leaked; `proof_notes` still 50 — the server stands |
+| 5 | `offline_reconnected` | `isOnline() === true` after the reconnect |
+| 6 | `offline_drain` | `sync()` drains the journal (`pending` == 0); the driver reads the rows back |
+| 7 | `offline_server_drained` | A second, independent Hrana client (raw HTTP) reads the 3 journaled rows from the server, key+value exact |
+| 8 | host-side check (in `proof.sh`) | `jour` count == 3 on sqld — the full round-trip replicated |
+
+Two things worth knowing, both enforced from the driver's side:
+
+- **The extension refuses `prepare()` in offline-write mode.** The driver
+  therefore binds parameters and routes statements through the connection's
+  `execute()`/`query()` methods (which journal writes, DDL included) instead
+  of prepared statements. Online connections are untouched.
+- The offline-write flavor used here is the **sqld (self-hosted libsql-server)
+  variant** — `sqldOfflineMode=true` **and** `offlineWrites=true`. The
+  `offline_writes` flag is Turso Cloud-only; the `sqld_offline_mode`+`offline_writes`
+  pair is the documented self-hosted combination.
 
 The final report lives in `docker/proof/proof-report/proof-<timestamp>.json`:
 
@@ -132,11 +168,11 @@ DRIVER_SOURCE=packagist DRIVER_VERSION=^1.4 docker/proof/proof.sh --teardown
 
 ## What this does NOT prove
 
-- **Offline-write modes** (`DB_OFFLINE_WRITES`, `DB_SQLD_OFFLINE_MODE`),
-  including the outage windows (`docker network disconnect`) exercised by the
-  extension repository's `docker/production-proof/` in
-  `tursodatabase/turso-client-php`. This harness covers fpm + remote Hrana,
-  not offline journaling.
+- **Turso Cloud offline writes** (`DB_OFFLINE_WRITES=true` without
+  `DB_SQLD_OFFLINE_MODE=true`). That flavor targets Turso Cloud; this harness
+  proves the **sqld (self-hosted) offline-write** combination —
+  `sqldOfflineMode=true` + `offlineWrites=true` — against the official
+  `ghcr.io/tursodatabase/libsql-server` image.
 - **Your application.** The proof uses a vanilla Laravel 12 skeleton served by
   fpm. Your app's middleware, opcache setup and connection pooling may differ.
 - **Debug error pages are environment-specific.** `throw_over_http` asserts
@@ -159,11 +195,14 @@ DRIVER_SOURCE=packagist DRIVER_VERSION=^1.4 docker/proof/proof.sh --teardown
 |---|---|
 | `Dockerfile` | Builds the Laravel 12 + driver image on `php:8.3-fpm` (build args: `DRIVER_SOURCE`, `DRIVER_VERSION`) |
 | `Dockerfile.dockerignore` | Per-Dockerfile ignore: keeps the context small, app payload included |
-| `compose.yaml` | `sqld` + `app` (php-fpm) + `web` (nginx) services; project name `turso-driver-proof` |
-| `proof.sh` | Orchestrator: wipe → build → server readiness → install → migrate → CLI assert → web tier → HTTP assert → reports |
+| `compose.yaml` | `sqld` + `app` (php-fpm) + `web` (nginx) services, split across `web-net` / `server-net`; project name `turso-driver-proof` |
+| `proof.sh` | Orchestrator: wipe → build → server readiness → install → migrate → CLI assert → web tier → HTTP assert → **offline window (disconnect/reconnect)** → reports |
 | `default.conf` | nginx tier: front controller to php-fpm (`fastcgi_pass app:9000`) |
+| `host-hrana-check.php` | Host-side raw Hrana probe for the server-side asserts (outside the outage) |
 | `app/ProofRun.php` | Console assert phases (`php artisan proof:run`) |
 | `app/ProofHttp.php` | HTTP/fpm assert phases (`php artisan proof:http`) |
+| `app/ProofOfflineWrite.php` | Offline-write assertions, run during the outage (`proof:offline-write`) |
+| `app/ProofOfflineSync.php` | Journal drain + server round-trip (`proof:offline-sync`) |
 | `app/web-routes.php` | Routes served over HTTP: `/proof/health`, `/proof/remote`, `/proof/throw` |
 | `app/create_proof_notes_table.php` | Migration created by `php artisan migrate --force` through the driver |
 | `proof-report/` | Generated reports (gitignored) |

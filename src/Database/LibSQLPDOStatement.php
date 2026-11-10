@@ -27,9 +27,21 @@ class LibSQLPDOStatement
     protected array $lastInsertIds = [];
 
     public function __construct(
-        private LibSQLStatement $statement,
-        protected string $query
+        private ?LibSQLStatement $statement,
+        protected string $query,
+        private ?LibSQL $direct = null,
     ) {
+    }
+
+    /**
+     * Offline-write mode: the extension refuses prepare() in offline_write
+     * mode (prepared statements would bypass the write journal). The driver
+     * instead binds parameters and routes through the connection's
+     * execute()/query() methods, which journal writes properly.
+     */
+    public static function direct(LibSQL $db, string $query): self
+    {
+        return new self(null, $query, $db);
     }
 
     public function setFetchMode(int $mode, mixed ...$args): bool
@@ -54,11 +66,37 @@ class LibSQLPDOStatement
 
     public function prepare(string $query): self
     {
-        return new self($this->statement, $query);
+        return new self($this->statement, $query, $this->direct);
     }
 
     public function query(array $parameters = []): mixed
     {
+        if ($this->direct !== null) {
+            $parameters = empty($parameters) ? $this->bindings : $parameters;
+            [$sql, $values] = $this->bindParametersForDirect($parameters);
+            $values = $this->parameterCasting($values);
+
+            if (preg_match('/^\s*(select|pragma|with|explain)/i', $sql) !== 1) {
+                // DDL/DML — not row-returning. The extension only journals
+                // writes submitted through execute() in offline_write mode;
+                // route them there too (the fake empty envelope keeps
+                // statement()'s rows contract intact).
+                $affected = (int) $this->direct->execute($sql, $values);
+                $result = ['columns' => [], 'rows' => [], 'rows_affected' => $affected];
+            } else {
+                $result = $this->direct->query($sql, $values)->fetchArray(LibSQL::LIBSQL_ALL);
+            }
+
+            $rows = $this->decodeDoubleBase64($this->normalizeRows($result));
+
+            return match ($this->mode) {
+                PDO::FETCH_ASSOC => collect($rows),
+                PDO::FETCH_OBJ => (object) $rows,
+                PDO::FETCH_NUM => array_values($rows),
+                default => collect($rows)
+            };
+        }
+
         if (empty($parameters)) {
             $parameters = $this->bindings;
 
@@ -91,6 +129,27 @@ class LibSQLPDOStatement
             PDO::FETCH_NUM => array_values($rows),
             default => collect($rows)
         };
+    }
+
+    /**
+     * The extension's fetchArray() does not always include a `rows` key —
+     * e.g. for DDL run through query(). Normalize so downstream code can
+     * rely on `$result['rows']` unconditionally.
+     */
+    private function normalizeRows(mixed $result): array
+    {
+        if (! is_array($result)) {
+            return ['rows' => []];
+        }
+
+        // Online flavor: {columns, rows, rows_affected, ...} envelope.
+        if (isset($result['rows']) && is_array($result['rows'])) {
+            return $result;
+        }
+
+        // Offline flavor: fetchArray(ALL) is a plain list of row objects —
+        // repackage it as the same envelope.
+        return ['rows' => array_values($result), 'columns' => array_keys($result[0] ?? [])];
     }
 
     private function parameterCasting(array $parameters): array
@@ -221,6 +280,29 @@ class LibSQLPDOStatement
 
     public function execute(array $parameters = []): bool
     {
+        if ($this->direct !== null) {
+            $parameters = empty($parameters) ? $this->bindings : $parameters;
+            [$sql, $values] = $this->bindParametersForDirect($parameters);
+            $values = $this->parameterCasting($values);
+
+            try {
+                if (preg_match('/^\s*(select|pragma|with|explain)/i', $sql) === 1) {
+                    $rows = $this->normalizeRows($this->direct->query($sql, $values)->fetchArray(LibSQL::LIBSQL_ALL));
+                    $this->affectedRows = count($rows['rows']);
+                } else {
+                    $this->affectedRows = (int) $this->direct->execute($sql, $values);
+                }
+
+                return true;
+            } catch (Exception $e) {
+                // Rethrow as PDOException so Laravel reports the failure instead of ignoring it
+                $exception = new PDOException($e->getMessage(), 0, $e);
+                $exception->errorInfo = ['HY000', $e->getCode(), $e->getMessage()];
+
+                throw $exception;
+            }
+        }
+
         if (empty($parameters)) {
             $parameters = $this->bindings;
         }
@@ -258,6 +340,31 @@ class LibSQLPDOStatement
     {
         if ($mode === PDO::FETCH_DEFAULT) {
             $mode = $this->mode;
+        }
+
+        if ($this->direct !== null) {
+            $parameters = $this->bindings;
+            [$sql, $values] = $this->bindParametersForDirect($parameters);
+            $values = $this->parameterCasting($values);
+            $rows = $this->direct->query($sql, $values)->fetchArray(LibSQL::LIBSQL_ASSOC);
+
+            if (! $rows) {
+                return false;
+            }
+
+            $row = $rows[$cursorOffset];
+            $row = array_map(function ($value) {
+                return is_string($value) && base64_encode(base64_decode($value, true)) === $value
+                    ? base64_decode($value)
+                    : $value;
+            }, $row);
+
+            return match ($mode) {
+                PDO::FETCH_ASSOC => collect($row),
+                PDO::FETCH_OBJ => (object) $row,
+                PDO::FETCH_NUM => array_values($row),
+                default => collect($row)
+            };
         }
 
         $parameters = $this->bindings;
@@ -315,6 +422,26 @@ class LibSQLPDOStatement
     {
         if ($mode === PDO::FETCH_DEFAULT) {
             $mode = $this->mode;
+        }
+
+        if ($this->direct !== null) {
+            $parameters = $this->bindings;
+            [$sql, $values] = $this->bindParametersForDirect($parameters);
+            $values = $this->parameterCasting($values);
+            $result = $this->direct->query($sql, $values);
+            $response = $this->normalizeRows($result->fetchArray(LibSQL::LIBSQL_ALL));
+
+            $allRows = $response['rows'];
+            $decodedRows = $this->parameterCasting($allRows);
+            $rowValues = \array_map('array_values', $decodedRows);
+
+            return match ($mode) {
+                PDO::FETCH_BOTH => [...$allRows, ...$rowValues],
+                PDO::FETCH_ASSOC, PDO::FETCH_NAMED => $allRows,
+                PDO::FETCH_NUM => $rowValues,
+                PDO::FETCH_OBJ => $allRows,
+                default => throw new PDOException('Unsupported fetch mode.'),
+            };
         }
 
         $parameters = $this->bindings;
@@ -379,5 +506,32 @@ class LibSQLPDOStatement
         }
 
         return false;
+    }
+
+    /**
+     * Convert the statement's binding state into a flat positional list the
+     * extension's execute()/query() methods accept, translating named
+     * placeholders (:name) into positional ones (?) in order of appearance.
+     *
+     * @return array{0: string, 1: array<int, mixed>}
+     */
+    private function bindParametersForDirect(array $parameters): array
+    {
+        if ($this->hasNamedParameters($parameters)) {
+            $values = [];
+            $sql = (string) preg_replace_callback(
+                '/:([a-zA-Z_][a-zA-Z0-9_]*)/',
+                static function (array $matches) use (&$values, $parameters): string {
+                    $values[] = $parameters[$matches[1]] ?? $parameters[':' . $matches[1]] ?? null;
+
+                    return '?';
+                },
+                $this->query
+            );
+
+            return [$sql, $values];
+        }
+
+        return [$this->query, array_values($parameters)];
     }
 }

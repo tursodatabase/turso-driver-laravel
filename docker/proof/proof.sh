@@ -13,10 +13,16 @@
 #   4. executes `php artisan proof:run` and prints the PROOF: {json} line
 #   5. brings up the web tier (nginx → php-fpm) and executes
 #      `php artisan proof:http` — HTTP assertions driven through the driver
-#   6. copies both JSON reports into docker/proof/proof-report/
+#   6. cuts app ↔ sqld (server-net only) and executes
+#      `php artisan proof:offline-write` — writes must journal locally,
+#      the server must stay blind (the web tier keeps serving throughout)
+#   7. reconnects and executes `php artisan proof:offline-sync` — sync()
+#      drains the journal, rows land on the server
+#   8. copies the JSON reports into docker/proof/proof-report/
 
 set -euo pipefail
-cd "$(dirname "$0")"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$DIR"
 
 TEARDOWN=0
 FORWARD_ARGS=()
@@ -87,11 +93,55 @@ fi
 echo "==> Running HTTP/fpm assertions"
 docker compose exec -T app php artisan proof:http
 
+echo "==> Offline-write window: disconnect app from sqld (server-net only, web-net intact)"
+APP_ID="$(docker compose ps -q app)"
+NET_NAME="$(docker network ls --filter name=turso-driver-proof_server-net --format '{{.Name}}' | head -1)"
+docker network disconnect "$NET_NAME" "$APP_ID"
+
+echo "==> The web tier keeps serving during the outage"
+if ! curl -sf -m 5 "http://127.0.0.1:${HTTP_PORT}/proof/health" >/dev/null; then
+    echo "error: web tier died during the network outage" >&2
+    exit 1
+fi
+
+echo "==> Running offline-write assertions (outage window)"
+docker compose exec -T app php artisan proof:offline-write
+
+echo "==> Server state from OUTSIDE the outage (host → sqld)"
+JOUR="$(php "$DIR/host-hrana-check.php" jour)"
+KV="$(php "$DIR/host-hrana-check.php" proof_notes)"
+echo "    jour on server: $JOUR (expect no-such-table or 0 — the journal must not have drained)"
+echo "    proof_notes on server: $KV (expect 50 — the outage must not hurt the server)"
+if [ "$JOUR" != "no-such-table" ] && [ "$JOUR" != "0" ]; then
+    echo "error: the server holds jour rows while app is offline — journal leaked to sqld" >&2
+    exit 1
+fi
+if [ "$KV" != "50" ]; then
+    echo "error: proof_notes on server changed during the outage ($KV, expected 50)" >&2
+    exit 1
+fi
+
+echo "==> Reconnecting app to sqld"
+docker network connect "$NET_NAME" "$APP_ID"
+
+echo "==> Running offline-sync assertions"
+docker compose exec -T app php artisan proof:offline-sync
+
+echo "==> Server state after the drain (host → sqld)"
+JOUR="$(php "$DIR/host-hrana-check.php" jour)"
+echo "    jour on server: $JOUR (expect 3 — journal drained by sync())"
+if [ "$JOUR" != "3" ]; then
+    echo "error: jour rows on server after sync ($JOUR, expected 3)" >&2
+    exit 1
+fi
+
 mkdir -p proof-report
 STAMP="$(date +%Y%m%d-%H%M%S)"
 docker compose cp app:/app/storage/app/proof-report.json "proof-report/proof-${STAMP}.json" >/dev/null
 docker compose cp app:/app/storage/app/proof-http-report.json "proof-report/proof-http-${STAMP}.json" >/dev/null
-echo "==> Reports written to docker/proof/proof-report/proof-${STAMP}.json and proof-http-${STAMP}.json"
+docker compose cp app:/app/storage/app/proof-offline-write-report.json "proof-report/proof-offline-write-${STAMP}.json" >/dev/null
+docker compose cp app:/app/storage/app/proof-offline-sync-report.json "proof-report/proof-offline-sync-${STAMP}.json" >/dev/null
+echo "==> Reports written to docker/proof/proof-report/ (proof/proof-http/proof-offline-write/proof-offline-sync ${STAMP})"
 
 if [ "$TEARDOWN" = "1" ]; then
     echo "==> Tearing down (removes containers and volumes)"

@@ -28,9 +28,16 @@ class LibSQLDatabase
 
     protected bool $in_transaction = false;
 
+    protected bool $offlineWriteMode = false;
+
     public function __construct(array $config = [])
     {
         $config = $this->createConfig($config);
+
+        // The extension refuses prepare() in offline_write mode (prepared
+        // statements would bypass the write journal) — route statements
+        // through its execute()/query() instead.
+        $this->offlineWriteMode = (bool) ($config['sqldOfflineMode'] ?? false) && (bool) ($config['offlineWrites'] ?? false);
 
         $this->setConnectionMode($config);
 
@@ -196,6 +203,10 @@ class LibSQLDatabase
 
     public function prepare(string $sql): LibSQLPDOStatement
     {
+        if ($this->offlineWriteMode) {
+            return LibSQLPDOStatement::direct($this->db, $sql);
+        }
+
         return new LibSQLPDOStatement(
             ($this->inTransaction() ? $this->tx : $this->db)->prepare($sql),
             $sql
