@@ -12,3 +12,6 @@ node_modules
 package_versioning.php
 tests/database/*
 !tests/database/.gitkeep
+
+# Isolated proof-of-usage harness: generated reports must never be committed
+docker/proof/proof-report/

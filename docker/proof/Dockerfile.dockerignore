@@ -1,0 +1,19 @@
+# Build context is the repository root; keep the image build lean and
+# deterministic. The driver tree under review needs src/, composer.json and
+# LICENSE.md — everything else is excluded.
+
+.git
+vendor
+node_modules
+.phpunit.cache
+workbench
+tests
+docs
+docker
+!docker/proof/app
+!docker/proof/app/ProofRun.php
+!docker/proof/app/create_proof_notes_table.php
+builder
+storage/framework/cache
+*.log
+docker/proof/proof-report

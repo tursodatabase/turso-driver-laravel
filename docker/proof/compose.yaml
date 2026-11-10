@@ -1,0 +1,32 @@
+# Turso Driver for Laravel — isolated proof of usage.
+#
+#   docker compose -f docker/proof/compose.yaml up -d --build sqld app
+#   docker/proof/proof.sh        (orchestrates build, readiness, phases, report)
+#
+# The `proof` orchestration lives in proof.sh (exec into the app container);
+# this file only declares the two services.
+
+name: turso-driver-proof
+
+services:
+  sqld:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    volumes:
+      - sqld-data:/var/lib/sqld
+    ports:
+      - "${SQLD_PORT:-8081}:8080"
+
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/proof/Dockerfile
+      args:
+        DRIVER_SOURCE: ${DRIVER_SOURCE:-path}
+        DRIVER_VERSION: ${DRIVER_VERSION:-*}
+    # Keeps the container alive so proof.sh can exec artisan commands.
+    command: ["tail", "-f", "/dev/null"]
+    # The app reaches the server over the compose network, so no driver
+    # config needs to be written by hand.
+
+volumes:
+  sqld-data:
