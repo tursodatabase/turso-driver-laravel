@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use ReflectionClass;
 use Turso\Driver\Laravel\Database\LibSQLDatabase;
 
 test('it keeps every extension constructor generation connectable', function () {
@@ -26,7 +25,7 @@ test('it accepts the 1.7.0 offline-write flag keys without changing connection s
 });
 
 test('it passes the encryption key positionally, not through the config array', function () {
-    $count = (new ReflectionClass(\LibSQL::class))->getMethod('__construct')->getNumberOfParameters();
+    $count = (new \ReflectionClass(\LibSQL::class))->getMethod('__construct')->getNumberOfParameters();
 
     expect($count)->toBeGreaterThanOrEqual(4);
 

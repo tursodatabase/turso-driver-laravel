@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Turso\Driver\Laravel\Tests\Fixtures\Models\Project;
 
 beforeEach(function () {
     if (shouldSkipTests()) {
-        $this->markTestSkipped('This test skipped by default because it need a running libsql server');
+        // ->skip() on the tests prevents the body from running; make the
+        // hook a no-op here so the eager database setup never executes.
+        return;
     }
 
     DB::setDefaultConnection('otherdb');
@@ -19,6 +23,10 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    if (shouldSkipTests()) {
+        return;
+    }
+
     DB::setDefaultConnection('otherdb');
     Schema::dropAllTables();
 });
@@ -26,19 +34,19 @@ afterEach(function () {
 test('it can connect to a in-memory database', function () {
     $mode = DB::connection('libsql')->getConnectionMode();
     expect($mode)->toBe('memory');
-})->group('MultiConnectionsTest', 'FeatureTest');
+})->skip(shouldSkipTests(), 'This test requires a running libsql server')->group('MultiConnectionsTest', 'FeatureTest');
 
 test('it can connect to a remote database', function () {
     $mode = DB::connection('otherdb')->getConnectionMode();
     expect($mode)->toBe('remote');
-})->group('MultiConnectionsTest', 'FeatureTest');
+})->skip(shouldSkipTests(), 'This test requires a running libsql server')->group('MultiConnectionsTest', 'FeatureTest');
 
 test('each connection has its own libsql client instance', function () {
     $client1 = DB::connection('libsql')->getPdo(); // In Memory Connection
     $client2 = DB::connection('otherdb')->getPdo(); // Remote Connection
 
     expect($client1)->not->toBe($client2);
-})->group('MultiConnectionsTest', 'FeatureTest');
+})->skip(shouldSkipTests(), 'This test requires a running libsql server')->group('MultiConnectionsTest', 'FeatureTest');
 
 test('it can get all rows from the projects table through the remote connection', function () {
     $projects = DB::connection('otherdb')->table('projects')->get();
@@ -47,4 +55,4 @@ test('it can get all rows from the projects table through the remote connection'
         ->and($projects[0]->name)->toEqual($this->project1->name)
         ->and($projects[1]->name)->toEqual($this->project2->name)
         ->and($projects[2]->name)->toEqual($this->project3->name);
-})->group('MultiConnectionsTest', 'FeatureTest');
+})->skip(shouldSkipTests(), 'This test requires a running libsql server')->group('MultiConnectionsTest', 'FeatureTest');
