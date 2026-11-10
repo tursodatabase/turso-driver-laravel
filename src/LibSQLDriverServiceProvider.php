@@ -49,24 +49,37 @@ class LibSQLDriverServiceProvider extends PackageServiceProvider
             return new LibSQLManager(config('database.connections.libsql'));
         });
 
+        // Register a facade extension for EVERY statically configured
+        // connection whose driver is libsql — not just the default one.
+        // The extension reads each connection's OWN config (bypassing
+        // ConfigurationUrlParser, which rewrites `url` into the driver
+        // scheme and would eat the sync `url` the extension needs).
         $this->app->resolving('db', function (DatabaseManager $db) {
-            $db->extend('libsql', function ($config, $name) {
-                $config = config('database.connections.libsql');
-                $config['name'] = $name;
-                if (!isset($config['driver'])) {
-                    $config['driver'] = 'libsql';
+            foreach (config('database.connections', []) as $connectionName => $definition) {
+                if (($definition['driver'] ?? null) !== 'libsql') {
+                    continue;
                 }
 
-                $connector = new LibSQLConnector();
-                $db = $connector->connect($config);
+                $db->extend($connectionName, function ($ignoredConfig, $name) {
+                    $raw = config("database.connections.{$name}", []);
 
-                $connection = new LibSQLConnection($db, $config['database'] ?? ':memory:', $config['prefix'], $config);
-                app()->instance(LibSQLConnection::class, $connection);
+                    if (empty($raw['driver'])) {
+                        $raw['driver'] = 'libsql';
+                    }
 
-                $connection->createReadPdo($config);
+                    $raw['name'] = $name;
 
-                return $connection;
-            });
+                    $connector = new LibSQLConnector();
+                    $db = $connector->connect($raw);
+
+                    $connection = new LibSQLConnection($db, $raw['database'] ?? ':memory:', $raw['prefix'] ?? '', $raw);
+                    app()->instance(LibSQLConnection::class, $connection);
+
+                    $connection->createReadPdo($raw);
+
+                    return $connection;
+                });
+            }
         });
     }
 }

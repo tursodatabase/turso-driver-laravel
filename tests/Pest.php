@@ -35,5 +35,5 @@ function clearDirectory(): void
 
 function shouldSkipTests()
 {
-    return true;
+    return filter_var(getenv('TURSO_SQLD_AVAILABLE'), FILTER_VALIDATE_BOOLEAN) !== true;
 }

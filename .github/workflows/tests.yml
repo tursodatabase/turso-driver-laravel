@@ -6,6 +6,13 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    services:
+      libsql:
+        # Local sqld for the server-dependent test suite
+        image: ghcr.io/tursodatabase/libsql-server:latest
+        ports:
+          - 8081:8080
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -25,4 +32,6 @@ jobs:
           ./vendor/darkterminal/turso-php-installer/builds/turso-php-installer install -n --php-version=8.3
 
       - name: Tests
+        env:
+          TURSO_SQLD_AVAILABLE: true
         run: composer run test:parallel
