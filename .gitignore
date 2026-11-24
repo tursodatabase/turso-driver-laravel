@@ -3,7 +3,9 @@
 .vscode/
 build
 coverage
-docs
+docs/_site
+docs/.jekyll-cache
+docs/vendor
 phpunit.xml
 phpstan.neon
 testbench.yaml

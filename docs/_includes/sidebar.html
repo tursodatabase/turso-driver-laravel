@@ -1,0 +1,21 @@
+<aside class="sidebar" data-sidebar>
+    {% assign sections = site.data.nav | group_by: "section" %}
+    {% for section in sections %}
+    <div class="sidebar__section">
+        <p class="sidebar__title">{{ section.name }}</p>
+        <ul class="sidebar__list">
+            {% for item in section.items %}
+            <li>
+                <a class="sidebar__link" href="{{ item.url | relative_url }}"
+                   {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+
+    <div class="sidebar__cta">
+        <p>Need Laravel + libSQL with offline writes and embedded replicas? Start with the manual.</p>
+        <a href="https://github.com/tursodatabase/turso-driver-laravel">Get the source →</a>
+    </div>
+</aside>
