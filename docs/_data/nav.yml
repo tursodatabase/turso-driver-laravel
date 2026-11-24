@@ -1,0 +1,33 @@
+- title: User Manual
+  url: /user-manual/
+  section: Getting started
+- title: Getting Started
+  url: /user-manual/getting-started/
+  section: Getting started
+- title: Configuration
+  url: /user-manual/configuration/
+  section: Getting started
+
+- title: Connection Types
+  url: /user-manual/connection-types/
+  section: Connections
+- title: Offline Writes
+  url: /user-manual/offline-writes/
+  section: Connections
+
+- title: Basic Usage
+  url: /user-manual/basic-usage/
+  section: Usage
+- title: Artisan Commands
+  url: /user-manual/commands/
+  section: Usage
+
+- title: Verification
+  url: /user-manual/verification/
+  section: Operations
+- title: Known Limitations
+  url: /user-manual/known-limitations/
+  section: Operations
+- title: Troubleshooting
+  url: /user-manual/troubleshooting/
+  section: Operations

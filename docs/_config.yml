@@ -1,0 +1,33 @@
+title: Turso Driver Laravel
+tagline: libSQL database driver for Laravel
+description: >-
+  Turso Driver Laravel is a Laravel database driver backed by the native
+  libSQL PHP extension. It supports Eloquent, Query Builder, migrations,
+  transactions, embedded replicas, and opt-in offline writes.
+url: https://tursodatabase.github.io
+baseurl: /turso-driver-laravel
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+permalink: pretty
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .jekyll-cache
+  - _site
+
+defaults:
+  - scope:
+      path: "user-manual"
+    values:
+      layout: manual
