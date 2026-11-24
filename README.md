@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img alt="Turso + Laravel" src="https://i.imgur.com/dpml6YK.png" width="1000">
+  <img alt="Turso Driver Laravel" src="art/libsql-driver-laravel.png" width="1000">
 </p>
 
 <p align="center">
