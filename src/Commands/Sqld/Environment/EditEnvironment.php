@@ -23,15 +23,22 @@ final class EditEnvironment extends Command
             $arguments[] = $nameOrId;
         }
 
-        $process = Process::forever()->tty()->run($this->callTursoCommand(
+        $command = $this->callTursoCommand(
             command: 'sqld:env-edit',
             arguments: $arguments,
-        ), function ($type, $line): void {
+        );
+
+        $process = Process::forever();
+        if (\Symfony\Component\Process\Process::isTtySupported()) {
+            $process = $process->tty();
+        }
+
+        $process = $process->run($command, function ($type, $line): void {
             $this->output->write($line);
         });
 
         if ($process->failed()) {
-            $this->error('Failed to list environments.');
+            $this->error('Failed to edit environment.');
 
             return;
         }

@@ -31,7 +31,7 @@ final class KillRunningDaemon extends Command
         });
 
         if ($process->failed()) {
-            $this->error('Failed to list running daemons.');
+            $this->error('Failed to kill daemon.');
 
             return;
         }

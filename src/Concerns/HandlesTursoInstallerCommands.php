@@ -18,7 +18,10 @@ trait HandlesTursoInstallerCommands
 
     protected function callTursoCommand(string $command, array $options = [], array $arguments = []): string
     {
-        return implode(' ', array_merge([$this->getTursoPhpInstallerBinary(), $command], $options, $arguments));
+        $parts = array_merge([$command], $options, $arguments);
+        $escaped = array_map(static fn (string $part): string => escapeshellarg($part), $parts);
+
+        return $this->getTursoPhpInstallerBinary() . ' ' . implode(' ', $escaped);
     }
 
     protected function getTursoPhpInstallerBinary(): string

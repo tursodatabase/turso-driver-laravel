@@ -51,7 +51,7 @@ final class ShowToken extends Command
         });
 
         if ($process->failed()) {
-            $this->error('Failed to list token.');
+            $this->error('Failed to show token.');
 
             return;
         }

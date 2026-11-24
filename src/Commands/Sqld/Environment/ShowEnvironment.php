@@ -31,7 +31,7 @@ final class ShowEnvironment extends Command
         });
 
         if ($process->failed()) {
-            $this->error('Failed to list environments.');
+            $this->error('Failed to show environment.');
 
             return;
         }

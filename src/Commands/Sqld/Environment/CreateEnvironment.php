@@ -35,11 +35,18 @@ final class CreateEnvironment extends Command
             $options[] = '--force';
         }
 
-        $process = Process::forever()->tty()->run($this->callTursoCommand(
+        $command = $this->callTursoCommand(
             command: 'sqld:env-new',
             options: $options,
             arguments: $arguments,
-        ), function ($type, $line): void {
+        );
+
+        $process = Process::forever();
+        if (\Symfony\Component\Process\Process::isTtySupported()) {
+            $process = $process->tty();
+        }
+
+        $process = $process->run($command, function ($type, $line): void {
             $this->output->write($line);
         });
 
