@@ -44,7 +44,7 @@ final class DeleteToken extends Command
         });
 
         if ($process->failed()) {
-            $this->error('Failed to list token.');
+            $this->error('Failed to delete token.');
 
             return;
         }

@@ -27,13 +27,20 @@ final class OpenDatabaseCli extends Command
             $arguments[] = $dbName;
         }
 
-        $process = Process::forever()->tty()->run($this->callTursoCommand(
+        $command = $this->callTursoCommand(
             command: 'sqld:open-db',
             arguments: $arguments,
-        ));
+        );
+
+        $process = Process::forever();
+        if (\Symfony\Component\Process\Process::isTtySupported()) {
+            $process = $process->tty();
+        }
+
+        $process = $process->run($command);
 
         if ($process->failed()) {
-            $this->error('Failed to list running daemons.');
+            $this->error('Failed to open database CLI.');
 
             return;
         }

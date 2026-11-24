@@ -24,7 +24,7 @@ final class SetCertificateStore extends Command
         }
 
         $process = Process::run($this->callTursoCommand(
-            command: 'server:cert-store-get',
+            command: 'server:cert-store-set',
             arguments: $arguments,
         ), function ($type, $line): void {
             $this->output->write($line);

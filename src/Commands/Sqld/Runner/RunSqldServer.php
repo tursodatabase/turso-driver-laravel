@@ -41,7 +41,7 @@ final class RunSqldServer extends Command
         });
 
         if ($process->failed()) {
-            $this->error('Failed to open database.');
+            $this->error('Failed to run sqld server.');
 
             return;
         }
