@@ -1,3 +1,10 @@
+## [1.7.1] - 2026-11-24
+
+- fix(commands): `turso-php:cert-store-set` now dispatches `server:cert-store-set` (was incorrectly calling `server:cert-store-get`)
+- fix(commands): corrected misleading failure messages across token, sqld environment, and sqld runner command wrappers
+- fix(commands): guard TTY-only commands (`env-create`, `env-edit`, `open-db`) with `Process::isTtySupported()` to avoid crashes in non-TTY contexts
+- fix(commands): escape `turso-php-installer` arguments in `HandlesTursoInstallerCommands` to prevent shell splitting for DSN/option values containing `;`
+
 ## [1.7.0] - 2026-11-10
 
 - fix(driver): `cursor()` streaming — the streaming path iterated the raw extension envelope (`columns`, `rows`, `rows_affected`, `last_insert_rowid`) instead of yielding rows, so `DB::table(...)->cursor()` never returned a correct row and skipped all cell decoding. It now normalizes the envelope (online stdClass / offline row list), decodes cells exactly like `select()` (double-base64, JSON vectors, resource blobs) and yields `stdClass` rows per Laravel's cursor contract
