@@ -61,6 +61,18 @@ unencrypted file cannot be converted retroactively.
 This is intentional in the sqld flavor. It disables background sync;
 `DB::sync()` still drains the journal manually.
 
+## Artisan wrapper command fails in non-TTY or with `;` in variables
+
+**Symptoms:** older 1.7.0 wrappers could throw `TTY mode requires /dev/tty...`
+for interactive commands in CI/non-TTY shells, or misparse
+`--variables="SQLD_NODE=primary;DATABASE_TOKEN_ID=1"` because `;` was split by
+the shell.
+
+**Fix:** upgrade to 1.7.1+. The wrappers guard TTY mode with
+`Process::isTtySupported()` and escape installer arguments with
+`escapeshellarg()`. For `env-create`, prefer the DSN format supported by the
+installer, e.g. `--variables="DATABASE_TOKEN_ID=1&SQLD_NODE=primary"`.
+
 ## Text reads back as binary garbage
 
 **Symptom:** a stored word such as `bzwobkku` comes back as two garbage bytes

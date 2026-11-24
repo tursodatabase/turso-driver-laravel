@@ -44,6 +44,11 @@ PHP configuration instead of the detected one.
 | `turso-php:daemon-kill {pid}` | Kill a daemon |
 | `turso-php:open-db {env} {db-name}` | Open the database CLI |
 
+Notes:
+
+- `--variables` accepts the format supported by `turso-php-installer` (for example DSN key/value pairs such as `DATABASE_TOKEN_ID=1&SQLD_NODE=primary`). Since 1.7.1, wrapper arguments are shell-escaped before dispatch.
+- `env-create`, `env-edit`, and `open-db` are interactive when a TTY is available. Since 1.7.1, wrappers only enable TTY mode when `Process::isTtySupported()` reports support; in non-TTY contexts they run without forcing `/dev/tty`.
+
 ## TLS certificates
 
 | Command | Purpose |
