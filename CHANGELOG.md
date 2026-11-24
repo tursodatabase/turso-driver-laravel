@@ -1,3 +1,14 @@
+## 1.7.1 - 2026-11-24
+
+### What's Changed
+
+- fix(commands): `turso-php:cert-store-set` now dispatches `server:cert-store-set` (was incorrectly calling `server:cert-store-get`)
+- fix(commands): corrected misleading failure messages across token, sqld environment, and sqld runner command wrappers
+- fix(commands): guard TTY-only commands (`env-create`, `env-edit`, `open-db`) with `Process::isTtySupported()` to avoid crashes in non-TTY contexts
+- fix(commands): escape `turso-php-installer` arguments in `HandlesTursoInstallerCommands` to prevent shell splitting for DSN/option values containing `;`
+
+**Full Changelog**: https://github.com/tursodatabase/turso-driver-laravel/compare/1.7.0...1.7.1
+
 ## [1.7.1] - 2026-11-24
 
 - fix(commands): `turso-php:cert-store-set` now dispatches `server:cert-store-set` (was incorrectly calling `server:cert-store-get`)
