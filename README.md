@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://discord.gg/9eAaMnJtfY">
+    <img src="art/support-my-work-banner.png" alt="Support my work - Turso PHP Ecosystem" width="1000">
+  </a>
+</p>
+
 > [!IMPORTANT]
 > Offline writes are currently in **beta** and come in **two flavors**: the
 > journaled flavor for **Turso Cloud** (`DB_OFFLINE_WRITES=true` alone) and the
@@ -5,15 +11,7 @@
 > **and** `DB_OFFLINE_WRITES=true`). Both are supported via the libSQL PHP
 > extension v1.7.0+ (see [Offline Writes](https://github.com/tursodatabase/turso-driver-laravel/wiki/Offline-Writes) in the Wiki).
 
-<p align="center">
-  <a href="https://discord.gg/9eAaMnJtfY">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
-      <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
-      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://i.imgur.com/vGCC0I4.png">
-    </picture>
-  </a>
-</p>
+
 
 <p align="center">
   <img alt="Turso Driver Laravel" src="art/libsql-driver-laravel.png" width="1000">
@@ -21,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE.md"><img src="https://img.shields.io/github/license/tursodatabase/turso-driver-laravel?color=F05340" alt="MIT License" /></a>
-  <a href="https://tur.so/discord-php"><img src="https://img.shields.io/discord/933071162680958986?color=F05340" alt="Discord" /></a>
+  <a href="https://discord.gg/9eAaMnJtfY"><img src="https://img.shields.io/discord/933071162680958986?color=F05340" alt="Discord" /></a>
   <a href="#contributors"><img src="https://img.shields.io/github/contributors/tursodatabase/turso-driver-laravel?color=F05340" alt="Contributors" /></a>
   <a href="https://packagist.org/packages/tursodatabase/turso-driver-laravel"><img src="https://img.shields.io/packagist/dt/tursodatabase/turso-driver-laravel?color=F05340" alt="Total downloads" /></a>
   <a href="https://github.com/tursodatabase/turso-driver-laravel/tags"><img src="https://img.shields.io/github/v/tag/tursodatabase/turso-driver-laravel?label=version&color=F05340" alt="Version Tag" /></a>
